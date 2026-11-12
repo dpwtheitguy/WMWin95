@@ -1,0 +1,47 @@
+{
+  "qemu": null,
+  "qemu_img": "/home/dwilson/Android/Sdk/emulator/qemu-img",
+  "kvm_device": false,
+  "kvm_access": false,
+  "iso_exists": true,
+  "disk_exists": false,
+  "boot_floppy_exists": null,
+  "command": [
+    "qemu-system-i386",
+    "-name",
+    "Win95LX Reference",
+    "-machine",
+    "pc",
+    "-accel",
+    "kvm",
+    "-cpu",
+    "pentium",
+    "-smp",
+    "1",
+    "-m",
+    "64",
+    "-vga",
+    "cirrus",
+    "-nic",
+    "none",
+    "-drive",
+    "file=/home/dwilson/Documents/Windows95/private/vm/win95.qcow2,format=qcow2,if=ide,index=0",
+    "-drive",
+    "file=/home/dwilson/Downloads/Windows 95C.iso,media=cdrom,readonly=on,if=ide,index=2",
+    "-boot",
+    "order=c",
+    "-rtc",
+    "base=localtime",
+    "-monitor",
+    "stdio",
+    "-device",
+    "sb16",
+    "-display",
+    "gtk,zoom-to-fit=off"
+  ],
+  "executed": false
+}
+
+# Review only. Create disk only if absent:
+qemu-img create -f qcow2 /home/dwilson/Documents/Windows95/private/vm/win95.qcow2 2G
+qemu-system-i386 -name 'Win95LX Reference' -machine pc -accel kvm -cpu pentium -smp 1 -m 64 -vga cirrus -nic none -drive file=/home/dwilson/Documents/Windows95/private/vm/win95.qcow2,format=qcow2,if=ide,index=0 -drive 'file=/home/dwilson/Downloads/Windows 95C.iso,media=cdrom,readonly=on,if=ide,index=2' -boot order=c -rtc base=localtime -monitor stdio -device sb16 -display gtk,zoom-to-fit=off

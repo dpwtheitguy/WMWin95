@@ -1,0 +1,86 @@
+# The VGA capture is 640x400. Its CRT display geometry is 4:3.
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+canvas_width = Math.Int(Math.Min(screen_width, screen_height * 4 / 3));
+canvas_height = Math.Int(Math.Min(screen_height, screen_width * 3 / 4));
+canvas_x = Window.GetX() + Math.Int((screen_width - canvas_width) / 2);
+canvas_y = Window.GetY() + Math.Int((screen_height - canvas_height) / 2);
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+background = Sprite();
+ribbon = Sprite();
+prompt = Sprite();
+answer = Sprite();
+message = Sprite();
+frame = 0;
+
+if (Plymouth.GetMode() == "boot" || Plymouth.GetMode() == "resume") {
+    background_height = Math.Int(canvas_height * 389 / 400);
+    ribbon_height = canvas_height - background_height;
+    background.SetImage(Image("background.png").Scale(canvas_width, background_height));
+    background.SetPosition(canvas_x, canvas_y, 0);
+    for (i = 0; i < @FRAME_COUNT@; i++) {
+        frames[i] = Image("ribbon-" + i + ".png").Scale(canvas_width, ribbon_height);
+    }
+    ribbon.SetImage(frames[0]);
+    ribbon.SetPosition(canvas_x, canvas_y + background_height, 1);
+}
+
+fun animate() {
+    if (frames[0]) {
+        global.frame = (global.frame + 1) % @FRAME_COUNT@;
+        ribbon.SetImage(frames[global.frame]);
+    }
+}
+
+fun centered_text(sprite, value, y) {
+    if (!value || value == "") {
+        sprite.SetOpacity(0);
+        return;
+    }
+    picture = Image.Text(value, 1, 1, 1, 1, "Sans 14");
+    sprite.SetImage(picture);
+    sprite.SetPosition(Window.GetX() + Math.Int((screen_width - picture.GetWidth()) / 2),
+                       Window.GetY() + y, 10);
+    sprite.SetOpacity(1);
+}
+
+fun show_normal() {
+    background.SetOpacity(1);
+    ribbon.SetOpacity(1);
+    prompt.SetOpacity(0);
+    answer.SetOpacity(0);
+}
+
+fun show_question(question, entry) {
+    background.SetOpacity(0);
+    ribbon.SetOpacity(0);
+    centered_text(prompt, question, Math.Int(screen_height / 2) - 24);
+    centered_text(answer, entry + "_", Math.Int(screen_height / 2) + 6);
+}
+
+fun show_password(question, bullets) {
+    masked = "";
+    for (i = 0; i < Math.Min(bullets, 40); i++) {
+        masked = masked + "*";
+    }
+    show_question(question, masked);
+}
+
+fun show_message(text) {
+    centered_text(message, text, screen_height - 32);
+}
+
+fun hide_message(text) {
+    message.SetOpacity(0);
+}
+
+Plymouth.SetRefreshRate(9);
+Plymouth.SetRefreshFunction(animate);
+Plymouth.SetDisplayNormalFunction(show_normal);
+Plymouth.SetDisplayQuestionFunction(show_question);
+Plymouth.SetDisplayPasswordFunction(show_password);
+Plymouth.SetMessageFunction(show_message);
+Plymouth.SetHideMessageFunction(hide_message);

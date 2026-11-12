@@ -1,0 +1,250 @@
+{
+  "release": "16017797a9fe2ba6",
+  "reference": "Windows 95 with IE4 Desktop Update, web desktop disabled",
+  "display_backend": "VirtIO VGA",
+  "screens": {
+    "start-menu": {
+      "width": 800,
+      "height": 600,
+      "differing_pixels": 48260,
+      "compared_pixels": 480000,
+      "masked_pixels": 0,
+      "differing_percent": 10.054166666666667,
+      "bbox_xyxy_exclusive": [
+        2,
+        2,
+        798,
+        598
+      ],
+      "passed": false,
+      "original_sha256": "967b0794b49faae1ef305462ab76f00f4a5274d28add8bf84dcd74fedc231a43",
+      "rebuilt_sha256": "ce26bc1a86044eea6ccd659b1aed33bc0efeb4327d557917b0103ec413ac3cf4"
+    },
+    "my-computer": {
+      "width": 800,
+      "height": 600,
+      "differing_pixels": 153654,
+      "compared_pixels": 480000,
+      "masked_pixels": 0,
+      "differing_percent": 32.01125,
+      "bbox_xyxy_exclusive": [
+        7,
+        2,
+        798,
+        598
+      ],
+      "passed": false,
+      "original_sha256": "526167354928fea5415b8d9edd5345bc60e24c6c4364494bda1d33558863edba",
+      "rebuilt_sha256": "04ffea84aca53d599af5f3ca5eee01ee5362b91b59cb71c8d85601f6b2cc1c0d"
+    },
+    "control-panel": {
+      "width": 800,
+      "height": 600,
+      "differing_pixels": 162569,
+      "compared_pixels": 480000,
+      "masked_pixels": 0,
+      "differing_percent": 33.868541666666665,
+      "bbox_xyxy_exclusive": [
+        7,
+        2,
+        798,
+        598
+      ],
+      "passed": false,
+      "original_sha256": "c8b7694ceb8ba8947eac41fc1d9ae9517253fce600f879c5b51308eb122da7f6",
+      "rebuilt_sha256": "bffc6ba07d0deaea2961308734d6c5bc9395c42819c5bc2aa088e8fbe1c3fac3"
+    }
+  },
+  "verified_display_modes": [
+    {
+      "mode": "800x600",
+      "framebuffer": [
+        800,
+        600
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "1280x720",
+      "framebuffer": [
+        1280,
+        720
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "1280x800",
+      "framebuffer": [
+        1280,
+        800
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "1360x768",
+      "framebuffer": [
+        1360,
+        768
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "1366x768",
+      "framebuffer": [
+        1366,
+        768
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "1440x900",
+      "framebuffer": [
+        1440,
+        900
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "1280x1024",
+      "framebuffer": [
+        1280,
+        1024
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "1536x864",
+      "framebuffer": [
+        1536,
+        864
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "1600x900",
+      "framebuffer": [
+        1600,
+        900
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "1680x1050",
+      "framebuffer": [
+        1680,
+        1050
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "1920x1080",
+      "framebuffer": [
+        1920,
+        1080
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "1920x1200",
+      "framebuffer": [
+        1920,
+        1200
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "2048x1152",
+      "framebuffer": [
+        2048,
+        1152
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "2560x1080",
+      "framebuffer": [
+        2560,
+        1080
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "2256x1504",
+      "framebuffer": [
+        2256,
+        1504
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "2560x1440",
+      "framebuffer": [
+        2560,
+        1440
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "2560x1600",
+      "framebuffer": [
+        2560,
+        1600
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "3440x1440",
+      "framebuffer": [
+        3440,
+        1440
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "2880x1800",
+      "framebuffer": [
+        2880,
+        1800
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "5120x1440",
+      "framebuffer": [
+        5120,
+        1440
+      ],
+      "taskbar_at_bottom": true
+    },
+    {
+      "mode": "3840x2160",
+      "framebuffer": [
+        3840,
+        2160
+      ],
+      "taskbar_at_bottom": true
+    }
+  ],
+  "start_flag_exact_pixels": 256,
+  "drive_opaque_matching_pixels": 406,
+  "drive_opaque_pixels": 406,
+  "caption_button_matching_pixels_of_224": {
+    "minimize": 224,
+    "maximize": 224,
+    "close": 224
+  },
+  "captures": {
+    "start-menu": [
+      "original-start-programs-800.png",
+      "rebuilt-start-key.png"
+    ],
+    "my-computer": [
+      "original-computer.png",
+      "rebuilt-computer.png"
+    ],
+    "control-panel": [
+      "original-control-panel.png",
+      "rebuilt-control-panel.png"
+    ]
+  }
+}

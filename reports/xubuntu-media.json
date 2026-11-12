@@ -1,0 +1,12 @@
+{
+  "path": "/home/dwilson/Downloads/xubuntu-24.04.5-minimal-amd64.iso",
+  "size_bytes": 3193516032,
+  "sha256": "9d47f975696ce496b8be882b6d7cc9079c1ea89fb625ac2c86caa63a4f180033",
+  "volume_id": "Xubuntu 24.04.5 LTS amd64",
+  "iso9660_signature": "CD001",
+  "stable_during_read": true,
+  "publisher_checksum_verified": true,
+  "publisher_checksum_source": "https://cdimage.ubuntu.com/xubuntu/releases/24.04/release/SHA256SUMS",
+  "publisher_expected_sha256": "9d47f975696ce496b8be882b6d7cc9079c1ea89fb625ac2c86caa63a4f180033",
+  "publisher_signature_verified": false
+}

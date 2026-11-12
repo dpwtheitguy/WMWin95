@@ -1,0 +1,3 @@
+# Create disk only if absent; this script does not execute commands:
+qemu-img create -f qcow2 /home/dwilson/Documents/Windows95/private/vm/xubuntu.qcow2 32G
+qemu-system-x86_64 -name 'Win95LX Development' -machine pc -accel kvm -m 4096 -smp 2 -drive file=/home/dwilson/Documents/Windows95/private/vm/xubuntu.qcow2,format=qcow2,if=virtio -drive file=/home/dwilson/Downloads/xubuntu-24.04.5-minimal-amd64.iso,media=cdrom,readonly=on -boot order=d -nic user,model=virtio-net-pci -vga std -display gtk,zoom-to-fit=off -monitor stdio

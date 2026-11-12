@@ -1,0 +1,23 @@
+# Proposed packages for the isolated Xubuntu development VM; not host installs.
+build-essential
+python3
+python3-venv
+python3-pil
+python3-pefile
+cabextract
+libarchive-tools
+x11-apps
+x11-utils
+x11-xserver-utils
+xfce4
+xfce4-dev-tools
+libgtk-3-dev
+libxfce4ui-2-dev
+libxfce4util-dev
+libxfconf-0-dev
+python3-cairo
+python3-gi-cairo
+python3-gi
+gir1.2-gtk-3.0
+openssh-server
+openssh-sftp-server

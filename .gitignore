@@ -1,0 +1,8 @@
+/private/
+/.venv/
+/__pycache__/
+**/__pycache__/
+/results/
+*.iso
+*.qcow2
+*.vdi

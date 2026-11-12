@@ -1,0 +1,11 @@
+{
+  "stage": "file copying",
+  "source_file": "C:\\WININST0.400\\DRVSPACE.BAT",
+  "destination": "A:\\DRVSPACE.BAT",
+  "installer_error": "Write protect error #13",
+  "action": "Preserved checkpoint; retry with writable private boot image; no file skipped",
+  "original_iso_modified": false,
+  "retry_result": "Writable boot copy prepared; primary partition active flag repaired; missing DOS boot paths supplied; registry/SYSTEM.INI setup still incomplete",
+  "last_observation": "Reference process exited after the incomplete Windows launch; exact process-exit cause not established",
+  "vendor_binaries_modified": false
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "resolution": [800, 600],
+  "scaling": 1,
+  "default_masks": [],
+  "pass_condition": "zero differing unmasked RGBA pixels",
+  "screens": [
+    {"id":"clean-desktop", "steps":["Boot original shell", "Close all windows", "Move pointer to agreed fixed position"]},
+    {"id":"start-menu", "steps":["Reset clean desktop", "Open Start using Ctrl+Esc"]},
+    {"id":"my-computer", "steps":["Reset clean desktop", "Double-click My Computer", "Use recorded window coordinates"]},
+    {"id":"my-computer-properties", "steps":["Reset clean desktop", "Select My Computer", "Press Alt+Enter"]},
+    {"id":"control-panel", "steps":["Open My Computer", "Open Control Panel", "Use recorded window coordinates"]},
+    {"id":"display-properties", "steps":["Reset clean desktop", "Open desktop context menu", "Select Properties"]},
+    {"id":"shutdown", "steps":["Reset clean desktop", "Open Start", "Select Shut Down", "Do not confirm"]}
+  ]
+}

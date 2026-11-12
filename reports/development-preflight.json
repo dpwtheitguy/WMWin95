@@ -1,0 +1,12 @@
+{
+  "python": "3.12.3",
+  "libarchive": "libarchive.so.13",
+  "qemu_system_i386": null,
+  "qemu_system_x86_64": null,
+  "qemu_img": "/home/dwilson/Android/Sdk/emulator/qemu-img",
+  "cabextract": null,
+  "kvm_visible": false,
+  "kvm_accessible": false,
+  "x11_display": true,
+  "host_settings_modified": false
+}

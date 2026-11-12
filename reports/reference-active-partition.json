@@ -1,0 +1,10 @@
+{
+  "target": "private Windows reference virtual disk only",
+  "finding": "FAT32 primary partition was not marked active",
+  "action": "Set active flag 0x00 to 0x80 in first MBR partition entry",
+  "bytes_changed": 1,
+  "before_sha256": "16df960160c11ccaee45c9b3bf79921d596ffa4ec0562f21954e3302a3391f5e",
+  "after_sha256": "4808d62321708f7e647081d49f97aaff772ca6fbadb3f5ed92cfeba358f512d0",
+  "backup": "private/boot-media/reference-mbr-before-active.bin",
+  "original_iso_modified": false
+}

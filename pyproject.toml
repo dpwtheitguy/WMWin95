@@ -1,0 +1,9 @@
+[project]
+name = "win95lx"
+version = "0.0.1"
+description = "Evidence-driven Windows 95 desktop preservation on Linux"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.win95lx]
+status = "scaffolding"

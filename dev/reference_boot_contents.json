@@ -1,0 +1,5 @@
+{
+  "c:\\msdos.sys": "[Paths]\nWinDir=C:\\WINDOWS\nWinBootDir=C:\\WINDOWS\nHostWinBootDrv=C\n[Options]\nBootGUI=0\n",
+  "c:\\config.sys": "DEVICE=C:\\WINDOWS\\HIMEM.SYS\nDEVICE=C:\\OAKCDROM.SYS /D:OEMCD001\nDOS=HIGH\n",
+  "c:\\autoexec.bat": "C:\\MSCDEX.EXE /D:OEMCD001 /L:D\nPATH C:\\WINDOWS;C:\\WINDOWS\\COMMAND;C:\\\n"
+}

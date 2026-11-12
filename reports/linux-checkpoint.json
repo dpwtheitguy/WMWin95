@@ -1,0 +1,70 @@
+{
+    "children": [
+        {
+            "name": "file",
+            "info": {
+                "children": [
+                ],
+                "virtual-size": 5956764160,
+                "filename": "/home/dwilson/Documents/Windows95/private/vm/xubuntu.qcow2",
+                "format": "file",
+                "actual-size": 5956734976,
+                "format-specific": {
+                    "type": "file",
+                    "data": {
+                    }
+                },
+                "dirty-flag": false
+            }
+        }
+    ],
+    "snapshots": [
+        {
+            "icount": 0,
+            "vm-clock-nsec": 0,
+            "name": "initial-shell",
+            "date-sec": 1793855856,
+            "date-nsec": 766716000,
+            "vm-clock-sec": 0,
+            "id": "1",
+            "vm-state-size": 0
+        },
+        {
+            "icount": 0,
+            "vm-clock-nsec": 0,
+            "name": "shell-milestone-001",
+            "date-sec": 1793856138,
+            "date-nsec": 79988000,
+            "vm-clock-sec": 0,
+            "id": "2",
+            "vm-state-size": 0
+        },
+        {
+            "icount": 0,
+            "vm-clock-nsec": 0,
+            "name": "desktop-milestone-002",
+            "date-sec": 1793856782,
+            "date-nsec": 724780000,
+            "vm-clock-sec": 0,
+            "id": "3",
+            "vm-state-size": 0
+        }
+    ],
+    "virtual-size": 34359738368,
+    "filename": "/home/dwilson/Documents/Windows95/private/vm/xubuntu.qcow2",
+    "cluster-size": 65536,
+    "format": "qcow2",
+    "actual-size": 5956734976,
+    "format-specific": {
+        "type": "qcow2",
+        "data": {
+            "compat": "1.1",
+            "compression-type": "zlib",
+            "lazy-refcounts": false,
+            "refcount-bits": 16,
+            "corrupt": false,
+            "extended-l2": false
+        }
+    },
+    "dirty-flag": false
+}

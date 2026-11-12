@@ -1,0 +1,12 @@
+{
+  "check_context": "broader host execution; read-only",
+  "kvm_device_visible": true,
+  "kvm_device_read_write_access": true,
+  "kvm_api_version": 12,
+  "qemu_system_i386": null,
+  "qemu_system_x86_64": null,
+  "virsh": null,
+  "virt_manager": null,
+  "host_settings_modified": false,
+  "finding": "Initial absence of /dev/kvm was sandbox visibility; host KVM is functional. System QEMU emulator not found."
+}

@@ -1,0 +1,15 @@
+{
+  "checkpoint": "awaiting-oem-key",
+  "result": "",
+  "status": {
+    "status": "paused",
+    "singlestep": false,
+    "running": false
+  },
+  "kvm": {
+    "enabled": true,
+    "present": true
+  },
+  "stage": "Windows 95 OEM Certificate of Authenticity",
+  "requires_user_licensed_oem_number": true
+}

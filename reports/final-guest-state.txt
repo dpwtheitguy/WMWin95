@@ -1,0 +1,4 @@
+/opt/win95lx/releases/30207fbbfbf6ee7e
+ 2 1000 developer -     -    active no -
+c1 1001 win95     seat0 tty7 active no -
+uid=1001(win95) gid=1001(win95) groups=1001(win95)

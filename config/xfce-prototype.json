@@ -1,0 +1,54 @@
+{
+  "status": "running experimental dedicated X11 shell; geometry unmeasured",
+  "target_session": "dedicated Xubuntu X11 VM user",
+  "theme": "Chicago95",
+  "background_rgb": [
+    0,
+    128,
+    128
+  ],
+  "resolution": [
+    800,
+    600
+  ],
+  "dpi": 96,
+  "scale": 1,
+  "compositing": false,
+  "font_antialias": false,
+  "panel": {
+    "edge": "bottom",
+    "rows": 1,
+    "height_candidate": 28,
+    "autohide": false
+  },
+  "font": {
+    "source": "sserife.fon FONT 84, MS Sans Serif 8pt 13px bitmap cell",
+    "fallback": null
+  },
+  "desktop_icons": [
+    {
+      "name": "My Computer",
+      "resource_group": 16,
+      "position_candidate": [
+        8,
+        12
+      ]
+    },
+    {
+      "name": "Recycle Bin",
+      "resource_group": 32,
+      "position_candidate": [
+        8,
+        164
+      ]
+    }
+  ],
+  "sound_events": {},
+  "blocked_on": [
+    "installed original-shell measurements",
+    "original sound-event authentication",
+    "full interaction and native component audit"
+  ],
+  "normal_user_application_allowlist": [],
+  "runtime": "GTK3/Cairo original-bitmap shell surface in non-admin guest session"
+}

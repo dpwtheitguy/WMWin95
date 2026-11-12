@@ -1,0 +1,15 @@
+{
+  "reason": "Interrupted OEM setup left missing Windows boot paths and inactive primary partition",
+  "backup_files": [
+    "C:\\MSDOS.PRE",
+    "C:\\CONFIG.PRE if originally present",
+    "C:\\AUTOEXEC.PRE if originally present"
+  ],
+  "boot_files": {
+    "c:\\msdos.sys": "[Paths]\nWinDir=C:\\WINDOWS\nWinBootDir=C:\\WINDOWS\nHostWinBootDrv=C\n[Options]\nBootGUI=0\n",
+    "c:\\config.sys": "DEVICE=C:\\WINDOWS\\HIMEM.SYS\nDEVICE=C:\\OAKCDROM.SYS /D:OEMCD001\nDOS=HIGH\n",
+    "c:\\autoexec.bat": "C:\\MSCDEX.EXE /D:OEMCD001 /L:D\nPATH C:\\WINDOWS;C:\\WINDOWS\\COMMAND;C:\\\n"
+  },
+  "vendor_binaries_modified": false,
+  "result": "DOS hard-disk boot works with CD support; original setup must be resumed to create registry and SYSTEM.INI"
+}

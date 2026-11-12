@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Win95LX
+Description=Windows 95 OSR 2.5 startup
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/win95lx
+ScriptFile=/usr/share/plymouth/themes/win95lx/win95lx.script
