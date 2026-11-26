@@ -1,13 +1,13 @@
 # Visible reference set — 2026-11-26
 
-The intended set is three Windows 95 references and one Win95LX development VM. All four have interactive GTK windows; the temporary headless probe is stopped. This report is updated as the classic installation completes.
+The intended set is three Windows 95 references and one Win95LX development VM. All four have interactive GTK windows; the temporary headless probe is stopped. The classic installation now has a verified pre-IE4 shell and a usable 800×600 desktop.
 
 | Machine | Current status | Recovery checkpoints |
 |---|---|---|
 | Win95LX Development | Working desktop and Mouse/basic/Plus pointer iteration, 800×600 | `win95lx-basic-plus-pointers-working`; earlier `validated-ab30f60`; pending prior Large-pointer preview in `before-basic-plus-pointers-pending-large` |
 | Original / IE4 reference | Existing working original Windows 95 with IE4 Desktop Update, 800×600 | `ie4-reference-working-20261126`, previous original checkpoints retained |
 | Windows 95 + Plus reference | Plus! installed from local original media, rebooted successfully, 800×600; theme pointer preview available | `plus95-desktop-working`, `plus95-pointer-preview-working`, `plus95-realtime-pointer-preview` |
-| Windows 95 Classic | First hard-disk restart reached final Windows configuration; display verification and accepted desktop checkpoint still pending | original installer disk retained; `before-harddisk-boot-repair`; repaired disk has `classic-dos-local-setup-ready`, `classic-setup-first-restart-ready` |
+| Windows 95 Classic | Working 800×600, 256-color desktop; Explorer 4.0.0.950 and Shell32 4.0.0.1111 verified from installed files | original installer disk retained; `before-harddisk-boot-repair`; repaired disk has `classic-dos-local-setup-ready`, `classic-setup-first-restart-ready`, `classic-desktop-working-800x600`, `classic-pre-ie4-verified`, `classic-reboot-verified` |
 
 Snapshots are internal QEMU RAM/disk checkpoints, not standalone off-machine backups. A snapshot called working means that desktop was observed usable; it does not imply every prototype applet is complete.
 
@@ -23,7 +23,9 @@ The early installer snapshot was started through a CD image that emulated a read
 
 The repair preserves that original disk and checkpoints. A separate private copy was made from its early Setup state, the primary partition was marked active, DOS boot paths were supplied, and the original setup media was copied into C:\WIN95. The DOS CD driver was removed from this repair path after its ATAPI probe stalled. Setup then ran from the local C: source, completed file copying without those A: write errors, restarted from the hard disk, and reached its final Control Panel/Start Menu/Help configuration phase. Original vendor executable files were not patched.
 
-The classic reference is not accepted until its desktop, lack of IE4 Desktop Update and comparison display mode are verified. Merely switching off Active Desktop in the IE4 installation does not create a pre-IE4 shell.
+The OEM media automatically opened IE4 Active Setup after first boot. That installer was stopped before installation; an accidental start was reverted to the preceding checkpoint. Installed EXPLORER.EXE reports 4.0.0.950 and SYSTEM/SHELL32.DLL reports 4.0.0.1111, independently extracted from the stopped disk. The native display was changed to 800×600 at 256 colors and confirmed. The exported CurrentVersion startup registry contains no OSRInstall/ie4setup entry; RunOnce retains only GrpConv. A normal native Restart then returned to the 800×600 desktop without reopening IE4 Setup. Merely switching off Active Desktop in the IE4 installation would not establish these pre-IE4 binaries.
+
+The new disk is `private/vm/windows95-classic-local-setup.qcow2`. Its visible launcher profile points to that disk. The original failed-installation and repair copies remain intact. Captures and actual QEMU snapshot inventories are under `private/screenshots/reference-set-20261126/`; version evidence is under `private/reference/classic-installed-versions/`. These private files are excluded from Git.
 
 ## Future product profiles
 
