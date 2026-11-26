@@ -426,4 +426,37 @@ for filename in ('webview-strings.json','webview-verdana-regular.json','webview-
         records.append({'source':'installed OSR2.5 IE4 reference','type':'WEBVIEW_METADATA' if filename=='webview-strings.json' else 'FONT',
                         'output':filename,'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
                         'original_sources':data.get('sources',data.get('source_sha256'))})
+mouse_resources=list(extract((source/'main.cpl').read_bytes()))
+group=next(data for kind,ident,lang,data,fmt in mouse_resources if kind==14 and ident==100)
+image_id=word(group[6:20],12)
+mouse_bits=next(data for kind,ident,lang,data,fmt in mouse_resources if kind==3 and ident==image_id)
+w,h,pixels=icon_dib(mouse_bits);write(output/'mouse-icon.png',w,h,pixels)
+write(output/'mouse-icon-small.png',16,16,[pixels[(yy*2)*w+xx*2] for yy in range(16) for xx in range(16)])
+records.append({'source':'main.cpl','type':'DERIVED_ICON','id':100,'output':'mouse-icon-small.png','transform':'32-to-16 nearest-neighbor','sha256':hashlib.sha256(mouse_bits).hexdigest()})
+records.append({'source':'main.cpl','type':'GROUP_ICON','id':100,'image_id':image_id,'output':'mouse-icon.png','sha256':hashlib.sha256(mouse_bits).hexdigest(),'dimensions':[w,h]})
+for name,reference,rect in (
+    ('buttons','native-mouse-buttons-clean.png',(44,44,404,448)),
+    ('pointers','native-mouse-pointers-probe.png',(0,0,404,448)),
+    ('motion','native-mouse-motion-probe.png',(0,0,404,448)),
+    ('general','native-mouse-general-probe.png',(0,0,404,448))):
+    source_path=ROOT/'private/screenshots/start-development-20261110'/reference
+    if source_path.is_file():
+        sw,sh,pixels=read(source_path);x,y,w,h=rect
+        write(output/f'mouse-{name}-frame.png',w,h,[pixels[(y+yy)*sw+x+xx] for yy in range(h) for xx in range(w)])
+        records.append({'source':reference,'type':'SCREEN_CAPTURE_CONTROL','output':f'mouse-{name}-frame.png',
+                        'rectangle':rect,'reference_sha256':hashlib.sha256(source_path.read_bytes()).hexdigest()})
+from stage_mouse_animation import main as stage_mouse_animation
+stage_mouse_animation()
+for path in sorted(output.glob('mouse-test-*')):
+    records.append({'source':'MAIN.CPL AVI 100','type':'ANIMATION_FRAME','output':path.name,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
+from stage_pointer_schemes import main as stage_pointer_schemes
+stage_pointer_schemes()
+pointer_catalog=json.loads((output/'pointer-schemes.json').read_text())
+for key,definition in pointer_catalog['assets'].items():
+    for frame in definition['frames']:
+        for filename in (frame['file'],str(Path(frame['file']).with_suffix('.json'))):
+            records.append({'source':definition['source'],'type':'CURSOR_FRAME','output':filename,
+                            'source_sha256':definition['source_sha256'],'sha256':hashlib.sha256((output/filename).read_bytes()).hexdigest()})
+records.append({'source':'original Windows95 and Plus95 private assets','type':'CURSOR_CATALOG','output':'pointer-schemes.json',
+                'sha256':hashlib.sha256((output/'pointer-schemes.json').read_bytes()).hexdigest()})
 (output/'manifest.json').write_text(json.dumps({'assets':records,'original_media_sha256':'c13b6bad0dcbd4f13c3d840d2b7efe939c6d4e40b1c63f086a5f92edfb1e9b77'},indent=2)+'\n');print('Prepared',len(records),'private assets')

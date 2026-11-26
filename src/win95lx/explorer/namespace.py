@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse,unquote
 
-TARGETS={'(C:)':'drive','Control Panel':'control','My Computer':'computer','Display':'display'}
+TARGETS={'(C:)':'drive','Control Panel':'control','My Computer':'computer','Display':'display','Mouse':'mouse'}
 
 @dataclass(frozen=True)
 class Shortcut:

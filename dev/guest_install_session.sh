@@ -48,6 +48,9 @@ if [ -r "$HOME/.config/win95lx/resolution" ]; then
 fi
 python3 -m win95lx.display_modes "$resolution" ||
     python3 -m win95lx.display_modes 800x600
+# Keep the comparison guest visible; a future power applet can manage its policy.
+xset s off
+xset -dpms
 # Independent desktop with an allowlisted set of built-in GTK accessories.
 exec python3 -m win95lx.shell.app --assets "$release/assets" > "$HOME/.win95lx-shell.log" 2>&1
 EOF

@@ -2,13 +2,13 @@
 """Launch the offline original-media reference VM using a private virtual disk."""
 import argparse,json,os,subprocess,time
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1];p=argparse.ArgumentParser();p.add_argument('--accel',choices=['kvm','tcg'],default='kvm');p.add_argument('--icount', type=int, help='TCG instruction-clock shift for legacy timing');p.add_argument('--boot-cd',action='store_true',help='Boot the installation CD once; default boots installed disk');p.add_argument('--floppy',type=Path,help='Private writable boot image for legacy setup');p.add_argument('--window', action='store_true', help='Open an interactive window on the host desktop');p.add_argument('--snapshot', help='Resume an existing internal VM snapshot');a=p.parse_args();run=ROOT/'private/run';disk=ROOT/'private/vm/windows95.qcow2';iso=Path.home()/'Downloads/Windows 95C.iso';qmp=run/'windows95.qmp'
+ROOT=Path(__file__).resolve().parents[1];p=argparse.ArgumentParser();p.add_argument('--accel',choices=['kvm','tcg'],default='kvm');p.add_argument('--icount', type=int, help='TCG instruction-clock shift for legacy timing');p.add_argument('--boot-cd',action='store_true',help='Boot the installation CD once; default boots installed disk');p.add_argument('--floppy',type=Path,help='Private writable boot image for legacy setup');p.add_argument('--window', action='store_true', default=True, help='Open an interactive window on the host desktop (default)');p.add_argument('--headless', action='store_true', help='Explicit unattended mode; use only when requested');p.add_argument('--snapshot', help='Resume an existing internal VM snapshot');a=p.parse_args();a.window=not a.headless;run=ROOT/'private/run';disk=ROOT/'private/vm/windows95.qcow2';iso=Path.home()/'Downloads/Windows 95C.iso';qmp=run/'windows95.qmp'
 if qmp.exists():p.error('Reference VM socket already exists; inspect existing VM')
 if not disk.exists():subprocess.run(['/usr/bin/qemu-img','create','-f','qcow2',str(disk),'2G'],check=True)
 cmd=['/usr/bin/qemu-system-i386','-name','Win95LX Original Reference','-machine','pc-i440fx-8.2','-accel',a.accel,'-cpu','pentium','-m','64','-smp','1','-drive',f'file={disk},format=qcow2,if=ide,index=0','-drive',f'file={iso},media=cdrom,readonly=on,if=ide,index=2','-boot','order=c,once=a' if a.floppy else ('order=c,once=d' if a.boot_cd else 'order=c'),'-vga','cirrus','-nic','none','-rtc','base=1997-11-01T12:00:00','-display','gtk,show-tabs=off,zoom-to-fit=off' if a.window else 'none','-qmp',f'unix:{qmp},server=on,wait=off','-pidfile',str(run/'windows95.pid'),'-D',str(run/'windows95.log')]
 if a.icount is not None:
  if a.accel != 'tcg':p.error('--icount requires TCG')
- cmd+=['-icount', f'shift={a.icount},sleep=off']
+ cmd+=['-icount', f'shift={a.icount},sleep={"on" if a.window else "off"}']
 if a.floppy:
  if ',' in str(a.floppy) or not a.floppy.is_file():p.error('Invalid private floppy path')
  cmd+=['-drive',f'file={a.floppy.resolve()},format=raw,if=floppy']

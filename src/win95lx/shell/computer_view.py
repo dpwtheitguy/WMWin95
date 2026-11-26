@@ -25,8 +25,9 @@ def geometry(win):
 def draw(shell,p,win):
     x,y,w,h=geometry(win)
     left=x+4; width=w-8
+    if 'mouse' not in shell.images and (shell.assets/'mouse-icon.png').exists():shell.images['mouse']=cairo.ImageSurface.create_from_png(str(shell.assets/'mouse-icon.png'))
     computer=win.kind=='computer'
-    entries=((9,'(C:)','drive'),(36,'Control Panel','control')) if computer else (('display','Display','display'),)
+    entries=((9,'(C:)','drive'),(36,'Control Panel','control')) if computer else (('display','Display','display'),('mouse','Mouse','mouse'))
     small_icon='computer' if computer else 36
     if shell.popup and isinstance(shell.popup[2],tuple) and shell.popup[2]==(win,'File'):
         p.bevel(left+11,y+26,32,19,True)
@@ -115,7 +116,7 @@ def draw(shell,p,win):
     for index,(ident,label,target) in enumerate(entries):
         # Namespace contents reflect the Linux machine; no fictitious A: or Windows CD.
         if win.web_view:
-            dx,dy=((step,0),(0,75))[index] if computer else (0,0)
+            dx,dy=((step,0),(0,75))[index] if computer else (index*step,0)
         else:dx,dy=index*step,0
         shell.icon(p,ident,label,icon_left+dx,icon_top+dy,
                    ('item',win,target,label,(dx,dy)),shell.item_selection in ((win,label),(win,None)) and shell.state.active is win and shell.popup is None,

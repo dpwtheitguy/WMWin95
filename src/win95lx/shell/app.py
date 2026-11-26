@@ -81,6 +81,8 @@ class Shell(Gtk.Window):
             path = assets / f'explorer-menu-{part}.png'
             if path.is_file():
                 self.explorer_menu_art[part] = cairo.ImageSurface.create_from_png(str(path))
+        if (assets/'mouse-icon.png').exists():self.images['mouse']=cairo.ImageSurface.create_from_png(str(assets/'mouse-icon.png'))
+        if (assets/'mouse-icon-small.png').exists():self.small_images['mouse']=cairo.ImageSurface.create_from_png(str(assets/'mouse-icon-small.png'))
         self.wallpaper_images = {}
         for label, filename in BITMAPS.items():
             path = assets / f'wallpaper-{filename}'
@@ -205,6 +207,18 @@ class Shell(Gtk.Window):
         screen.connect('size-changed', self.resize_to_display)
         self.width, self.height = screen.get_width(), screen.get_height()
         self.set_default_size(self.width, self.height)
+        from win95lx.assets.cursors import PointerLibrary
+        self.pointer_library=PointerLibrary(assets);self.cursor_animation_timer=None;self.cursor_animation_epoch=GLib.get_monotonic_time()
+        from win95lx.control_panel.mouse_preferences import MousePreferences,X11Mouse
+        mouse_path=Path.home()/'.config/win95lx/mouse.json'
+        self.mouse_preferences=MousePreferences.load(mouse_path)
+        Gtk.Settings.get_default().set_property('gtk-double-click-time',self.mouse_preferences.double_click_ms)
+        if mouse_path.exists():
+            try:
+                backend=X11Mouse()
+                try:backend.apply(self.mouse_preferences)
+                finally:backend.close()
+            except RuntimeError as error:print('Could not restore mouse settings:',error,flush=True)
         self.connect('realize',self.cursor)
         GLib.timeout_add_seconds(1,self.tick)
     def resize_to_display(self, screen):
@@ -219,23 +233,41 @@ class Shell(Gtk.Window):
             window.y = max(0, min(window.y, height - 28 - window.height))
 
     def cursor_for(self, name):
-        if name in self.cursors:
-            return self.cursors[name]
-        path = self.assets / f'{name}.png'
-        metadata = self.assets / f'{name}-cursor.json'
-        if name == 'arrow' and not metadata.exists():
-            metadata = self.assets / 'cursor.json'
-        if path.exists() and metadata.exists():
-            hotspot = json.loads(metadata.read_text())['hotspot']
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file(str(path))
-            self.cursors[name] = Gdk.Cursor.new_from_pixbuf(self.get_display(), pixbuf, *hotspot)
-        return self.cursors.get(name)
+        prefs=self.mouse_preferences
+        if name in prefs.overrides and Path(prefs.overrides[name]).exists():
+            path=Path(prefs.overrides[name]);data=path.read_bytes()
+            hotspot=[int.from_bytes(data[10:12],'little'),int.from_bytes(data[12:14],'little')]
+        else:
+            frame=self.pointer_library.frame(prefs.scheme,name,(GLib.get_monotonic_time()-self.cursor_animation_epoch)/1000)
+            path=self.assets/frame['file'];hotspot=frame['hotspot']
+        key=(name,str(path),tuple(hotspot))
+        if key not in self.cursors:
+            pixbuf=GdkPixbuf.Pixbuf.new_from_file(str(path))
+            self.cursors[key]=Gdk.Cursor.new_from_pixbuf(self.get_display(),pixbuf,*hotspot)
+        return self.cursors[key]
+
+    def refresh_mouse_cursors(self):
+        if not self.get_window():self.cursor_animation_timer=None;return False
+        self.cursor()
+        for window in self.accessory_windows.values():
+            if window.get_window():
+                cursor=self.cursor_for('arrow')
+                if window.get_window().get_cursor()!=cursor:window.get_window().set_cursor(cursor)
+            view=getattr(window,'view',None)
+            if isinstance(view,Gtk.TextView) and view.get_window(Gtk.TextWindowType.TEXT):
+                text_window=view.get_window(Gtk.TextWindowType.TEXT);cursor=self.cursor_for('beam')
+                if text_window.get_cursor()!=cursor:text_window.set_cursor(cursor)
+        return True
 
     def cursor(self, *_):
+        if _:self.cursor_animation_epoch=GLib.get_monotonic_time()
         cursor = self.cursor_for('arrow')
         if cursor:
-            self.get_window().set_cursor(cursor)
-            Gdk.get_default_root_window().set_cursor(cursor)
+            if self.get_window().get_cursor()!=cursor:self.get_window().set_cursor(cursor)
+            root=Gdk.get_default_root_window()
+            if root.get_cursor()!=cursor:root.set_cursor(cursor)
+        if any(len(self.pointer_library.definition(self.mouse_preferences.scheme,role)['sequence'])>1 for role in ('arrow','beam')) and self.cursor_animation_timer is None:
+            self.cursor_animation_timer=GLib.timeout_add(16,self.refresh_mouse_cursors)
 
     def tick(self):self.area.queue_draw();return True
     def hit(self,x,y,w,h,action):self.hits.append((x,y,w,h,action))
@@ -244,7 +276,7 @@ class Shell(Gtk.Window):
         from win95lx.explorer.namespace import read_shortcut
         link=read_shortcut(path)
         if not link:return default
-        if link.kind=='namespace':return {'control':36,'computer':'computer','drive':9,'display':'display'}[link.target]
+        if link.kind=='namespace':return {'control':36,'computer':'computer','drive':9,'display':'display','mouse':'mouse'}[link.target]
         target=Path(link.target)
         return 4 if target.is_dir() else self.drive_file_icon(target.name)
 
@@ -319,6 +351,7 @@ class Shell(Gtk.Window):
             self.open_drive_file(relative)
 
     def navigate_namespace(self,win,kind,folder=None,*,new_window=False):
+        if kind=='mouse':self.open('mouse');return
         if kind not in ('computer','control','drive') or new_window or not self.browsing_preferences.single_window:
             self.open(kind,folder)
             return
@@ -347,6 +380,8 @@ class Shell(Gtk.Window):
             self.item_selection=None;win.focus_item=None;self.popup=None
 
     def open(self,kind,folder=None):
+        if kind=='mouse':
+            self.launch_accessory('mouse');return
         if kind == 'drive':
             try:
                 folder = self._drive.view.resolve(folder or '.').relative_to(self._drive.view.root)
@@ -379,6 +414,26 @@ class Shell(Gtk.Window):
             self.resolution_focus = None
             self.resolution_error = ''
         self.area.queue_draw()
+    def apply_mouse_preferences(self,prefs):
+        prefs.validate()
+        if prefs.scheme not in self.pointer_library.names:raise ValueError('The selected pointer scheme is not installed.')
+        for path in prefs.overrides.values():
+            if not Path(path).is_file():raise FileNotFoundError('The selected pointer file cannot be found.')
+            GdkPixbuf.Pixbuf.new_from_file(str(path))
+        self.mouse_preferences=prefs;self.cursor_animation_epoch=GLib.get_monotonic_time()
+        if self.cursor_animation_timer:GLib.source_remove(self.cursor_animation_timer);self.cursor_animation_timer=None
+        Gtk.Settings.get_default().set_property('gtk-double-click-time',prefs.double_click_ms)
+        self.cursors.clear()
+        if self.get_window():self.cursor()
+        for window in self.accessory_windows.values():
+            if window.get_window():
+                cursor=self.cursor_for('arrow')
+                if window.get_window().get_cursor()!=cursor:window.get_window().set_cursor(cursor)
+            view=getattr(window,'view',None)
+            if isinstance(view,Gtk.TextView) and view.get_window(Gtk.TextWindowType.TEXT):
+                text_window=view.get_window(Gtk.TextWindowType.TEXT);cursor=self.cursor_for('beam')
+                if text_window.get_cursor()!=cursor:text_window.set_cursor(cursor)
+
     def launch_accessory(self, kind):
         self.state.start_open = False
         self.menu_path.clear()
@@ -605,7 +660,7 @@ class Shell(Gtk.Window):
                 computer_view.draw(self,p,win)
                 return
             explorer_chrome.draw(p, win, self.explorer_menu_art, self.hit)
-            items={'computer':[(9,'(C:)','drive'),(36,'Control Panel','control')],'control':[(('display' if 'display' in self.images else 147),'Display','display')],'recycle':[]}.get(win.kind)
+            items={'computer':[(9,'(C:)','drive'),(36,'Control Panel','control')],'control':[(('display' if 'display' in self.images else 147),'Display','display'),('mouse','Mouse','mouse')],'recycle':[]}.get(win.kind)
             if win.kind == 'start-folder':
                 items = [(icon, label, ('start-folder', action[1]) if action[0] == 'submenu' else action)
                          for label, icon, action in self.shortcut_folders.entries(win.folder)]
@@ -949,7 +1004,7 @@ class Shell(Gtk.Window):
         selection=(self.item_selection[1] or '*') if self.item_selection and self.item_selection[0] is win else None
         if win.kind=='computer':return explorer_menu.computer_file_rows(self.work_offline,selection)
         from win95lx.explorer.commands import Context,Item,file_commands
-        names=() if selection is None else ('Display',) if selection=='*' else (selection,)
+        names=() if selection is None else ('Display','Mouse') if selection=='*' else (selection,)
         return file_commands(Context('control',tuple(Item('applet',name,False) for name in names)))
 
     def context(self,p,x,y,kind):
@@ -1417,6 +1472,8 @@ class Shell(Gtk.Window):
                     self.action(('computer-menu',win,'properties'))
                 elif self.item_selection==(win,'Display'):
                     self.open('display')
+                elif self.item_selection==(win,'Mouse'):
+                    self.open('mouse')
                 elif win.kind=='computer' and (not self.item_selection or self.item_selection[0] is not win):
                     self.state.open('system')
             elif command=='back':
@@ -1439,9 +1496,9 @@ class Shell(Gtk.Window):
                 self.work_offline=not self.work_offline
             elif action[2] in ('open','explore'):
                 selection=self.item_selection[1] if self.item_selection and self.item_selection[0] is action[1] else None
-                labels=(selection,) if selection else (('Display',) if action[1].kind=='control' else ('(C:)','Control Panel'))
+                labels=(selection,) if selection else (('Display','Mouse') if action[1].kind=='control' else ('(C:)','Control Panel'))
                 for label in labels:
-                    self.navigate_namespace(action[1],{'(C:)':'drive','Control Panel':'control','Display':'display'}[label],new_window=action[2]=='explore' or len(labels)>1)
+                    self.navigate_namespace(action[1],{'(C:)':'drive','Control Panel':'control','Display':'display','Mouse':'mouse'}[label],new_window=action[2]=='explore' or len(labels)>1)
             elif action[2]=='find':
                 self.action(('find',))
             elif action[2]=='format':
@@ -1449,6 +1506,8 @@ class Shell(Gtk.Window):
                 message_box(self,'Format',"Windows cannot format this drive because it is in use.",Gtk.MessageType.ERROR)
             elif action[2]=='computer':
                 self.item_selection=None
+            elif action[2]=='properties' and self.item_selection==(action[1],'Mouse'):
+                self.open('mouse')
             elif action[2]=='properties' and self.item_selection==(action[1],'Display'):
                 self.open('display')
             elif action[2]=='properties' and self.item_selection and self.item_selection==(action[1],'(C:)'):
@@ -1462,7 +1521,7 @@ class Shell(Gtk.Window):
                 if answer==Gtk.ResponseType.YES:
                     from win95lx.explorer.namespace import create_shortcut
                     try:
-                        labels=(self.item_selection[1],) if self.item_selection[1] else (('Display',) if action[1].kind=='control' else ('(C:)','Control Panel'))
+                        labels=(self.item_selection[1],) if self.item_selection[1] else (('Display','Mouse') if action[1].kind=='control' else ('(C:)','Control Panel'))
                         for label in labels:create_shortcut(self.desktop_folder,label)
                         self.refresh_desktop_files()
                     except (OSError,KeyError) as error:
@@ -2444,7 +2503,7 @@ class Shell(Gtk.Window):
                 if row:
                     action = row[2]
                     self.action(('start-folder', action[1]) if action[0]=='submenu' else action)
-            target={('computer','(C:)'):'drive',('computer','Control Panel'):'control',('control','Display'):'display'}.get((active,label))
+            target={('computer','(C:)'):'drive',('computer','Control Panel'):'control',('control','Display'):'display',('control','Mouse'):'mouse'}.get((active,label))
             if target:self.open(target)
         self.area.queue_draw();return True
 

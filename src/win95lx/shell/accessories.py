@@ -108,6 +108,9 @@ def install_menu_style(screen):
 
 
 def build(kind, shell):
+    if kind=='mouse':
+        from win95lx.apps.mouse import MouseWindow
+        return MouseWindow(shell)
     module, factory = APPLICATIONS[kind]
     create = getattr(import_module(f'win95lx.apps.{module}'), factory)
     window = create(shell.assets) if kind == 'wordpad' else create()

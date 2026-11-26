@@ -13,10 +13,11 @@ def draw(shell,p,win,left,top,width,height,*,panel_top=88):
         shell.webview_fonts=[RasterFont(shell.assets/f'webview-verdana-{weight}.json') for weight in ('regular','bold')]
     selected=None
     if shell.item_selection and shell.item_selection[0] is win:
-        selected=[shell.item_selection[1]] if shell.item_selection[1] is not None else ['(C:)','Control Panel']
+        selected=[shell.item_selection[1]] if shell.item_selection[1] is not None else (['Display','Mouse'] if win.kind=='control' else ['(C:)','Control Panel'])
     if win.kind=='control':
         from win95lx.explorer.webview_details import Details
         if selected and selected[0]=='Display':details=Details('Display','Changes settings for your display.')
+        elif selected and selected[0]=='Mouse':details=Details('Mouse','Changes settings for your mouse.')
         elif selected:details=Details(title=f'{len(selected)} objects selected.',names=tuple(selected))
         else:details=describe(None,shell.webview_strings,shell._drive.view.root)
     else:details=describe(selected,shell.webview_strings,shell._drive.view.root)

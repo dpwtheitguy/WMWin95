@@ -37,3 +37,11 @@ Run `make test` for layout and interaction logic, then `make check-ui` for the r
 `text_entry.py` supplies shared caret, selection, replacement, arrows, Home/End, Delete/Backspace and Ctrl+A behavior for single-line edit controls. Its first consumer is the address field. Reuse it instead of clearing the field merely because Ctrl+A was pressed.
 
 Run `dev/check_computer_view.py` under Xvfb at 800×600 and 1280×720 (or `make check-computer-view`). It saves complete menus, selected-item states, band toggles, original hashes, and pixel rectangles. Namespace shortcut serialization is in `explorer/namespace.py`; unknown links must never execute arbitrary commands.
+
+## Mouse property sheet and animation
+
+`apps/mouse.py` owns the native 404×448 sheet, pending edits, pointer/keyboard hit targets and original AVI test playback. Reuse `MouseController` in `control_panel/mouse_preferences.py` for Apply/Cancel/persistence/rollback. Read actual backend state before applying unrelated settings; applying an artwork choice must not reset existing button mapping or acceleration. X11 acceleration readback does not prove an effect on an absolute tablet or a libinput device.
+
+`assets/rle8.py` decodes bounded BI_RLE8 key/delta frames and preserves the prior image. `tools/stage_mouse_animation.py` stages the original private MAIN.CPL AVI and transparency. New animation consumers need independent input tests as well as a resource-derived frame; never substitute a static picture for a working control.
+
+Run `make check-mouse` for both viewport sizes. See `reports/MOUSE_PROPERTIES_2026-11-26.md` for exactly accepted regions and the still-unimplemented trails, scheme management and theming paths.

@@ -31,7 +31,7 @@ def main():
             a.output.parent.mkdir(parents=True, exist_ok=True)
             result = q.call('screendump', {'filename':str(a.output.resolve()), 'format':image_format})
         elif a.action=='type':
-            punctuation={',':('comma',False),' ':('spc',False),'\n':('ret',False),'-':('minus',False),'_':('minus',True),'/':('slash',False),'.':('dot',False),':':('semicolon',True),';':('semicolon',False),'$':('4',True),'"':('apostrophe',True),"'":('apostrophe',False),'=':('equal',False),'\\':('backslash',False),'>':('dot',True),'[':('bracket_left',False),']':('bracket_right',False),'|':('backslash',True),'(':('9',True),')':('0',True)}
+            punctuation={'!':('1',True),',':('comma',False),' ':('spc',False),'\n':('ret',False),'-':('minus',False),'_':('minus',True),'/':('slash',False),'.':('dot',False),':':('semicolon',True),';':('semicolon',False),'$':('4',True),'"':('apostrophe',True),"'":('apostrophe',False),'=':('equal',False),'\\':('backslash',False),'>':('dot',True),'[':('bracket_left',False),']':('bracket_right',False),'|':('backslash',True),'(':('9',True),')':('0',True)}
             events=[]
             if len(a.text)>512: p.error('Text limited to 512 characters per call')
             for char in a.text:
