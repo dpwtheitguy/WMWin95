@@ -335,7 +335,9 @@ class NotepadWindow(Gtk.Window):
         self.buffer.begin_user_action()
         try:
             self.buffer.delete_selection(True, True)
-            self.buffer.insert_at_cursor(datetime.now().strftime("%I:%M %p %m/%d/%y").lstrip("0"))
+            from win95lx.control_panel.regional_preferences import current
+            prefs=current();now=datetime.now()
+            self.buffer.insert_at_cursor(prefs.short_time(now)+' '+prefs.date(now))
         finally:
             self.buffer.end_user_action()
 

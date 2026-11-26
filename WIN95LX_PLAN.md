@@ -73,3 +73,7 @@ Complete and independently recheck the cumulative user requests above; commit an
 Mouse Properties now has a first working implementation; see reports/MOUSE_PROPERTIES_2026-11-26.md. Do not mark the complete Mouse assignment accepted: pointer trails, named custom schemes, third-party cursor theming, physical-device acceleration and complete modified-state comparisons remain open. The basic and original available animated/Plus schemes are now implemented.
 
 The pointer iteration now stages the basic USER.EXE set as default, retains 3D/large schemes, and adds the original Plus! pointer catalog. Full desktop profile switching is later work; keep Explorer generation, Active Desktop and Plus! customization independent as described in docs/DESKTOP_PROFILES.md. The intended visible reference set is three Windows VMs (classic, IE4, Plus!) and one Win95LX VM. Preserve working-desktop snapshots and do not use recovery snapshots as the default normal launcher behavior.
+
+## Control Panel expansion — November 26
+
+See reports/CONTROL_PANEL_2026-11-26.md for the six routed applets, narrowly accepted native states, actual-backend tests, 47-mode geometry scope, measured palette acceleration, RTM licensing blocker, and remaining feature inventory. No blanket all-applet acceptance is asserted. Continue the remaining applets using native control measurements and effect/rollback tests.

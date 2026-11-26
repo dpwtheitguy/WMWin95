@@ -23,7 +23,7 @@ from win95lx.shell.shutdown_dialog import ShutdownDialog, is_development_guest
 from win95lx.shell.run_dialog import RunDialog
 from win95lx.shell.start_context import StartContext, SystemContext
 from win95lx.shell.system_menu import ARROWS, MENU_WIDTH, WindowOperation, options as system_options
-from win95lx.display_modes import DISPLAY_MODES, remember_resolution, set_resolution
+from win95lx.display_modes import DISPLAY_MODES, discover_modes, remember_resolution, set_resolution
 from win95lx.explorer.trash import TrashStore
 from win95lx.explorer.file_operations import FileClipboard, child_name, move_entry
 from win95lx.explorer.drive_browser import DriveBrowser, SCROLLBAR_WIDTH
@@ -31,6 +31,7 @@ from win95lx.shell.drop_geometry import contains, folder_drop_rect, drag_started
 from win95lx.shell.combo_box import ComboBox
 from win95lx.shell.scrollbar import VerticalScrollbar
 from win95lx.control_panel.applets import APPLETS
+from win95lx.control_panel import catalog as cpl_catalog
 from win95lx.control_panel import background, display_settings
 from win95lx.control_panel.display_preferences import DisplayPreferences, FONT_SIZES, PALETTES, color_surface
 from win95lx.control_panel.wallpaper import BITMAPS, Wallpaper, paint_wallpaper, paint_pattern
@@ -186,6 +187,12 @@ class Shell(Gtk.Window):
         display_icon = assets/'display-applet.png'
         if display_icon.exists():
             self.images['display'] = cairo.ImageSurface.create_from_png(str(display_icon))
+        for applet in cpl_catalog.implemented():
+            for size,mapping in ((32,self.images),(16,self.small_images)):
+                icon=assets/f'cpl-{applet.key}-{size}.png'
+                if icon.exists():
+                    mapping['cpl-'+applet.key]=cairo.ImageSurface.create_from_png(str(icon))
+                    mapping[applet.key]=mapping['cpl-'+applet.key]
         for ident, filename in (
             ('banner', 'start-banner.png'), ('computer', 'my-computer-32.png'),
             ('favorites', 'start-favorites.png'), ('settings', 'start-settings.png'),
@@ -206,6 +213,9 @@ class Shell(Gtk.Window):
         Gtk.Settings.get_for_screen(screen).set_property('gtk-xft-dpi', self.display_preferences.dpi*1024)
         screen.connect('size-changed', self.resize_to_display)
         self.width, self.height = screen.get_width(), screen.get_height()
+        self.detected_resolution_modes=discover_modes()
+        self.keyboard_preferences=None;self.keyboard_groups=None
+        self.connect('destroy',lambda *_:self.keyboard_groups.close() if self.keyboard_groups else None)
         self.set_default_size(self.width, self.height)
         from win95lx.assets.cursors import PointerLibrary
         self.pointer_library=PointerLibrary(assets);self.cursor_animation_timer=None;self.cursor_animation_epoch=GLib.get_monotonic_time()
@@ -219,9 +229,18 @@ class Shell(Gtk.Window):
                 try:backend.apply(self.mouse_preferences)
                 finally:backend.close()
             except RuntimeError as error:print('Could not restore mouse settings:',error,flush=True)
+        keyboard_path=Path.home()/'.config/win95lx/keyboard.json'
+        if keyboard_path.exists():
+            from win95lx.control_panel.keyboard_preferences import X11Keyboard,KeyboardPreferences,apply_session
+            from win95lx.control_panel.preferences import PreferenceController
+            try:
+                controller=PreferenceController(keyboard_path,X11Keyboard(),KeyboardPreferences,lambda prefs:apply_session(Gtk.Settings.get_default(),prefs))
+                controller.apply();self.keyboard_preferences=controller.applied
+            except (OSError,RuntimeError,ValueError,subprocess.SubprocessError) as error:print('Could not restore keyboard settings:',error,flush=True)
         self.connect('realize',self.cursor)
         GLib.timeout_add_seconds(1,self.tick)
     def resize_to_display(self, screen):
+        from win95lx.shell.window_bounds import fit_bounds
         width, height = screen.get_width(), screen.get_height()
         self.resize(width, height)
         scale = self.display_preferences.dpi/96
@@ -229,8 +248,7 @@ class Shell(Gtk.Window):
         for window in self.state.windows:
             if window.restored_bounds is not None:
                 window.width, window.height = width, height-28
-            window.x = max(0, min(window.x, width - window.width))
-            window.y = max(0, min(window.y, height - 28 - window.height))
+            window.x,window.y,window.width,window.height=fit_bounds((window.x,window.y,window.width,window.height),(width,height),resizable=window.kind in ('computer','control','drive','recycle','start-folder'))
 
     def cursor_for(self, name):
         prefs=self.mouse_preferences
@@ -276,7 +294,7 @@ class Shell(Gtk.Window):
         from win95lx.explorer.namespace import read_shortcut
         link=read_shortcut(path)
         if not link:return default
-        if link.kind=='namespace':return {'control':36,'computer':'computer','drive':9,'display':'display','mouse':'mouse'}[link.target]
+        if link.kind=='namespace':return {'control':36,'computer':'computer','drive':9,**{applet.key:applet.key for applet in cpl_catalog.implemented()}}[link.target]
         target=Path(link.target)
         return 4 if target.is_dir() else self.drive_file_icon(target.name)
 
@@ -292,6 +310,14 @@ class Shell(Gtk.Window):
         if shortcut and 29 in self.images:p.image(self.images[29],x+16+image_offset,y)
         if image is None and ident in self.small_images:p.image(self.small_images[ident],x+24,y+8)
         from win95lx.explorer.namespace import display_name
+        if action[0]=='item' and action[1].kind=='control':
+            from win95lx.shell.icon_labels import wrap_label
+            lines=wrap_label(display_name(label),self.font)
+            for row,line in enumerate(lines):
+                width=self.font.width(line);left=x+(64-width)//2+label_offset;top=y+36+13*row
+                if selected:p.fill(left-1,top+1,width+2,13,NAVY)
+                p.text(line,left,top,LIGHT if selected else BLACK)
+            self.hit(x,y,70,max(54,36+13*len(lines)),action);return
         label = taskbar.title_that_fits(self.font, display_name(label), ICON_WIDTH-4, False)
         width=self.font.width(label)
         if selected:
@@ -351,7 +377,7 @@ class Shell(Gtk.Window):
             self.open_drive_file(relative)
 
     def navigate_namespace(self,win,kind,folder=None,*,new_window=False):
-        if kind=='mouse':self.open('mouse');return
+        if kind in cpl_catalog.BY_KEY and kind!='display':self.open(kind);return
         if kind not in ('computer','control','drive') or new_window or not self.browsing_preferences.single_window:
             self.open(kind,folder)
             return
@@ -380,8 +406,8 @@ class Shell(Gtk.Window):
             self.item_selection=None;win.focus_item=None;self.popup=None
 
     def open(self,kind,folder=None):
-        if kind=='mouse':
-            self.launch_accessory('mouse');return
+        if kind in cpl_catalog.targets().values() and kind!='display':
+            self.launch_accessory(kind);return
         if kind == 'drive':
             try:
                 folder = self._drive.view.resolve(folder or '.').relative_to(self._drive.view.root)
@@ -413,6 +439,7 @@ class Shell(Gtk.Window):
             self.reset_display_combos()
             self.resolution_focus = None
             self.resolution_error = ''
+        self.resize_to_display(self.get_screen())
         self.area.queue_draw()
     def apply_mouse_preferences(self,prefs):
         prefs.validate()
@@ -442,7 +469,11 @@ class Shell(Gtk.Window):
         if window is None:
             try:
                 window = accessories.build(kind, self)
-            except (ImportError, AttributeError) as error:
+            except (ImportError, AttributeError, OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
+                if kind in cpl_catalog.BY_KEY:
+                    from win95lx.apps.dialogs import message_box
+                    message_box(self,cpl_catalog.BY_KEY[kind].label+' Properties',str(error),Gtk.MessageType.ERROR)
+                    return
                 print(f'Could not start {kind}: {error}', flush=True)
                 self.state.dialog = 'run'
                 self.dialog_error = 'This program could not be started.'
@@ -550,7 +581,17 @@ class Shell(Gtk.Window):
             self.draw_start_button(p,bar)
         self.hit(2,bar+4,54,22,('start',))
         tray = self.display_preferences.tray
-        self.draw_tasks(p, bar, width-(95 if tray else 75))
+        language=bool(self.keyboard_preferences and self.keyboard_preferences.indicator and len(self.keyboard_preferences.layouts)>1)
+        self.draw_tasks(p, bar, width-(95 if tray else 75)-(24 if language else 0))
+        if language:
+            from win95lx.control_panel.keyboard_preferences import KeyboardGroups
+            try:
+                if self.keyboard_groups is None:self.keyboard_groups=KeyboardGroups()
+                index=self.keyboard_groups.current();code=self.keyboard_preferences.layouts[min(index,len(self.keyboard_preferences.layouts)-1)]
+            except RuntimeError:code=self.keyboard_preferences.layouts[0]
+            left=width-(112 if tray else 88)
+            p.fill(left,bar+6,19,17,NAVY);p.text({'us':'En','gb':'En','de':'De','fr':'Fr','es':'Es'}.get(code,code[:2].title()),left+2,bar+8,LIGHT)
+            self.hit(left,bar+4,22,22,('keyboard-language-menu',))
         if tray:
             p.bevel(width-88,bar+4,22,22,True)
             icon = self.small_images.get('display') or self.images.get('display')
@@ -564,7 +605,8 @@ class Shell(Gtk.Window):
         p.fill(width-69,bar+4,1,22,SHADOW)
         p.fill(width-68,bar+4,1,22,LIGHT)
         p.bevel(width-65,bar+4,63,22,True)
-        clock=self.clock or datetime.datetime.now().strftime('%I:%M %p').lstrip('0')
+        from win95lx.control_panel.regional_preferences import current as current_regional
+        clock=self.clock or current_regional().short_time(datetime.datetime.now())
         p.text(clock,width-34-self.font.width(clock)//2,bar+8)
         self.menu_hit_start=len(self.hits)
         if self.state.start_open:self.startmenu(p)
@@ -660,7 +702,7 @@ class Shell(Gtk.Window):
                 computer_view.draw(self,p,win)
                 return
             explorer_chrome.draw(p, win, self.explorer_menu_art, self.hit)
-            items={'computer':[(9,'(C:)','drive'),(36,'Control Panel','control')],'control':[(('display' if 'display' in self.images else 147),'Display','display'),('mouse','Mouse','mouse')],'recycle':[]}.get(win.kind)
+            items={'computer':[(9,'(C:)','drive'),(36,'Control Panel','control')],'control':cpl_catalog.entries(),'recycle':[]}.get(win.kind)
             if win.kind == 'start-folder':
                 items = [(icon, label, ('start-folder', action[1]) if action[0] == 'submenu' else action)
                          for label, icon, action in self.shortcut_folders.entries(win.folder)]
@@ -1004,7 +1046,7 @@ class Shell(Gtk.Window):
         selection=(self.item_selection[1] or '*') if self.item_selection and self.item_selection[0] is win else None
         if win.kind=='computer':return explorer_menu.computer_file_rows(self.work_offline,selection)
         from win95lx.explorer.commands import Context,Item,file_commands
-        names=() if selection is None else ('Display','Mouse') if selection=='*' else (selection,)
+        names=() if selection is None else cpl_catalog.labels() if selection=='*' else (selection,)
         return file_commands(Context('control',tuple(Item('applet',name,False) for name in names)))
 
     def context(self,p,x,y,kind):
@@ -1390,6 +1432,21 @@ class Shell(Gtk.Window):
         elif kind == 'display-tray':
             self.resolution_focus = 'tray'
             self.pending_display = replace(self.pending_display, tray=not self.pending_display.tray)
+        elif kind=='keyboard-language-menu':
+            from win95lx.control_panel.keyboard_preferences import LAYOUT_NAMES
+            prefs=self.keyboard_preferences
+            if prefs:
+                rows=[(LAYOUT_NAMES.get(code,code),('keyboard-language-select',index)) for index,code in enumerate(prefs.layouts)]
+                self.start_context=StartContext(self.width-230,self.height-28-6-17*len(rows),rows,230,self.width,self.height)
+        elif kind=='keyboard-language-select':
+            from win95lx.control_panel.keyboard_preferences import KeyboardGroups
+            try:
+                if self.keyboard_groups is None:self.keyboard_groups=KeyboardGroups()
+                self.keyboard_groups.select(action[1])
+            except (RuntimeError,ValueError) as error:
+                from win95lx.apps.dialogs import message_box
+                message_box(self,'Keyboard Properties',str(error),Gtk.MessageType.ERROR)
+            self.start_context=None
         elif kind == 'display-tray-open':
             self.open('display')
             self.display_tab = 'settings'
@@ -1402,7 +1459,8 @@ class Shell(Gtk.Window):
             self.state.windows.append(win)
             self.resolution_focus = top
             index = self.resolution_modes.index(self.pending_resolution)
-            center = display_settings.slider_center(index, len(self.resolution_modes))
+            modes=self.resolution_modes
+            center = display_settings.slider_center(index,len(modes),modes.index((800,600)) if (800,600) in modes else 0)
             offset = event.x-win.x-center
             if abs(offset) > 5:
                 offset = 0
@@ -1470,12 +1528,10 @@ class Shell(Gtk.Window):
             elif command=='properties':
                 if self.item_selection==(win,'(C:)'):
                     self.action(('computer-menu',win,'properties'))
-                elif self.item_selection==(win,'Display'):
-                    self.open('display')
-                elif self.item_selection==(win,'Mouse'):
-                    self.open('mouse')
+                elif self.item_selection and self.item_selection[0] is win and self.item_selection[1] in cpl_catalog.targets():
+                    self.open(cpl_catalog.targets()[self.item_selection[1]])
                 elif win.kind=='computer' and (not self.item_selection or self.item_selection[0] is not win):
-                    self.state.open('system')
+                    self.open('system')
             elif command=='back':
                 self.navigate_history(win,True)
             elif command=='forward':
@@ -1496,9 +1552,9 @@ class Shell(Gtk.Window):
                 self.work_offline=not self.work_offline
             elif action[2] in ('open','explore'):
                 selection=self.item_selection[1] if self.item_selection and self.item_selection[0] is action[1] else None
-                labels=(selection,) if selection else (('Display','Mouse') if action[1].kind=='control' else ('(C:)','Control Panel'))
+                labels=(selection,) if selection else (cpl_catalog.labels() if action[1].kind=='control' else ('(C:)','Control Panel'))
                 for label in labels:
-                    self.navigate_namespace(action[1],{'(C:)':'drive','Control Panel':'control','Display':'display','Mouse':'mouse'}[label],new_window=action[2]=='explore' or len(labels)>1)
+                    self.navigate_namespace(action[1],{'(C:)':'drive','Control Panel':'control',**cpl_catalog.targets()}[label],new_window=action[2]=='explore' or len(labels)>1)
             elif action[2]=='find':
                 self.action(('find',))
             elif action[2]=='format':
@@ -1506,10 +1562,8 @@ class Shell(Gtk.Window):
                 message_box(self,'Format',"Windows cannot format this drive because it is in use.",Gtk.MessageType.ERROR)
             elif action[2]=='computer':
                 self.item_selection=None
-            elif action[2]=='properties' and self.item_selection==(action[1],'Mouse'):
-                self.open('mouse')
-            elif action[2]=='properties' and self.item_selection==(action[1],'Display'):
-                self.open('display')
+            elif action[2]=='properties' and self.item_selection and self.item_selection[0] is action[1] and self.item_selection[1] in cpl_catalog.targets():
+                self.open(cpl_catalog.targets()[self.item_selection[1]])
             elif action[2]=='properties' and self.item_selection and self.item_selection==(action[1],'(C:)'):
                 import shutil
                 from win95lx.apps.dialogs import message_box
@@ -1521,7 +1575,7 @@ class Shell(Gtk.Window):
                 if answer==Gtk.ResponseType.YES:
                     from win95lx.explorer.namespace import create_shortcut
                     try:
-                        labels=(self.item_selection[1],) if self.item_selection[1] else (('Display','Mouse') if action[1].kind=='control' else ('(C:)','Control Panel'))
+                        labels=(self.item_selection[1],) if self.item_selection[1] else (cpl_catalog.labels() if action[1].kind=='control' else ('(C:)','Control Panel'))
                         for label in labels:create_shortcut(self.desktop_folder,label)
                         self.refresh_desktop_files()
                     except (OSError,KeyError) as error:
@@ -1662,12 +1716,12 @@ class Shell(Gtk.Window):
 
     @property
     def resolution_modes(self):
-        return tuple(sorted(set(DISPLAY_MODES) | {self.applied_resolution},
+        return tuple(sorted(set(getattr(self,'detected_resolution_modes',DISPLAY_MODES)) | {self.applied_resolution},
                             key=lambda mode: (mode[0]*mode[1], *mode)))
 
     def move_resolution_slider(self, win, pointer_x):
         modes = self.resolution_modes
-        self.pending_resolution = modes[display_settings.slider_index(pointer_x-win.x, len(modes))]
+        self.pending_resolution = modes[display_settings.slider_index(pointer_x-win.x,len(modes),modes.index((800,600)) if (800,600) in modes else 0)]
         self.resolution_error = ''
 
     def try_resolution(self, win, close):
@@ -2503,7 +2557,7 @@ class Shell(Gtk.Window):
                 if row:
                     action = row[2]
                     self.action(('start-folder', action[1]) if action[0]=='submenu' else action)
-            target={('computer','(C:)'):'drive',('computer','Control Panel'):'control',('control','Display'):'display',('control','Mouse'):'mouse'}.get((active,label))
+            target={('computer','(C:)'):'drive',('computer','Control Panel'):'control',**{('control',name):kind for name,kind in cpl_catalog.targets().items()}}.get((active,label))
             if target:self.open(target)
         self.area.queue_draw();return True
 

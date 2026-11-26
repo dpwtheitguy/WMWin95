@@ -457,6 +457,8 @@ for key,definition in pointer_catalog['assets'].items():
         for filename in (frame['file'],str(Path(frame['file']).with_suffix('.json'))):
             records.append({'source':definition['source'],'type':'CURSOR_FRAME','output':filename,
                             'source_sha256':definition['source_sha256'],'sha256':hashlib.sha256((output/filename).read_bytes()).hexdigest()})
+from stage_control_panel_assets import stage as stage_control_panel_assets
+records.extend(stage_control_panel_assets(output))
 records.append({'source':'original Windows95 and Plus95 private assets','type':'CURSOR_CATALOG','output':'pointer-schemes.json',
                 'sha256':hashlib.sha256((output/'pointer-schemes.json').read_bytes()).hexdigest()})
 (output/'manifest.json').write_text(json.dumps({'assets':records,'original_media_sha256':'c13b6bad0dcbd4f13c3d840d2b7efe939c6d4e40b1c63f086a5f92edfb1e9b77'},indent=2)+'\n');print('Prepared',len(records),'private assets')

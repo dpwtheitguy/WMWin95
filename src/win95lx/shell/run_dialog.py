@@ -13,6 +13,13 @@ COMMANDS = {
     'desk.cpl': ('open', 'display'),
     'c:': ('open', 'drive'),
 }
+from win95lx.control_panel.catalog import implemented as control_applets
+for applet in control_applets():
+    COMMANDS[applet.native_command]=('open',applet.key)
+    command=applet.native_command.removeprefix('control ')
+    if command.endswith('.cpl'):COMMANDS[command]=('open',applet.key)
+COMMANDS['control mouse']=('open','mouse')
+COMMANDS['control main.cpl @1']=('open','keyboard')
 
 BROWSE_COMMANDS = (
     ('Calculator', 'calc.exe'),
@@ -28,6 +35,7 @@ BROWSE_COMMANDS = (
 
 def resolve_command(value):
     command = value.strip().casefold()
+    if command.startswith('control.exe '):command='control '+command[12:].lstrip()
     if command.endswith('.exe'):
         command = command[:-4]
         if command in ('desk.cpl', 'c:'):

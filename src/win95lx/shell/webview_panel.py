@@ -3,6 +3,7 @@ import json,math
 from win95lx.assets.raster_font import RasterFont
 from win95lx.explorer.webview_details import describe,wrapped,size_text
 from win95lx.shell.widgets import Painter,BLACK,FACE,LIGHT,SHADOW
+from win95lx.control_panel.catalog import labels as control_labels
 
 
 def draw(shell,p,win,left,top,width,height,*,panel_top=88):
@@ -13,11 +14,15 @@ def draw(shell,p,win,left,top,width,height,*,panel_top=88):
         shell.webview_fonts=[RasterFont(shell.assets/f'webview-verdana-{weight}.json') for weight in ('regular','bold')]
     selected=None
     if shell.item_selection and shell.item_selection[0] is win:
-        selected=[shell.item_selection[1]] if shell.item_selection[1] is not None else (['Display','Mouse'] if win.kind=='control' else ['(C:)','Control Panel'])
+        selected=[shell.item_selection[1]] if shell.item_selection[1] is not None else (list(control_labels()) if win.kind=='control' else ['(C:)','Control Panel'])
     if win.kind=='control':
         from win95lx.explorer.webview_details import Details
         if selected and selected[0]=='Display':details=Details('Display','Changes settings for your display.')
         elif selected and selected[0]=='Mouse':details=Details('Mouse','Changes settings for your mouse.')
+        elif selected and len(selected)==1 and selected[0] in control_labels():
+            if not hasattr(shell,'cpl_descriptions'):
+                path=shell.assets/'cpl-descriptions.json';shell.cpl_descriptions=json.loads(path.read_text()) if path.exists() else {}
+            details=Details(selected[0],shell.cpl_descriptions.get(selected[0],''))
         elif selected:details=Details(title=f'{len(selected)} objects selected.',names=tuple(selected))
         else:details=describe(None,shell.webview_strings,shell._drive.view.root)
     else:details=describe(selected,shell.webview_strings,shell._drive.view.root)

@@ -333,6 +333,7 @@ def build_window():
 
         def button(self, key, style, width=KEY_WIDTH):
             button = Gtk.Button(label=key)
+            if key=='.':self.decimal_button=button
             button.set_size_request(width, KEY_HEIGHT)
             button.set_focus_on_click(False)
             button.get_style_context().add_class('key')
@@ -342,7 +343,9 @@ def build_window():
             return button
 
         def refresh(self):
-            self.readout.set_text(self.calculator.display)
+            from win95lx.control_panel.regional_preferences import current
+            self.readout.set_text(self.calculator.display if self.calculator.error else current().calculator_text(self.calculator.display))
+            self.decimal_button.set_label(current().decimal)
             self.memory_indicator.set_text('M' if self.calculator.memory_active else '')
 
         def press(self, key):
@@ -351,13 +354,15 @@ def build_window():
 
         def copy(self, _):
             if not self.calculator.error:
-                self.clipboard.set_text(self.calculator.display, -1)
+                from win95lx.control_panel.regional_preferences import current
+                self.clipboard.set_text(current().calculator_text(self.calculator.display), -1)
 
         def paste(self, _):
             self.clipboard.request_text(self.paste_text)
 
         def paste_text(self, _, text):
-            if text is not None and self.calculator.paste(text):
+            from win95lx.control_panel.regional_preferences import current
+            if text is not None and self.calculator.paste(current().calculator_input(text)):
                 self.refresh()
 
         def message(self, title, body):
@@ -395,6 +400,10 @@ def build_window():
                 digit = name.removeprefix('KP_')
                 if key is None and len(digit) == 1 and digit in '0123456789':
                     key = digit
+                if key is None:
+                    from win95lx.control_panel.regional_preferences import current
+                    code=Gdk.keyval_to_unicode(event.keyval)
+                    if code and chr(code)==current().decimal:key='.'
             if key is None:
                 return False
             self.press(key)

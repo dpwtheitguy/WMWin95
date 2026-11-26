@@ -27,11 +27,16 @@ class MouseWindow(Gtk.Window):
         install_palette_filter(self,lambda:shell.display_preferences.palette)
         self.set_icon(GdkPixbuf.Pixbuf.new_from_file(str(self.assets/'mouse-icon.png')))
         self.connect('realize',lambda *_:self.get_window().set_cursor(shell.cursor_for('arrow')))
-        self.connect('map-event',lambda *_:(self.get_window().focus(Gdk.CURRENT_TIME),False)[1])
+        self.connect('map-event',self.mapped)
         self.connect('focus-in-event',lambda *_:self.caption_focus(True))
         self.connect('focus-out-event',lambda *_:self.caption_focus(False))
         self.preview_signature=None;self.preview_epoch=GLib.get_monotonic_time()
         self.preview_timer=GLib.timeout_add(16,self.animate_previews)
+    def mapped(self,*_):
+        from win95lx.shell.window_bounds import fit_bounds
+        screen=self.get_screen();x,y=self.get_position()
+        x,y,_,_=fit_bounds((x,y,404,448),(screen.get_width(),screen.get_height()))
+        self.move(x,y);self.get_window().focus(Gdk.CURRENT_TIME);return False
     def apply_session(self,prefs):self.shell.apply_mouse_preferences(prefs)
     def update(self,**kwargs):
         if 'scheme' in kwargs:self.preview_epoch=GLib.get_monotonic_time()
@@ -209,7 +214,9 @@ class MouseWindow(Gtk.Window):
             from win95lx.shell.scrollbar import VerticalScrollbar
             self.scheme_scroll=VerticalScrollbar(158,len(self.scheme_choices)-12,thumb=47).value_at(e.y-106-self.scheme_drag);self.area.queue_draw();return
         if self.caption_drag:
-            self.move(max(0,min(int(e.x_root-self.caption_drag[0]),self.shell.width-80)),max(0,min(int(e.y_root-self.caption_drag[1]),self.shell.height-50)));return
+            from win95lx.shell.window_bounds import fit_bounds
+            screen=self.get_screen();x,y,_,_=fit_bounds((int(e.x_root-self.caption_drag[0]),int(e.y_root-self.caption_drag[1]),404,448),(screen.get_width(),screen.get_height()))
+            self.move(x,y);return
         if self.dragging:
             if self.dragging[0]=='pointer-thumb':
                 from win95lx.shell.scrollbar import VerticalScrollbar

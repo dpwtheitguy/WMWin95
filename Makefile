@@ -1,5 +1,7 @@
 PYTHON ?= python3
-.PHONY: check test check-ui check-menu-seams check-sprint-controls check-computer-view check-mouse check-pointer-catalog check-selection-details stage reference-plan
+.PHONY: check test check-ui check-menu-seams check-sprint-controls check-computer-view check-mouse check-pointer-catalog check-selection-details check-control-panel stage reference-plan native
+native:
+	$(PYTHON) dev/build_native.py
 check:
 	$(PYTHON) dev/check.py
 test:
@@ -21,7 +23,10 @@ check-mouse:
 check-pointer-catalog:
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_pointer_catalog.py --output private/screenshots/pointers-$$(date +%s%N)-800
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_pointer_catalog.py --output private/screenshots/pointers-$$(date +%s%N)-1280
-check-ui: check-pointer-catalog check-mouse check-menu-seams check-sprint-controls check-computer-view check-selection-details
+check-control-panel:
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_control_panel.py --output private/screenshots/control-panel-$$(date +%s%N)-800
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_control_panel.py --output private/screenshots/control-panel-$$(date +%s%N)-1280
+check-ui: check-control-panel check-pointer-catalog check-mouse check-menu-seams check-sprint-controls check-computer-view check-selection-details
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_folder_windows.py
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_folder_windows.py
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_file_dialogs.py

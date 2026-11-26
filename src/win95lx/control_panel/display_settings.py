@@ -9,13 +9,25 @@ COMBO_WIDTH = 155
 FOCUS_ORDER = ('palette', SLIDERS[0], 'font', SLIDERS[1], 'tray', 'advanced')
 
 
-def slider_center(index, count):
-    return MIN_CENTER + round((MAX_CENTER-MIN_CENTER)*index/(count-1))
+def slider_center(index, count, reference_index=1):
+    if count<=1:return MIN_CENTER
+    # Keep the measured 800x600 detent at x=280. The added 640x480
+    # compatibility mode occupies the native left detent. Dense modern lists
+    # can share a pixel; keyboard arrows still reach every discrete mode.
+    reference_index=max(0,min(count-1,reference_index))
+    if index<reference_index:return 260+round(20*index/reference_index)
+    if index==reference_index:return MIN_CENTER
+    return MIN_CENTER+round((MAX_CENTER-MIN_CENTER)*(index-reference_index)/(count-1-reference_index))
 
 
-def slider_index(x, count):
+def slider_index(x, count, reference_index=1):
+    if count<=1:return 0
+    reference_index=max(0,min(count-1,reference_index))
+    if x<MIN_CENTER and reference_index:
+        return round((max(260,x)-260)*reference_index/20)
+    if reference_index==count-1:return reference_index
     position = min(MAX_CENTER, max(MIN_CENTER, x))
-    return round((position-MIN_CENTER)*(count-1)/(MAX_CENTER-MIN_CENTER))
+    return reference_index+round((position-MIN_CENTER)*(count-1-reference_index)/(MAX_CENTER-MIN_CENTER))
 
 
 def draw(p, win, shell):
@@ -28,7 +40,7 @@ def draw(p, win, shell):
     modes = shell.resolution_modes
     index = modes.index(mode)
     changed = mode != shell.applied_resolution or shell.pending_display != shell.display_preferences
-    center = slider_center(index, len(modes))
+    center = slider_center(index, len(modes),modes.index((800,600)) if (800,600) in modes else 0)
     if frame:
         p.image(frame, x, y)
         if win is not shell.state.active:

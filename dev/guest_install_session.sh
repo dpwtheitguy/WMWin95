@@ -22,6 +22,9 @@ release="/opt/win95lx/releases/$version"
 install -d "$release/assets"
 cp -a /home/developer/win95lx-preview/src "$release/"
 cp -a /home/developer/win95lx-preview/private/shell-assets/. "$release/assets/"
+if command -v cc >/dev/null 2>&1; then
+    cc -O3 -std=c99 -Wall -Wextra -Werror -fPIC -shared "$release/src/win95lx/assets/palette.c" -o "$release/src/win95lx/assets/libpalette.so"
+fi
 PYTHONPATH="$release/src" python3 -c 'from win95lx.shell.app import Shell; from win95lx.explorer.presentation import DriveView'
 chown -R root:root "$release"
 chmod -R go-w "$release"

@@ -24,7 +24,7 @@ def main():
    ordered=sorted(values);runs.append({'state':state,'frames':len(values),'median_ms':statistics.median(values),'p95_ms':ordered[min(len(values)-1,int(len(values)*.95))],'max_ms':max(values)})
   shell.disconnect_by_func(Gtk.main_quit);shell.destroy()
  digest=hashlib.sha256()
- for path in sorted((ROOT/'src').rglob('*.py')):digest.update(str(path.relative_to(ROOT)).encode());digest.update(path.read_bytes())
+ for path in sorted(path for path in (ROOT/'src').rglob('*') if path.suffix in ('.py','.c','.h')):digest.update(str(path.relative_to(ROOT)).encode());digest.update(path.read_bytes())
  report={'source_sha256':digest.hexdigest(),'viewport':[shell.width,shell.height],'measurement':'Cairo shell.draw CPU time; excludes X presentation, pointer input, compositor and viewer','runs':runs}
  a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))
 if __name__=='__main__':main()

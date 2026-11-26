@@ -47,6 +47,9 @@ def color_surface(surface, palette):
         context.set_source_surface(surface, 0, 0)
         context.paint()
         return converted
+    from win95lx.assets.native_palette import convert
+    accelerated=convert(surface,palette)
+    if accelerated is not None:return accelerated
     surface.flush()
     values = array('I')
     values.frombytes(surface.get_data())

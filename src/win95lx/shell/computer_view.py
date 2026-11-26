@@ -1,5 +1,6 @@
 """Interactive IE4 My Computer toolbar, address band and Web View."""
 import cairo
+from win95lx.control_panel.catalog import entries as control_entries
 from win95lx.shell.widgets import BLACK, FACE, LIGHT, SHADOW
 
 BUTTONS=(('back',8,75),('forward',75,144),('up',144,204),
@@ -27,7 +28,7 @@ def draw(shell,p,win):
     left=x+4; width=w-8
     if 'mouse' not in shell.images and (shell.assets/'mouse-icon.png').exists():shell.images['mouse']=cairo.ImageSurface.create_from_png(str(shell.assets/'mouse-icon.png'))
     computer=win.kind=='computer'
-    entries=((9,'(C:)','drive'),(36,'Control Panel','control')) if computer else (('display','Display','display'),('mouse','Mouse','mouse'))
+    entries=((9,'(C:)','drive'),(36,'Control Panel','control')) if computer else control_entries()
     small_icon='computer' if computer else 36
     if shell.popup and isinstance(shell.popup[2],tuple) and shell.popup[2]==(win,'File'):
         p.bevel(left+11,y+26,32,19,True)

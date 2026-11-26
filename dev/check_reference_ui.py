@@ -253,10 +253,14 @@ def main():
             assert compare_region(settings, native('reference-display-settings-native'),
                                   (320,415,75,23), (win.x+320,win.y+415)) == 0
         original = shell.applied_resolution
+        # Input/rollback tests use a synthetic mode catalog; the Xvfb output's
+        # own framebuffer maximum is intentionally only the test viewport.
+        from win95lx.display_modes import DISPLAY_MODES
+        shell.detected_resolution_modes=DISPLAY_MODES
         key('Tab')
         key('Tab')
         key('Home')
-        assert shell.pending_resolution == (800,600)
+        assert shell.pending_resolution == shell.resolution_modes[0] == (640,480)
         key('End')
         assert shell.pending_resolution == shell.resolution_modes[-1]
         shell.pending_resolution = (800,600)

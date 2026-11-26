@@ -108,6 +108,18 @@ def install_menu_style(screen):
 
 
 def build(kind, shell):
+    if kind=='regional':
+        from win95lx.apps.regional import RegionalWindow
+        return RegionalWindow(shell)
+    if kind=='datetime':
+        from win95lx.apps.datetime import DateTimeWindow
+        return DateTimeWindow(shell)
+    if kind=='system':
+        from win95lx.apps.system import SystemWindow
+        return SystemWindow(shell)
+    if kind=='keyboard':
+        from win95lx.apps.keyboard import KeyboardWindow
+        return KeyboardWindow(shell)
     if kind=='mouse':
         from win95lx.apps.mouse import MouseWindow
         return MouseWindow(shell)

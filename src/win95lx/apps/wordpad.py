@@ -595,7 +595,8 @@ def build_window(assets=None):
             self.buffer.begin_user_action()
             try:
                 self.buffer.delete_selection(True, True)
-                self.buffer.insert_at_cursor(datetime.now().strftime('%m/%d/%Y'))
+                from win95lx.control_panel.regional_preferences import current
+                self.buffer.insert_at_cursor(current().date(datetime.now()))
             finally:
                 self.buffer.end_user_action()
 

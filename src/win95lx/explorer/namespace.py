@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse,unquote
 
-TARGETS={'(C:)':'drive','Control Panel':'control','My Computer':'computer','Display':'display','Mouse':'mouse'}
+from win95lx.control_panel.catalog import targets
+TARGETS={'(C:)':'drive','Control Panel':'control','My Computer':'computer',**targets()}
 
 @dataclass(frozen=True)
 class Shortcut:

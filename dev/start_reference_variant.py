@@ -3,7 +3,7 @@
 import argparse,json,os,socket,subprocess,time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-PROFILES={'ie4':'windows95','classic':'windows95-classic','plus':'windows95-plus-reference'}
+PROFILES={'ie4':'windows95','classic':'windows95-classic','plus':'windows95-plus-reference','rtm':'windows95-rtm','osr1':'windows95-osr1','osr2':'windows95-osr2'}
 
 def visible_command(saved,snapshot=None):
     args=list(saved['command'] if isinstance(saved,dict) else saved)

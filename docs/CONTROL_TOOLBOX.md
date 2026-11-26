@@ -2,6 +2,8 @@
 
 The working target is Windows 95 OSR 2.5 with IE4 Desktop Update. The Visual Basic names are useful for identifying controls. The toolbox below is an implementation inventory and a work list. Availability across VB4, VB5, and VB6 and the precise version of each optional OCX still need verification.
 
+For Control Panel, keep classic, IE4 and Plus reference captures separate and record actual CPL versions. See the fidelity engineer instructions and `dev/capture_control_panel.py`. Raw automated tab labels are hypotheses until the images are reviewed. Static original artwork does not establish working controls; every changed setting needs a backend-effect, Apply/Cancel, failure and persistence check. Disabled features must explain their actual limitation, including when implementation is merely unfinished.
+
 ## Reuse the controls we have
 
 | Control | Implementation and usage | Evidence to check |
@@ -45,3 +47,7 @@ Run `dev/check_computer_view.py` under Xvfb at 800×600 and 1280×720 (or `make 
 `assets/rle8.py` decodes bounded BI_RLE8 key/delta frames and preserves the prior image. `tools/stage_mouse_animation.py` stages the original private MAIN.CPL AVI and transparency. New animation consumers need independent input tests as well as a resource-derived frame; never substitute a static picture for a working control.
 
 Run `make check-mouse` for both viewport sizes. See `reports/MOUSE_PROPERTIES_2026-11-26.md` for exactly accepted regions and the still-unimplemented trails, scheme management and theming paths.
+
+## Native property-sheet measurements
+
+Build `tools/native/w95probe.c` using `dev/build_reference_probe.py` for an i386-compatible reference tool. Run it inside a reference (for example `W95PROBE.EXE keyboard 0`) to collect child HWND geometry, fonts, combo choices, enabled states, trackbar ranges and a matching BMP in C:\W95PROBE. Keep captures private. Do not infer a page origin from the painted top of a GroupBox: its text and border do not coincide with its HWND bounds. `pixel_rect` requires explicit measured origin and font base. Verify VM checkpoints with `dev/snapshot_vm.py`; raw writable floppy media can prevent a complete save.
