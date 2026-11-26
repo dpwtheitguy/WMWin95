@@ -25,7 +25,11 @@ def main():
         elif a.action in ('pause','resume'):result=q.call('stop' if a.action=='pause' else 'cont')
         elif a.action=='capture':
             if a.output.exists(): p.error('Capture output exists; use a new filename')
-            a.output.parent.mkdir(parents=True,exist_ok=True); result=q.call('screendump',{'filename':str(a.output.resolve())})
+            image_format = a.output.suffix.lower().lstrip('.')
+            if image_format not in ('png', 'ppm'):
+                p.error('Capture filename must end in .png or .ppm')
+            a.output.parent.mkdir(parents=True, exist_ok=True)
+            result = q.call('screendump', {'filename':str(a.output.resolve()), 'format':image_format})
         elif a.action=='type':
             punctuation={' ':('spc',False),'\n':('ret',False),'-':('minus',False),'_':('minus',True),'/':('slash',False),'.':('dot',False),':':('semicolon',True),';':('semicolon',False),'$':('4',True),'"':('apostrophe',True),"'":('apostrophe',False),'=':('equal',False),'\\':('backslash',False),'>':('dot',True),'[':('bracket_left',False),']':('bracket_right',False),'|':('backslash',True),'(':('9',True),')':('0',True)}
             events=[]

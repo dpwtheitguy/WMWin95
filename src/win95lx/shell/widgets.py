@@ -1,6 +1,17 @@
 """Shared classic controls drawn on integer pixels with original bitmap glyphs."""
 import cairo
+from functools import lru_cache
 FACE=(192,192,192);LIGHT=(255,255,255);SHADOW=(128,128,128);BLACK=(0,0,0);NAVY=(0,0,128);TEAL=(0,128,128)
+@lru_cache(maxsize=8)
+def drag_mask(width,height):
+    stride=cairo.ImageSurface.format_stride_for_width(cairo.FORMAT_A8,width)
+    pixels=bytearray(stride*height)
+    for y in range(height):
+        for x in range(width):
+            pixels[y*stride+x]=255 if (x+y)%2==0 else 0
+    return cairo.ImageSurface.create_for_data(pixels,cairo.FORMAT_A8,width,height,stride)
+
+
 class Painter:
     def __init__(self,cr,font):self.cr=cr;self.font=font;cr.set_antialias(cairo.ANTIALIAS_NONE)
     def fill(self,x,y,w,h,color):
@@ -12,6 +23,13 @@ class Painter:
             for xx,yy in points:self.cr.rectangle(int(x+xx),int(y+yy),2 if bold else 1,1)
             x+=width+int(bold)
         self.cr.fill()
+    def menu_text(self,label,x,y,color=BLACK,mnemonic=None):
+        self.text(label,x,y,color)
+        if mnemonic:
+            index=label.casefold().find(mnemonic.casefold())
+            if index>=0:
+                self.fill(x+self.font.width(label[:index]),y+12,self.font.width(label[index]),1,color)
+
     def bevel(self,x,y,w,h,sunken=False):
         self.fill(x,y,w,h,FACE)
         a,b=(SHADOW,LIGHT) if sunken else (LIGHT,BLACK)
@@ -34,10 +52,10 @@ class Painter:
             self.fill(x+3, y+2, 9, 9, BLACK)
             self.fill(x+4, y+4, 7, 6, FACE)
         elif symbol == 'restore':
-            self.fill(x+6, y+2, 7, 7, BLACK)
-            self.fill(x+7, y+4, 5, 4, FACE)
-            self.fill(x+3, y+5, 7, 7, BLACK)
-            self.fill(x+4, y+7, 5, 4, FACE)
+            self.fill(x+5, y+2, 6, 6, BLACK)
+            self.fill(x+6, y+4, 4, 3, FACE)
+            self.fill(x+3, y+5, 6, 6, BLACK)
+            self.fill(x+4, y+7, 4, 3, FACE)
         else:
             for row, offset in enumerate((0, 1, 2, 3, 2, 1, 0)):
                 self.fill(x+4+offset, y+3+row, 2, 1, BLACK)
@@ -46,4 +64,18 @@ class Painter:
     def button(self,label,x,y,w,h,pressed=False,default=False):
         if default:self.fill(x-1,y-1,w+2,h+2,BLACK)
         self.bevel(x,y,w,h,pressed);tx=x+(w-self.font.width(label))//2+int(pressed);self.text(label,tx,y+(h-self.font.height)//2+int(pressed))
+    def toolbar_band_edges(self,width,height,raised_width,top_extent=None,bottom_extent=None):
+        if top_extent is not None and top_extent<width:
+            self.fill(top_extent,0,width-top_extent,1,FACE)
+        if bottom_extent is not None and bottom_extent<width:
+            self.fill(bottom_extent,height-1,width-bottom_extent,1,FACE)
+        self.fill(raised_width-2,1,1,height-2,SHADOW)
+        self.fill(raised_width-1,1,1,height-2,LIGHT)
+
+    def drag_image(self,surface,x,y):
+        self.cr.save()
+        self.cr.set_source_surface(surface,int(x),int(y))
+        self.cr.mask_surface(drag_mask(surface.get_width(),surface.get_height()),int(x),int(y))
+        self.cr.restore()
+
     def image(self,surface,x,y):self.cr.set_source_surface(surface,int(x),int(y));self.cr.paint()

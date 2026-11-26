@@ -14,7 +14,9 @@ import gi
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, GLib, Gtk, Pango
-from win95lx.apps.dialogs import SAVE_CHANGES, choose_file, message_box, run_dialog
+from win95lx.recent_documents import record_document
+from win95lx.shell.menu_layout import NOTEPAD_HELP_ROWS
+from win95lx.apps.dialogs import SAVE_CHANGES, about_dialog, choose_file, message_box, run_dialog
 
 
 MENU_STYLE = b"""
@@ -198,9 +200,9 @@ class NotepadWindow(Gtk.Window):
             ("Find _Next", self.find_next, "F3"),
         ])
         self.add_menu(menu_bar, "_Help", [
-            ("_Help Topics", self.show_help, "F1"),
-            None,
-            ("_About Notepad", self.show_about, None),
+            (NOTEPAD_HELP_ROWS[0], self.show_help, "F1"),
+            NOTEPAD_HELP_ROWS[1],
+            (NOTEPAD_HELP_ROWS[2], self.show_about, None),
         ])
         self.find_text = ""
         self.scroller = Gtk.ScrolledWindow()
@@ -231,6 +233,12 @@ class NotepadWindow(Gtk.Window):
         top = Gtk.MenuItem.new_with_mnemonic(label)
         menu = Gtk.Menu()
         self.style_menu(menu)
+        if label == '_File':
+            menu.get_style_context().add_class('notepad-file-menu')
+        elif label == '_Edit':
+            menu.get_style_context().add_class('notepad-edit-menu')
+        elif label == '_Help':
+            menu.get_style_context().add_class('notepad-help-menu')
         top.set_submenu(menu)
         menu_bar.append(top)
         for action in actions:
@@ -238,12 +246,59 @@ class NotepadWindow(Gtk.Window):
                 menu.append(Gtk.SeparatorMenuItem())
                 continue
             caption, callback, shortcut = action
+            if label == '_Edit':
+                item = Gtk.MenuItem()
+                item.get_accessible().set_name(caption.replace('_',''))
+                item.win95_label = caption
+                area = Gtk.DrawingArea()
+                area.set_size_request(135,17)
+                item.add(area)
+                def draw_edit(widget, context, caption=caption, callback=callback, shortcut=shortcut, item=item):
+                    from win95lx.assets.bitmap import BitmapFont
+                    from win95lx.shell.widgets import Painter,BLACK,LIGHT,NAVY,SHADOW
+                    from win95lx.apps.dialogs import dialog_art
+                    art = dialog_art(self,'close')
+                    if not art:
+                        return False
+                    font = art[2]
+                    p = Painter(context,font)
+                    selected = bool(item.get_state_flags() & Gtk.StateFlags.PRELIGHT)
+                    color = LIGHT if selected else BLACK if item.get_sensitive() else SHADOW
+                    text = caption.replace('_','')
+                    p.text(text,22,1,color)
+                    if '_' in caption:
+                        offset = caption.index('_')
+                        p.fill(22+font.width(text[:offset]),13,font.width(text[offset]),1,color)
+                    hotkey = {'<Primary>z':'Ctrl+Z','<Primary>x':'Ctrl+X','<Primary>c':'Ctrl+C',
+                              '<Primary>v':'Ctrl+V','Delete':'Del','F5':'F5'}.get(shortcut,'')
+                    if caption.startswith('Time/'):
+                        p.text(hotkey,86,1,color)
+                    elif hotkey:
+                        p.text(hotkey,86,1,color)
+                    if callback == self.toggle_wrap and self.view.get_wrap_mode() != Gtk.WrapMode.NONE:
+                        path = art[0]/'menu-check.png'
+                        if path.is_file():
+                            import cairo
+                            mark = cairo.ImageSurface.create_from_png(str(path))
+                            context.set_source_rgb(*(channel/255 for channel in color))
+                            context.mask_surface(mark,8,7)
+                    return False
+                area.connect('draw',draw_edit)
+                item.connect('activate',lambda _item,invoke=callback:invoke())
+                if shortcut:
+                    key,modifiers = Gtk.accelerator_parse(shortcut)
+                    item.add_accelerator('activate',self.accels,key,modifiers,Gtk.AccelFlags(0))
+                menu.append(item)
+                continue
             item_class = Gtk.CheckMenuItem if callback == self.toggle_wrap else Gtk.MenuItem
             item = item_class.new_with_mnemonic(caption)
             item.connect("activate", lambda _item, invoke=callback: invoke())
             if shortcut:
                 key, modifiers = Gtk.accelerator_parse(shortcut)
-                item.add_accelerator("activate", self.accels, key, modifiers, Gtk.AccelFlags.VISIBLE)
+                flags = Gtk.AccelFlags(0) if label in ("_File", "_Help") else Gtk.AccelFlags.VISIBLE
+                item.add_accelerator("activate", self.accels, key, modifiers, flags)
+                if label in ("_File", "_Help"):
+                    item.get_child().set_accel_widget(None)
             menu.append(item)
 
     def text(self):
@@ -347,7 +402,7 @@ class NotepadWindow(Gtk.Window):
         )
 
     def show_about(self):
-        self.message(Gtk.MessageType.INFO, "About Notepad", "Notepad for Win95LX")
+        about_dialog(self, "Notepad")
 
     def find(self):
         dialog = Gtk.Dialog(title="Find", transient_for=self, modal=True)
@@ -389,7 +444,7 @@ class NotepadWindow(Gtk.Window):
         if self.text() == self.saved_text:
             return True
         name = self.path.name if self.path else "Untitled"
-        response = message_box(self, "Notepad", f"Do you want to save the changes to {name}?",
+        response = message_box(self, "Notepad", f"The text in the {name} file has changed.\n\nDo you want to save the changes?",
                                Gtk.MessageType.QUESTION, SAVE_CHANGES, Gtk.ResponseType.YES)
         return response == Gtk.ResponseType.NO or (response == Gtk.ResponseType.YES and self.save())
 
@@ -412,8 +467,8 @@ class NotepadWindow(Gtk.Window):
     def choose_path(self, saving=False):
         filters = (("Text Documents (*.txt)", ("*.txt",), ".txt"),
                    ("All Files (*.*)", ("*",), ""))
-        name = self.path.name if self.path else "Untitled.txt"
-        return choose_file(self, self.path, filters, saving, name if saving else "")
+        name = self.path.name if self.path else "Untitled"
+        return choose_file(self, self.path, filters, saving, name if saving else "*.txt")
 
     def open(self):
         if self.confirm_discard():
@@ -431,6 +486,7 @@ class NotepadWindow(Gtk.Window):
             self.message(Gtk.MessageType.ERROR, f"Cannot open {path.name}.", str(error))
             return False
         self.set_document(path, text, encoding, newline)
+        record_document(path)
         return True
 
     def save_as(self):
@@ -444,6 +500,7 @@ class NotepadWindow(Gtk.Window):
         path = Path(path).absolute()
         text = self.text()
         if path == self.path and text == self.saved_text and path.exists():
+            record_document(path)
             return True
         try:
             self.encoding = write_document(path, text, self.encoding, self.newline)
@@ -453,6 +510,7 @@ class NotepadWindow(Gtk.Window):
         self.path = path
         self.saved_text = text
         self.update_title()
+        record_document(path)
         return True
 
 

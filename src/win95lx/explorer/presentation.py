@@ -8,13 +8,20 @@ class DriveView:
     def __init__(self, root):
         self.root = Path(root).resolve()
 
-    def entries(self, relative="."):
+    def resolve(self, relative="."):
         path = (self.root / relative).resolve()
         if not path.is_relative_to(self.root):
             raise PermissionError("Outside presentation drive")
-        return sorted(
-            (item.name, item.is_dir())
-            for item in path.iterdir()
-            if not item.name.startswith(".")
-            and item.resolve().is_relative_to(self.root)
-        )
+        return path
+
+    def entries(self, relative="."):
+        entries = []
+        for item in self.resolve(relative).iterdir():
+            if item.name.startswith("."):
+                continue
+            try:
+                if item.resolve().is_relative_to(self.root):
+                    entries.append((item.name, item.is_dir()))
+            except (OSError, RuntimeError):
+                continue
+        return sorted(entries, key=lambda item: (not item[1], item[0].casefold(), item[0]))

@@ -80,15 +80,20 @@ for program, group_id in (('notepad', 2), ('wordpad', 154), ('calc', 'SC'), ('wi
     resources = list(extract((source / filename).read_bytes()))
     group = next(data for kind, ident, _, data, _ in resources if kind == 14 and ident == group_id)
     entries = [group[i:i+14] for i in range(6, 6 + 14 * word(group, 4), 14)]
-    entry = next(entry for entry in entries if entry[:2] == bytes((16, 16)))
-    image_id = word(entry, 12)
-    data = next(data for kind, ident, _, data, _ in resources if kind == 3 and ident == image_id)
-    w, h, pixels = icon_dib(data)
-    name = f'accessory-{program}.png'
-    write(output / name, w, h, pixels)
-    records.append({'source': filename, 'type': 'GROUP_ICON', 'id': group_id,
-                    'image_id': image_id, 'output': name,
-                    'sha256': hashlib.sha256(data).hexdigest(), 'dimensions': [w, h]})
+    for size, suffix in ((16, ''), (32, '-32')):
+        variants = [entry for entry in entries if entry[:2] == bytes((size, size))]
+        entry = next((entry for entry in variants if word(entry, 6) == 4),
+                     variants[0] if variants else None)
+        if entry is None:
+            continue
+        image_id = word(entry, 12)
+        data = next(data for kind, ident, _, data, _ in resources if kind == 3 and ident == image_id)
+        w, h, pixels = icon_dib(data)
+        name = f'accessory-{program}{suffix}.png'
+        write(output / name, w, h, pixels)
+        records.append({'source': filename, 'type': 'GROUP_ICON', 'id': group_id,
+                        'image_id': image_id, 'output': name,
+                        'sha256': hashlib.sha256(data).hexdigest(), 'dimensions': [w, h]})
 
 # Desktop Update replaces these three menu icons. Recover their masks from
 # two native captures of the same row against gray and selected blue.
@@ -142,6 +147,210 @@ for state in ('poweroff', 'reboot', 'dos'):
                         'output': name, 'dimensions': [w, h], 'rectangle': [x, y, w, h],
                         'reference_sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
 
+from win95lx.control_panel.wallpaper import BITMAPS
+
+for label, filename in BITMAPS.items():
+    path = source / filename
+    if path.is_file():
+        data = path.read_bytes()
+        name = f'wallpaper-{filename}'
+        (output / name).write_bytes(data)
+        records.append({'source': filename, 'type': 'WALLPAPER', 'label': label,
+                        'output': name, 'sha256': hashlib.sha256(data).hexdigest()})
+
+for state in ('clean', 'clouds'):
+    path = captures / f'reference-background-{state}-v2.png'
+    if path.is_file():
+        width, height, pixels = read(path)
+        if (width, height) != (800, 600):
+            raise ValueError(f'Invalid Background reference size for {state}')
+        w, h = 404, 448
+        image = [pixel for row in range(h) for pixel in pixels[row*width:row*width+w]]
+        name = f'background-frame-{state}.png'
+        write(output/name, w, h, image)
+        records.append({'source': 'Windows 95 Display Properties reference', 'type': 'SCREEN_CAPTURE_DIALOG',
+                        'output': name, 'dimensions': [w, h], 'rectangle': [0, 0, w, h],
+                        'reference_sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
+
+for state, rect in {
+    'open': (96,131,426,263), 'save': (96,131,426,263), 'close': (270,245,266,126),
+    'about': (126,163,348,283),
+    'missing': (234,245,338,126), 'overwrite': (257,237,291,139),
+}.items():
+    path = captures/('native-notepad-about.png' if state == 'about' else f'native-notepad-{state}-dialog.png')
+    if path.is_file():
+        width, _, pixels = read(path)
+        x, y, w, h = rect
+        name = f'file-dialog-{state}.png'
+        write(output/name, w, h, [pixel for row in range(y,y+h)
+                                 for pixel in pixels[row*width+x:row*width+x+w]])
+        records.append({'source': 'Windows 95 Notepad reference', 'type': 'SCREEN_CAPTURE_DIALOG',
+                        'output': name, 'rectangle': list(rect), 'dimensions': [w,h],
+                        'reference_sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
+
+file_controls = captures/'native-notepad-missing-dialog.png'
+if file_controls.is_file():
+    width, _, pixels = read(file_controls)
+    for state, (x,y,w,h) in {'up': (389,157,23,22), 'folder': (179,159,17,17)}.items():
+        name = f'file-dialog-{state}.png'
+        write(output/name, w, h, [pixel for row in range(y,y+h)
+                                 for pixel in pixels[row*width+x:row*width+x+w]])
+        records.append({'source': 'Windows 95 Notepad Open reference', 'type': 'SCREEN_CAPTURE_CONTROL',
+                        'output': name, 'rectangle': [x,y,w,h], 'dimensions': [w,h],
+                        'reference_sha256': hashlib.sha256(file_controls.read_bytes()).hexdigest()})
+
+wordpad_reference = captures/'reference-wordpad.png'
+if wordpad_reference.is_file():
+    width,_,pixels = read(wordpad_reference)
+    controls = {'ruler': (114,213,592,23), 'family-field':(118,187,240,21),
+                'size-field':(366,187,50,21),'left-active':(526,187,23,22), 'editor-top':(114,236,592,2)}
+    for name,x in (('find',251),('cut',282),('copy',305),('paste',328),('undo',351)):
+        controls['disabled-'+name]=(x,157,23,22)
+    for control,(x,y,w,h) in controls.items():
+        name = f'wordpad-native-{control}.png'
+        write(output/name,w,h,[pixel for row in range(y,y+h) for pixel in pixels[row*width+x:row*width+x+w]])
+        records.append({'source':'Windows 95 wordpad.exe reference','type':'SCREEN_CAPTURE_CONTROL',
+                        'output':name,'dimensions':[w,h],'rectangle':[x,y,w,h],
+                        'reference_sha256':hashlib.sha256(wordpad_reference.read_bytes()).hexdigest()})
+
+pattern_reference = captures/'native-pattern-clean.png'
+if pattern_reference.is_file():
+    width,_,pixels = read(pattern_reference)
+    x,y,w,h = 25,43,318,206
+    name = 'desktop-pattern-dialog.png'
+    write(output/name,w,h,[pixel for row in range(y,y+h) for pixel in pixels[row*width+x:row*width+x+w]])
+    records.append({'source':'Windows 95 Pattern dialog','type':'SCREEN_CAPTURE_DIALOG','output':name,
+                    'dimensions':[w,h],'rectangle':[x,y,w,h],'pointer_position':[400,300],
+                    'reference_sha256':hashlib.sha256(pattern_reference.read_bytes()).hexdigest()})
+
+checked_path = captures/'native-notepad-wordwrap-checked.png'
+unchecked_path = captures/'native-notepad-wordwrap-unchecked.png'
+if checked_path.is_file() and unchecked_path.is_file():
+    width,height,pixels = read(checked_path)
+    _,_,unchecked = read(unchecked_path)
+    points = [(x,y) for y in range(230,251) for x in range(82,103)
+              if pixels[y*width+x] != unchecked[y*width+x] and pixels[y*width+x][:3]==(0,0,0)]
+    left,top = min(x for x,y in points),min(y for x,y in points)
+    w,h = max(x for x,y in points)-left+1,max(y for x,y in points)-top+1
+    image = [(0,0,0,255) if (left+x,top+y) in points else (0,0,0,0)
+             for y in range(h) for x in range(w)]
+    name = 'menu-check.png'
+    write(output/name,w,h,image)
+    records.append({'source':'Windows 95 Notepad Edit menu','type':'SCREEN_CAPTURE_CONTROL','output':name,
+                    'dimensions':[w,h],'rectangle':[left,top,w,h],
+                    'reference_sha256':hashlib.sha256(checked_path.read_bytes()).hexdigest()})
+
+checkbox_reference = captures/'native-settings-checkbox.png'
+if checkbox_reference.is_file():
+    width, _, pixels = read(checkbox_reference)
+    x,y,w,h = 90,446,13,13
+    name = 'display-settings-checkbox-checked.png'
+    write(output/name,w,h,[pixel for row in range(y,y+h) for pixel in pixels[row*width+x:row*width+x+w]])
+    records.append({'source':'Windows 95 Display Properties checkbox', 'type':'SCREEN_CAPTURE_CONTROL',
+                    'output':name, 'dimensions':[w,h], 'rectangle':[x,y,w,h],
+                    'reference_sha256':hashlib.sha256(checkbox_reference.read_bytes()).hexdigest()})
+
+settings_path = captures / 'native-settings-clean.png'
+settings_idle_path = captures / 'reference-display-settings-native.png'
+if settings_path.is_file() and settings_idle_path.is_file():
+    width, height, pixels = read(settings_path)
+    idle_width, idle_height, idle_pixels = read(settings_idle_path)
+    if (width, height) != (800, 600) or (idle_width, idle_height) != (800, 600):
+        raise ValueError('Unexpected Display Settings reference dimensions')
+    x, y, w, h = 66, 66, 404, 448
+    frame = [pixel for row in range(y, y+h) for pixel in pixels[row*width+x:row*width+x+w]]
+    enabled = [pixel for row in range(415, 438) for pixel in frame[row*w+320:row*w+395]]
+    write(output/'display-settings-apply.png', 75, 23, enabled)
+    records.append({'source': 'Windows 95 Display Properties Settings reference',
+                    'type': 'SCREEN_CAPTURE_BUTTON', 'output': 'display-settings-apply.png',
+                    'rectangle': [x+320, y+415, 75, 23], 'dimensions': [75, 23],
+                    'reference_sha256': hashlib.sha256(settings_path.read_bytes()).hexdigest()})
+    # The clean capture has an unapplied wallpaper change. Use the idle Apply artwork.
+    for row in range(415, 438):
+        frame[row*w+320:row*w+395] = idle_pixels[row*idle_width+320:row*idle_width+395]
+    name = 'display-settings.png'
+    write(output/name, w, h, frame)
+    records.append({'source': 'Windows 95 Display Properties Settings reference',
+                    'type': 'SCREEN_CAPTURE_DIALOG', 'output': name, 'dimensions': [w, h],
+                    'rectangle': [x, y, w, h],
+                    'reference_sha256': hashlib.sha256(settings_path.read_bytes()).hexdigest(),
+                    'idle_reference_sha256': hashlib.sha256(settings_idle_path.read_bytes()).hexdigest()})
+
+path = captures / 'native-explorer-menu-clean.png'
+if path.is_file():
+    width, height, pixels = read(path)
+    if (width, height) != (800, 600):
+        raise ValueError('Unexpected Explorer reference size')
+    for part, x, w in (('left', 4, 242), ('middle', 246, 1), ('right', 466, 42)):
+        y, h = 22, 32
+        data = [pixel for row in range(y, y+h)
+                for pixel in pixels[row*width+x:row*width+x+w]]
+        name = f'explorer-menu-{part}.png'
+        write(output/name, w, h, data)
+        records.append({'source': 'Windows 95 compact My Computer reference', 'type': 'SCREEN_CAPTURE_MENU',
+                        'output': name, 'dimensions': [w, h], 'rectangle': [x, y, w, h],
+                        'reference_sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
+
+path = captures/'native-independent-folders-compact.png'
+mask_path = output/'shell32-group-4.png'
+if path.is_file() and mask_path.is_file():
+    width, _, pixels = read(path)
+    w,h,mask = read(mask_path)
+    x,y = 49,77
+    image = [pixels[(y+row)*width+x+col][:3]+(mask[row*w+col][3],)
+             for row in range(h) for col in range(w)]
+    name = 'explorer-folder-32.png'
+    write(output/name,w,h,image)
+    records.append({'source': 'Windows 95 IE4 compact folder reference',
+                    'type': 'SCREEN_CAPTURE_ICON', 'output': name, 'dimensions': [w,h],
+                    'rectangle': [x,y,w,h], 'alpha_mask': mask_path.name,
+                    'reference_sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
+
+# Preserve original named 8x8 desktop patterns from Setup's control.ini entries.
+import re
+shell_inf = (source/'shell.inf').read_text(encoding='cp1252')
+strings = dict(re.findall(r'^([A-Za-z]+Desc)\s*=\s*"([^"]+)"',shell_inf,re.M))
+patterns = {}
+for key,values in re.findall(r'control.ini,Patterns,,"%([A-Za-z]+Desc)%=([0-9 ]+)"',shell_inf):
+    rows = [int(value) for value in values.split()]
+    if len(rows)==8:
+        patterns[strings.get(key,key)] = rows
+name = 'desktop-patterns.json'
+(output/name).write_text(json.dumps(patterns,indent=2)+'\n')
+records.append({'source':'shell.inf','type':'DESKTOP_PATTERNS','output':name,
+                'sha256':hashlib.sha256((source/'shell.inf').read_bytes()).hexdigest()})
+
+left_hover = captures/'native-drop-hover-86-94.png'
+right_hover = captures/'native-drop-hover-42-94.png'
+mask_path = output/'shell32-group-4.png'
+if left_hover.is_file() and right_hover.is_file() and mask_path.is_file():
+    width,_,left_pixels = read(left_hover)
+    _,_,right_pixels = read(right_hover)
+    w,h,mask = read(mask_path)
+    x,y = 49,77
+    selected = [(left_pixels if column<16 else right_pixels)[(y+row)*width+x+column][:3]+
+                (mask[row*w+column][3],) for row in range(h) for column in range(w)]
+    name = 'explorer-folder-selected-32.png'
+    write(output/name,w,h,selected)
+    records.append({'source':'Windows 95 folder drop highlight','type':'SCREEN_CAPTURE_ICON','output':name,
+                    'dimensions':[w,h],'rectangle':[x,y,w,h],
+                    'references':[{'file':path.name,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
+                                  for path in (left_hover,right_hover)],'alpha_mask':mask_path.name})
+
+user_resources = list(extract((source/'user.exe').read_bytes()))
+user_icons = {ident:data for kind,ident,lang,data,fmt in user_resources if kind==3}
+for kind,ident,lang,data,fmt in user_resources:
+    if kind != 14 or ident not in (101,102,103,104):
+        continue
+    entry = next(data[offset:offset+14] for offset in range(6,6+14*word(data,4),14)
+                 if data[offset:offset+2] == bytes((32,32)) and word(data,offset+6)==4)
+    dib = user_icons[word(entry,12)]
+    width,height,image = icon_dib(dib)
+    name = f'message-icon-{ident}.png'
+    write(output/name,width,height,image)
+    records.append({'source':'user.exe','type':'GROUP_ICON','id':ident,'output':name,
+                    'dimensions':[width,height],'sha256':hashlib.sha256(dib).hexdigest()})
+
 # Display Properties uses the Control Panel applet icon, not a folder icon.
 applet_resources=list(extract((source/'desk.cpl').read_bytes()))
 applet_images={ident:data for kind,ident,lang,data,fmt in applet_resources if kind==3}
@@ -153,6 +362,26 @@ data=applet_images[image_id]
 w,h,pixels=icon_dib(data)
 write(output/'display-applet.png',w,h,pixels)
 records.append({'source':'desk.cpl','type':'GROUP_ICON','id':100,'image_id':image_id,'output':'display-applet.png','sha256':hashlib.sha256(data).hexdigest(),'dimensions':[w,h]})
+# Original IE4 Explorer controls; independently captured with the pointer outside artwork.
+full_explorer = captures/'native-computer-web-full.png'
+if full_explorer.is_file():
+    width,_,pixels = read(full_explorer)
+    parts = {'web-computer':(4,118,85,85), 'web-heading':(110,136,160,25), 'web-description':(20,218,165,32), 'file-pressed':(11,22,32,19),
+             'toolbar-grip':(0,42,8,46), 'toolbar-end':(630,42,1,46), 'address-left':(0,88,76,26),
+             'address-middle':(150,88,1,26), 'address-right':(776,88,24,26), 'toolbar-right':(798,42,2,46),
+             'toolbar-top-right':(758,42,42,1), 'toolbar-bottom-right':(793,87,7,1)}
+    for label,left,right in (('back',8,75),('forward',75,144),('up',144,204),
+                             ('cut',204,262),('copy',262,316),('paste',316,374),
+                             ('undo',374,435),('delete',435,493),
+                             ('properties',493,553),('views',553,630)):
+        parts['toolbar-'+label]=(left,42,right-left,46)
+    for label,(x,y,w,h) in parts.items():
+        name='explorer-'+label+'.png'
+        write(output/name,w,h,[pixel for row in range(y,y+h) for pixel in pixels[row*width+x:row*width+x+w]])
+        records.append({'source':'Windows 95 IE4 My Computer','type':'SCREEN_CAPTURE_CONTROL',
+                        'output':name,'rectangle':[x,y,w,h],
+                        'reference_sha256':hashlib.sha256(full_explorer.read_bytes()).hexdigest()})
+
 font=BitmapFont((output/'ms-sans-serif-8.fnt').read_bytes()); cols=12; cellw=64; cellh=54; width=cols*cellw; height=((len(previews)+cols-1)//cols)*cellh; canvas=[(192,192,192,255)]*(width*height)
 for index,(ident,w,h,pixels) in enumerate(previews):
     x=(index%cols)*cellw+16; y=(index//cols)*cellh+2

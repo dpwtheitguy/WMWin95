@@ -10,7 +10,7 @@ vm=ROOT/'private/vm'; run=ROOT/'private/run'; vm.mkdir(parents=True,exist_ok=Tru
 disk=vm/'xubuntu.qcow2'; qmp=run/'xubuntu.qmp'; pid=run/'xubuntu.pid'
 if qmp.exists():p.error('QMP socket exists; inspect running guest before starting another')
 if not disk.exists():subprocess.run(['/usr/bin/qemu-img','create','-f','qcow2',str(disk),'32G'],check=True)
-cmd=['/usr/bin/qemu-system-x86_64','-name','Win95LX Development','-machine','pc-i440fx-8.2','-accel','kvm','-cpu','host','-m','4096','-smp','2','-drive',f'file={disk},format=qcow2,if=virtio','-drive',f'file={a.iso.resolve()},media=cdrom,readonly=on' if a.boot_iso else 'media=cdrom,readonly=on','-boot','order=c,once=d' if a.boot_iso else 'order=c','-nic','user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:22295-:22','-device','virtio-tablet-pci','-device','virtio-vga','-display', 'gtk,show-tabs=off,zoom-to-fit=on' if a.window else 'none','-qmp',f'unix:{qmp},server=on,wait=off','-pidfile',str(pid),'-D',str(run/'xubuntu.log')]
+cmd=['/usr/bin/qemu-system-x86_64','-name','Win95LX Development','-machine','pc-i440fx-8.2','-accel','kvm','-cpu','host','-m','4096','-smp','2','-drive',f'file={disk},format=qcow2,if=virtio','-drive',f'file={a.iso.resolve()},media=cdrom,readonly=on' if a.boot_iso else 'media=cdrom,readonly=on','-boot','order=c,once=d' if a.boot_iso else 'order=c','-nic','user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:22295-:22','-device','virtio-tablet-pci','-device','virtio-vga','-display', 'gtk,show-tabs=off,zoom-to-fit=off' if a.window else 'none','-qmp',f'unix:{qmp},server=on,wait=off','-pidfile',str(pid),'-D',str(run/'xubuntu.log')]
 if a.window:
     runtime_dir = os.environ.get('XDG_RUNTIME_DIR')
     if runtime_dir and (Path(runtime_dir) / 'pipewire-0').exists():

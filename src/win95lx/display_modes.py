@@ -21,18 +21,22 @@ def _run(*args):
 
 
 def set_resolution(width, height):
-    if (width, height) not in DISPLAY_MODES:
-        raise ValueError("Unknown display resolution")
     listing = _run('xrandr', '--query')
     outputs = list(re.finditer(r'^(\S+) connected\b([^\n]*)\n((?:[ \t].*\n)*)', listing, re.M))
     if not outputs:
         raise ValueError("No connected X11 display")
     selected = next((output for output in outputs if ' primary ' in output[2]), outputs[0])
     connector = selected[1]
-    modes = {line.split()[0] for line in selected[3].splitlines() if line.strip()}
+    mode_rows = [line.split() for line in selected[3].splitlines() if line.strip()]
+    modes = {row[0] for row in mode_rows}
     size = f'{width}x{height}'
+    if any(row[0] in (size, f'Win95LX-{size}') and any('*' in rate for rate in row[1:])
+           for row in mode_rows):
+        return
     mode = size
     if mode not in modes:
+        if (width, height) not in DISPLAY_MODES:
+            raise ValueError('Unknown display resolution')
         mode = f'Win95LX-{size}'
         if mode not in modes:
             modeline = next(line for line in _run('cvt', '-r', str(width), str(height), '60').splitlines()

@@ -205,6 +205,28 @@ CSS = b"""
 }
 .win95-wordpad textview text selection { background: #000080; color: white; }
 .win95-wordpad .status { border-top: 1px solid #808080; padding: 0 3px; }
+
+.win95-wordpad .wordpad-files { padding-left: 6px; padding-right: 6px; }
+.win95-wordpad .wordpad-format { padding-left: 4px; padding-right: 4px; }
+.win95-wordpad .toolbar button.wordpad-command {
+    border: 0; padding: 0; margin: 0;
+    min-width: 23px; min-height: 22px; background: #c0c0c0; box-shadow: none;
+}
+.win95-wordpad .toolbar button.wordpad-command:disabled { opacity: 1; }
+.win95-wordpad .toolbar button.wordpad-command:disabled drawingarea { opacity: 1; }
+
+.win95-wordpad .wordpad-native-field button, .win95-wordpad .wordpad-native-field entry {
+    min-height: 0; min-width: 0; padding: 0; border: 0; box-shadow: none;
+}
+.win95-wordpad scrolledwindow.wordpad-editor {
+    border: 1px solid; border-color: #000 #c0c0c0 #c0c0c0 #000;
+    border-radius: 0; padding: 0; box-shadow: none;
+}
+.win95-wordpad .wordpad-editor-frame {
+    border: 1px solid; border-top-width: 0;
+    border-color: #808080 #fff #fff #808080;
+    border-radius: 0; padding: 0; box-shadow: none;
+}
 """
 
 
@@ -218,7 +240,11 @@ def build_window(assets=None):
     except ImportError:
         ruler_available = False
     from gi.repository import Gdk, Gtk, Pango
-    from win95lx.apps.dialogs import SAVE_CHANGES, choose_file, message_box, run_dialog
+    import cairo
+    from win95lx.assets.bitmap import BitmapFont
+    from win95lx.shell.widgets import Painter, FACE
+    from win95lx.recent_documents import record_document
+    from win95lx.apps.dialogs import SAVE_CHANGES, about_dialog, choose_file, message_box, run_dialog
 
     class WordPad(Gtk.Window):
         def __init__(self):
@@ -257,6 +283,7 @@ def build_window(assets=None):
             box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
             self.add(box)
             bar = Gtk.MenuBar()
+            bar.get_style_context().add_class('wordpad-menubar')
             self.add_menu(bar, '_File', (
                 ('_New', '<Control>n', self.new),
                 ('_Open...', '<Control>o', self.open_dialog),
@@ -285,11 +312,14 @@ def build_window(assets=None):
                 ('_Underline', '<Control>u', lambda: self.toggle_format('underline')),
             ))
             self.add_menu(bar, '_Help', (
-                ('_About WordPad', 'F1', self.about),
+                ('_About WordPad', None, self.about),
             ))
             box.pack_start(bar, False, False, 0)
 
             files = self.toolbar(box)
+            files.get_style_context().add_class('wordpad-files')
+            self.style_toolbar_band(files,299,bottom_extent=520)
+            self.command_buttons = {}
             for icon, label, callback, gap in (
                 ('new', 'New', self.new, 0), ('open', 'Open', self.open_dialog, 0),
                 ('save', 'Save', self.save, 0), ('print', 'Print', None, 8),
@@ -306,25 +336,31 @@ def build_window(assets=None):
                 if callback:
                     button.connect('clicked', lambda _, function=callback: function())
                 files.pack_start(button, False, False, 0)
+                self.command_buttons[icon] = button
 
             formatting = self.toolbar(box)
+            formatting.get_style_context().add_class('wordpad-format')
+            self.style_toolbar_band(formatting,520,top_extent=520)
             family = Gtk.ComboBoxText()
             family.get_style_context().add_class('wordpad-family')
             family.append_text('Times New Roman')
             family.set_active(0)
-            family.set_size_request(237, -1)
-            formatting.pack_start(family, False, False, 0)
+            family.set_size_request(239, 21)
+            formatting.pack_start(self.native_combo(family,'family-field',240,lambda:'Times New Roman'),False,False,0)
             self.size = Gtk.ComboBoxText.new_with_entry()
             for points in (8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 36, 48, 72):
                 self.size.append_text(str(points))
+            self.size.set_size_request(49,21)
             self.size.get_child().set_width_chars(3)
-            self.size.set_margin_start(10)
-            self.size.set_margin_end(10)
+
             self.size.set_tooltip_text('Font size in points')
             self.size.connect('changed', self.size_changed)
             self.size.get_child().connect('activate', self.size_entered)
             self.size.get_child().connect('focus-out-event', self.size_entered)
-            formatting.pack_start(self.size, False, False, 0)
+            size_control=self.native_combo(self.size,'size-field',50,lambda:self.size.get_child().get_text())
+            size_control.set_margin_start(8)
+            size_control.set_margin_end(10)
+            formatting.pack_start(size_control,False,False,0)
             self.format_buttons = {}
             for attribute in ('bold', 'italic', 'underline'):
                 button = self.toolbar_button(attribute, attribute.capitalize(), toggle=True)
@@ -342,15 +378,30 @@ def build_window(assets=None):
                 formatting.pack_start(button, False, False, 0)
 
             ruler = Gtk.DrawingArea() if ruler_available else Gtk.Box()
-            ruler.set_size_request(-1, 21)
+            self.ruler = ruler
+            ruler.set_size_request(-1, 23)
             if ruler_available:
                 ruler.connect('draw', self.draw_ruler)
             box.pack_start(ruler, False, False, 0)
 
             viewport = Gtk.ScrolledWindow()
-            viewport.set_shadow_type(Gtk.ShadowType.IN)
+            viewport.set_shadow_type(Gtk.ShadowType.NONE)
+            viewport.get_style_context().add_class('wordpad-editor')
             viewport.add(self.view)
-            box.pack_start(viewport, True, True, 0)
+            editor_frame=Gtk.Frame(shadow_type=Gtk.ShadowType.NONE)
+            editor_frame.get_style_context().add_class('wordpad-editor-frame')
+            editor_frame.add(viewport)
+            edge_path=assets/'wordpad-native-editor-top.png' if assets else None
+            if edge_path and edge_path.is_file():
+                edge=cairo.ImageSurface.create_from_png(str(edge_path))
+                def editor_edge(widget,context):
+                    context.set_source_surface(edge,0,0)
+                    context.rectangle(0,0,min(widget.get_allocated_width(),edge.get_width()),2)
+                    context.fill()
+                    return False
+                editor_frame.connect_after('draw',editor_edge)
+            box.pack_start(editor_frame,True,True,0)
+            self.view.set_left_margin(7)
             self.status = Gtk.Label(label='For Help, press F1', xalign=0)
             self.status.set_size_request(-1, 18)
             self.status.get_style_context().add_class('status')
@@ -360,6 +411,16 @@ def build_window(assets=None):
             self.buffer.connect('mark-set', self.mark_moved)
             self.connect('delete-event', lambda *_: not self.confirm_discard())
             self.update_title()
+            self.buffer.connect('mark-set',lambda *_:self.update_command_states())
+            self.buffer.connect('changed',lambda *_:self.update_command_states())
+            self.update_command_states()
+
+        def update_command_states(self):
+            selected = self.buffer.get_has_selection()
+            for name in ('cut','copy'):
+                self.command_buttons[name].set_sensitive(selected)
+            self.command_buttons['undo'].set_sensitive(bool(self.undo_stack))
+            self.command_buttons['paste'].set_sensitive(self.clipboard.wait_is_text_available())
 
         def add_menu(self, bar, label, entries):
             menu_item = Gtk.MenuItem.new_with_mnemonic(label)
@@ -384,19 +445,118 @@ def build_window(assets=None):
             parent.pack_start(toolbar, False, False, 0)
             return toolbar
 
+        def style_toolbar_band(self,toolbar,raised_width,top_extent=None,bottom_extent=None):
+            if not assets:
+                return
+            font=BitmapFont((assets/'ms-sans-serif-8.fnt').read_bytes())
+            def draw(widget,context):
+                p=Painter(context,font)
+                p.toolbar_band_edges(widget.get_allocated_width(),widget.get_allocated_height(),
+                                     raised_width,top_extent,bottom_extent)
+                return False
+            toolbar.connect_after('draw',draw)
+
+        def native_combo(self,combo,name,width,get_text):
+            path=assets/f'wordpad-native-{name}.png' if assets else None
+            if not path or not path.is_file():
+                return combo
+            frame=cairo.ImageSurface.create_from_png(str(path))
+            font=BitmapFont((assets/'ms-sans-serif-8.fnt').read_bytes())
+            overlay=Gtk.Overlay()
+            overlay.set_size_request(width,21)
+            area=Gtk.DrawingArea()
+            area.set_size_request(width,21)
+            overlay.add(area)
+            combo.get_style_context().add_class('wordpad-native-field')
+            combo.set_opacity(0)
+            combo.set_size_request(width,21)
+            overlay.add_overlay(combo)
+            entry=combo.get_child() if combo.get_has_entry() else None
+            def draw(_widget,context):
+                p=Painter(context,font)
+                p.image(frame,0,0)
+                text=get_text()
+                default='10' if name=='size-field' else 'Times New Roman'
+                if text != default or entry and entry.has_focus():
+                    p.fill(3,2,width-22,17,(255,255,255))
+                    p.cr.save()
+                    p.cr.rectangle(3,2,width-22,17)
+                    p.cr.clip()
+                    p.text(text,3,4)
+                    if entry and entry.has_focus():
+                        selection=entry.get_selection_bounds()
+                        if selection:
+                            start,end=selection
+                            left=3+font.width(text[:start])
+                            p.fill(left,3,font.width(text[start:end]),15,(0,0,128))
+                            p.text(text[start:end],left,4,(255,255,255))
+                        else:
+                            left=3+font.width(text[:entry.get_position()])
+                            p.fill(left,3,1,15,(0,0,0))
+                    p.cr.restore()
+                return False
+            area.connect('draw',draw)
+            combo.connect('changed',lambda *_:area.queue_draw())
+            if entry:
+                entry.connect('changed',lambda *_:area.queue_draw())
+                entry.connect('notify::has-focus',lambda *_:area.queue_draw())
+            return overlay
+
         def toolbar_button(self, icon, label, toggle=False):
             button = Gtk.ToggleButton() if toggle else Gtk.Button()
             button.set_tooltip_text(label)
             button.set_focus_on_click(False)
-            image_path = assets / f'wordpad-toolbar-{icon}.png' if assets else None
+            button.get_style_context().add_class('wordpad-command')
+            image_path = assets/f'wordpad-toolbar-{icon}.png' if assets else None
             if image_path and image_path.is_file():
-                button.set_image(Gtk.Image.new_from_file(str(image_path)))
-                button.set_size_request(23, 22)
+                sprite = cairo.ImageSurface.create_from_png(str(image_path))
+                font = BitmapFont((assets/'ms-sans-serif-8.fnt').read_bytes())
+                disabled_path = assets/f'wordpad-native-disabled-{icon}.png'
+                disabled = cairo.ImageSurface.create_from_png(str(disabled_path)) if disabled_path.is_file() else None
+                active_path = assets/'wordpad-native-left-active.png'
+                left_active = cairo.ImageSurface.create_from_png(str(active_path)) if icon=='left' and active_path.is_file() else None
+                area = Gtk.DrawingArea()
+                area.set_size_request(23,22)
+                button.add(area)
+                def draw(_widget,context):
+                    p=Painter(context,font)
+                    pressed = bool(button.get_state_flags() & (Gtk.StateFlags.ACTIVE|Gtk.StateFlags.CHECKED))
+                    if left_active:
+                        p.image(left_active,0,0)
+                    elif not button.get_sensitive() and disabled:
+                        p.image(disabled,0,0)
+                    else:
+                        p.bevel(0,0,23,22,pressed)
+                        p.image(sprite,3+int(pressed),3+int(pressed))
+                    return False
+                area.connect('draw',draw)
+                button.connect('notify::sensitive',lambda *_:area.queue_draw())
+                button.connect('pressed',lambda *_:area.queue_draw())
+                button.connect('released',lambda *_:area.queue_draw())
+                button.set_size_request(23,22)
             else:
                 button.set_label(label[0] if toggle else label)
             return button
 
         def draw_ruler(self, widget, cr):
+            native = assets/'wordpad-native-ruler.png' if assets else None
+            if native and native.is_file():
+                image = cairo.ImageSurface.create_from_png(str(native))
+                width = widget.get_allocated_width()
+                cr.save()
+                cr.rectangle(0,0,width,23)
+                cr.clip()
+                cr.set_source_rgb(.75,.75,.75)
+                cr.paint()
+                cr.set_source_surface(image,0,0)
+                cr.paint()
+                if width != image.get_width():
+                    cr.rectangle(width-10,0,10,23)
+                    cr.clip()
+                    cr.set_source_surface(image,width-image.get_width(),0)
+                    cr.paint()
+                cr.restore()
+                return
             width = widget.get_allocated_width()
             cr.set_source_rgb(0.5, 0.5, 0.5)
             cr.rectangle(5, 3, width - 10, 17)
@@ -440,13 +600,7 @@ def build_window(assets=None):
                 self.buffer.end_user_action()
 
         def about(self):
-            dialog = Gtk.MessageDialog(
-                transient_for=self, modal=True, message_type=Gtk.MessageType.INFO,
-                buttons=Gtk.ButtonsType.OK, text='WordPad',
-            )
-            dialog.format_secondary_text('Win95LX WordPad')
-            run_dialog(dialog)
-            dialog.destroy()
+            about_dialog(self, 'WordPad')
 
         def style_at(self, iterator):
             return next((self.tag_styles[tag] for tag in iterator.get_tags() if tag in self.tag_styles), Style())
@@ -662,6 +816,7 @@ def build_window(assets=None):
             self.saved = self.snapshot()
             self.undo_stack.clear()
             self.update_title()
+            record_document(path)
 
         def save(self):
             if self.path is None:
@@ -708,6 +863,7 @@ def build_window(assets=None):
             self.external_rtf = None
             self.saved = runs
             self.update_title(runs)
+            record_document(path)
             return True
 
     return WordPad()

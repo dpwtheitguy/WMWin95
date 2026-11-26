@@ -244,7 +244,7 @@ def build_window():
     gi.require_version('Gdk', '3.0')
     gi.require_version('Gtk', '3.0')
     from gi.repository import Gdk, Gtk
-    from win95lx.apps.dialogs import run_dialog
+    from win95lx.apps.dialogs import about_dialog, run_dialog
 
     class CalculatorWindow(Gtk.Window):
         def __init__(self):
@@ -377,7 +377,7 @@ def build_window():
             )
 
         def about(self, _):
-            self.message('Calculator', 'Win95LX Standard Calculator')
+            about_dialog(self, 'Calculator')
 
         def on_key(self, _, event):
             name = Gdk.keyval_name(event.keyval) or ''

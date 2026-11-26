@@ -11,14 +11,24 @@ class Window:
     height:int=310
     minimized:bool=False
     restored_bounds: tuple[int, int, int, int] | None = None
+    folder: int | str | Path | None = None
+    browser: object | None = None
+    toolbar: bool = True
+    address_bar: bool = True
+    web_view: bool = True
 class DesktopState:
     def __init__(self):
         self.windows=[];self.start_open=False;self.menu_index=0;self.selection=None;self.dialog=None
-    def open(self,kind):
-        titles={'computer':'My Computer','control':'Control Panel','display':'Display Properties','system':'System Properties','notepad':'Untitled - Notepad','drive':'(C:)','recycle':'Recycle Bin'}
-        existing=next((w for w in self.windows if w.kind==kind),None)
+    def open(self,kind,folder=None):
+        titles={'computer':'My Computer','control':'Control Panel','display':'Display Properties','system':'System Properties','notepad':'Untitled - Notepad','drive':'(C:)','recycle':'Recycle Bin','start-folder':'Start Menu'}
+        existing=next((w for w in self.windows if w.kind==kind and w.folder==folder),None)
         if existing:self.windows.remove(existing);existing.minimized=False;self.windows.append(existing)
-        else:self.windows.append(Window(kind,titles[kind],100+len(self.windows)*20,65+len(self.windows)*18))
+        else:
+            window = Window(kind, titles[kind], 100+len(self.windows)*20, 65+len(self.windows)*18,
+                            folder=folder)
+            if kind == 'computer':
+                window.width, window.height = 512, 461
+            self.windows.append(window)
         self.start_open=False
     @property
     def active(self):return next((w for w in reversed(self.windows) if not w.minimized),None)

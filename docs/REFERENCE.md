@@ -86,3 +86,8 @@ The reference VM is now paused at its OEM Certificate of Authenticity page, with
 The user subsequently supplied two possible OEM numbers. The first was accepted by the original installer, which advanced to User Information and hardware/component selection. Numbers are kept only in a mode-0600 file under ignored `private/licenses/`; they are not reproduced in documentation or reports. This records installer acceptance, not independent proof of license ownership. The reference now continues past the earlier key prompt using a generic “Win95LX Reference” identity, Typical installation, common components, and no new startup floppy.
 
 The CAB files are sufficient for resource extraction and Linux development. Installing the offline reference is separately necessary for the project's requested original-shell geometry, interaction checks, installed registry state and reproducible screenshot measurements. The Linux desktop does not depend on Windows being installed or running.
+
+
+To open the installed reference on the host desktop, use `python3 dev/start_reference.py --accel tcg --icount 5 --window --snapshot desktop-reference-800` when its QEMU process is stopped. This snapshot was captured under TCG with instruction counting. Use Ctrl+Alt+G to release the QEMU mouse grab.
+
+Comparison launchers use native-size GTK viewers (`zoom-to-fit=off`) for both VMs. The standard comparison mode is 800×600. Win95LX restores `/home/win95/.config/win95lx/resolution`, defaulting to 800×600; the original reference snapshot `desktop-reference-800` restores its 800×600 desktop. Keep guest resolution separate from host viewer size. Capture QMP framebuffer pixels for measurement.

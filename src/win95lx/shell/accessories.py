@@ -2,8 +2,10 @@
 
 from importlib import import_module
 
-from gi.repository import Gdk, GdkPixbuf, Gtk
+from gi.repository import Gdk, GdkPixbuf, GLib, Gtk
 
+from win95lx.shell.menu_layout import NOTEPAD_FILE_WIDTH, NOTEPAD_HELP_WIDTH, POPUP_GUTTER
+from win95lx.shell.system_menu import ARROWS, COMMANDS, MENU_WIDTH, WindowOperation, options
 from win95lx.shell.widgets import FACE, LIGHT, NAVY, SHADOW, Painter
 
 # Window bounds from the original 800×600 accessory captures.
@@ -23,29 +25,38 @@ APPLICATIONS = {
 MENU_STYLE = b"""
 .win95-app-menubar, .win95-app-menu {
     background: #c0c0c0;
+    background-image: none;
     color: black;
     font: 11px "Liberation Sans";
     border-radius: 0;
     box-shadow: none;
     padding: 0;
 }
+.win95-app-menubar {
+    border: 0;
+    margin: 0;
+}
 .win95-app-menubar > menuitem {
     padding: 0 6px;
     min-height: 20px;
 }
-.win95-app-menubar.notepad-menu > menuitem { min-height: 19px; }
+.win95-app-menubar.notepad-menu > menuitem,
+.win95-app-menubar.wordpad-menubar > menuitem { min-height: 19px; }
 .win95-app-menu {
     padding: 1px;
     border: 2px solid;
     border-color: #fff #404040 #404040 #fff;
 }
+.win95-app-menu.notepad-file-menu, .win95-app-menu.notepad-edit-menu { padding-bottom: 5px; }
+.win95-app-menu.notepad-edit-menu > menuitem { padding: 0; min-height: 17px; }
 .win95-app-menu > menuitem {
-    min-height: 16px;
-    padding: 0 8px;
+    min-height: 17px;
+    padding: 0 16px 0 @GUTTER@px;
 }
+.win95-app-menu.has-checks > menuitem { padding-left: 0; }
 .win95-app-menu > separator {
     min-height: 1px;
-    margin: 2px 1px;
+    margin: 4px 1px;
     background: #808080;
 }
 .win95-app-menubar > menuitem:hover, .win95-app-menu > menuitem:hover {
@@ -57,14 +68,31 @@ MENU_STYLE = b"""
 }
 .win95-app-menu > menuitem > check:not(:checked) { opacity: 0; }
 cursor-handle { opacity: 0; }
-"""
+""".replace(b"@GUTTER@", str(POPUP_GUTTER-1).encode())
 
 
 def style_menus(widget):
     if isinstance(widget, Gtk.MenuBar):
         widget.get_style_context().add_class('win95-app-menubar')
     elif isinstance(widget, Gtk.Menu):
-        widget.get_style_context().add_class('win95-app-menu')
+        context = widget.get_style_context()
+        context.add_class('win95-app-menu')
+        if any(isinstance(child, Gtk.CheckMenuItem) for child in widget.get_children()):
+            context.add_class('has-checks')
+        widget.set_reserve_toggle_size(False)
+        if not getattr(widget,'win95_palette_installed',False):
+            anchor=getattr(widget,'win95_palette_owner',None) or widget.get_attach_widget()
+            owner=anchor.get_toplevel() if anchor is not None else None
+            while isinstance(owner,Gtk.Window) and not hasattr(owner,'display_preferences'):
+                owner=owner.get_transient_for()
+            if owner is not None and hasattr(owner,'display_preferences'):
+                from win95lx.control_panel.display_preferences import install_palette_filter
+                install_palette_filter(widget,lambda owner=owner:owner.display_preferences.palette)
+                widget.win95_palette_installed=True
+        if context.has_class('notepad-file-menu'):
+            widget.set_size_request(NOTEPAD_FILE_WIDTH, -1)
+        elif context.has_class('notepad-help-menu'):
+            widget.set_size_request(NOTEPAD_HELP_WIDTH, -1)
     if isinstance(widget, Gtk.MenuItem) and widget.get_submenu():
         style_menus(widget.get_submenu())
     if isinstance(widget, Gtk.Container):
@@ -85,6 +113,9 @@ def build(kind, shell):
     window = create(shell.assets) if kind == 'wordpad' else create()
     focus = window.get_focus()
     window.set_transient_for(shell)
+    window.dialog_assets = shell.assets
+    from win95lx.control_panel.display_preferences import install_palette_filter
+    install_palette_filter(window,lambda: shell.display_preferences.palette)
     window.set_decorated(False)
     window.connect('realize', lambda widget: widget.get_window().set_cursor(shell.cursor_for('arrow')))
     if kind in ('notepad', 'wordpad'):
@@ -126,6 +157,8 @@ def build(kind, shell):
         window.set_focus(focus)
     drag = None
     restored_bounds = None
+    operation = None
+    grabbed = False
 
     def toggle_maximize():
         nonlocal restored_bounds
@@ -141,6 +174,76 @@ def build(kind, shell):
             window.move(x, y)
             window.resize(width, height)
         caption.queue_draw()
+
+    def minimize():
+        window.hide()
+        shell.get_window().focus(Gdk.CURRENT_TIME)
+
+    def apply_bounds(bounds):
+        x, y, width, height = bounds
+        window.move(x, y)
+        if operation is not None and operation.command == 'size':
+            window.resize(width, height)
+
+    def end_operation(cancel=False):
+        nonlocal operation, grabbed
+        if cancel:
+            apply_bounds(operation.original)
+        operation = None
+        if grabbed:
+            window.get_display().get_default_seat().ungrab()
+            grabbed = False
+
+    def begin_operation(command):
+        nonlocal operation, grabbed
+        seat = window.get_display().get_default_seat()
+        pointer = seat.get_pointer().get_position()
+        operation = WindowOperation.begin(command, (*window.get_position(), *window.get_size()),
+                                          (pointer.x, pointer.y))
+        window.get_window().focus(Gdk.CURRENT_TIME)
+        grabbed = seat.grab(window.get_window(), Gdk.SeatCapabilities.POINTER, False,
+                            shell.cursor_for('move' if command == 'move' else 'size1'),
+                            None, None, None) == Gdk.GrabStatus.SUCCESS
+        return GLib.SOURCE_REMOVE
+
+    def system_command(_item, command):
+        if command in ('restore', 'maximize'):
+            toggle_maximize()
+        elif command == 'minimize':
+            minimize()
+        elif command == 'close':
+            window.close()
+        else:
+            GLib.idle_add(begin_operation, command)
+
+    system_menu = Gtk.Menu()
+    system_menu.attach_to_widget(window, None)
+    system_items = []
+    for command, label, mnemonic in COMMANDS:
+        if command == 'close':
+            system_menu.append(Gtk.SeparatorMenuItem())
+        offset = label.casefold().index(mnemonic)
+        item = Gtk.MenuItem.new_with_mnemonic(label[:offset]+'_'+label[offset:])
+        if command == 'close':
+            item.get_child().set_markup_with_mnemonic('<b>_Close</b>')
+            item.get_child().set_accel(Gdk.KEY_F4, Gdk.ModifierType.MOD1_MASK)
+        item.connect('activate', system_command, command)
+        system_items.append(item)
+        system_menu.append(item)
+    style_menus(system_menu)
+    system_menu.set_size_request(MENU_WIDTH, -1)
+
+    def show_system_menu(event=None):
+        profile = options(resizable=window.get_resizable(), minimizable=True,
+                          maximized=restored_bounds is not None)
+        for item, (_, _, _, enabled) in zip(system_items, profile):
+            item.set_sensitive(enabled)
+        system_menu.show_all()
+        anchor = Gdk.Rectangle()
+        anchor.x, anchor.y, anchor.width, anchor.height = 4, 22, 1, 1
+        system_menu.popup_at_rect(window.get_window(), anchor, Gdk.Gravity.NORTH_WEST,
+                                  Gdk.Gravity.NORTH_WEST, event)
+        system_menu.select_first(False)
 
     def draw(area, context):
         width = area.get_allocated_width()
@@ -172,8 +275,12 @@ def build(kind, shell):
         elif event.x >= width - 36:
             toggle_maximize()
         elif event.x >= width - 52:
-            window.hide()
-            shell.get_window().focus(Gdk.CURRENT_TIME)
+            minimize()
+        elif event.x < 19:
+            if event.type == Gdk.EventType._2BUTTON_PRESS:
+                window.close()
+            else:
+                show_system_menu(event)
         elif event.type == Gdk.EventType._2BUTTON_PRESS:
             drag = None
             toggle_maximize()
@@ -195,9 +302,31 @@ def build(kind, shell):
         drag = None
         return True
 
-    def key(_window, event):
-        if event.keyval == Gdk.KEY_F4 and event.state & Gdk.ModifierType.MOD1_MASK:
+    def key(_controller, keyval, _keycode, state):
+        name = Gdk.keyval_name(keyval)
+        if operation is not None:
+            if name in ARROWS:
+                apply_bounds(operation.step(*ARROWS[name], (shell.width,shell.height)))
+            elif name in ('Escape', 'Return', 'KP_Enter'):
+                end_operation(cancel=name == 'Escape')
+            return True
+        if keyval == Gdk.KEY_space and state & Gdk.ModifierType.MOD1_MASK:
+            show_system_menu(Gtk.get_current_event())
+            return True
+        if keyval == Gdk.KEY_F4 and state & Gdk.ModifierType.MOD1_MASK:
             window.close()
+            return True
+        return False
+
+    def operation_motion(_widget, event):
+        if operation is None:
+            return False
+        apply_bounds(operation.motion(event.x_root, event.y_root, (shell.width,shell.height)))
+        return True
+
+    def operation_press(_widget, event):
+        if operation is not None and event.button == 1:
+            end_operation()
             return True
         return False
 
@@ -205,7 +334,14 @@ def build(kind, shell):
     caption.connect('button-press-event', press)
     caption.connect('motion-notify-event', move)
     caption.connect('button-release-event', release)
-    window.connect('key-press-event', key)
+    controller = Gtk.EventControllerKey.new(window)
+    controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+    controller.connect('key-pressed', key)
+    window.win95_key_controller = controller
+    window.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK)
+    window.connect('button-press-event', operation_press)
+    window.connect('motion-notify-event', operation_motion)
+    window.connect('destroy', lambda *_: end_operation() if operation is not None else None)
     window.connect('notify::title', lambda *_: caption.queue_draw())
     window.connect('notify::is-active', lambda *_: caption.queue_draw())
     if kind in REFERENCE_BOUNDS:
