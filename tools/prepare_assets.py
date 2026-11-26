@@ -23,6 +23,21 @@ for name in ('arrow', 'beam', 'busy', 'cross', 'help', 'move', 'no', 'size1', 's
     }) + '\n')
     records.append({'source': filename, 'type': 'CURSOR', 'output': f'{name}.png',
                     'sha256': hashlib.sha256(cursor).hexdigest(), 'dimensions': [width, height]})
+# Retain every original cursor size/scheme for the Mouse applet, without
+# silently scaling the small artwork into a different native size.
+for path in sorted(source.glob('*.cur')):
+    cursor=path.read_bytes()
+    offset=int.from_bytes(cursor[18:22],'little')
+    width,height,pixels=icon_dib(cursor[offset:])
+    name='pointer-'+path.stem
+    write(output/(name+'.png'),width,height,pixels)
+    (output/(name+'.json')).write_text(json.dumps({'hotspot':[word(cursor,10),word(cursor,12)],'source':path.name})+'\n')
+    records.append({'source':path.name,'type':'CURSOR','output':name+'.png',
+                    'sha256':hashlib.sha256(cursor).hexdigest(),'dimensions':[width,height]})
+for path in sorted(source.glob('*.ani')):
+    (output/path.name).write_bytes(path.read_bytes())
+    records.append({'source':path.name,'type':'ANIMATED_CURSOR','output':path.name,
+                    'sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
 startup = source / 'mssound.wav'
 if startup.is_file():
     data = startup.read_bytes()
@@ -395,4 +410,20 @@ for index,(ident,w,h,pixels) in enumerate(previews):
         for xx,yy in points:canvas[(y+34+yy)*width+tx+xx]=(0,0,0,255)
         tx+=advance
 write(output/'contact-sheet.png',width,height,canvas)
+control_reference=captures/'native-control-web-header.png'
+if control_reference.is_file():
+    width,_,pixels=read(control_reference)
+    for name,(x,y,w,h) in {'control-web-computer':(4,118,85,85),'control-web-heading':(110,136,180,25),
+                          'control-toolbar-back':(8,42,67,46),'control-toolbar-up':(144,42,60,46)}.items():
+        filename='explorer-'+name+'.png'
+        write(output/filename,w,h,[v for row in range(y,y+h) for v in pixels[row*width+x:row*width+x+w]])
+        records.append({'source':'installed IE4 Control Panel','type':'SCREEN_CAPTURE_CONTROL','output':filename,
+                        'rectangle':[x,y,w,h],'reference_sha256':hashlib.sha256(control_reference.read_bytes()).hexdigest()})
+for filename in ('webview-strings.json','webview-verdana-regular.json','webview-verdana-bold.json'):
+    path=output/filename
+    if path.is_file():
+        data=json.loads(path.read_text())
+        records.append({'source':'installed OSR2.5 IE4 reference','type':'WEBVIEW_METADATA' if filename=='webview-strings.json' else 'FONT',
+                        'output':filename,'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
+                        'original_sources':data.get('sources',data.get('source_sha256'))})
 (output/'manifest.json').write_text(json.dumps({'assets':records,'original_media_sha256':'c13b6bad0dcbd4f13c3d840d2b7efe939c6d4e40b1c63f086a5f92edfb1e9b77'},indent=2)+'\n');print('Prepared',len(records),'private assets')

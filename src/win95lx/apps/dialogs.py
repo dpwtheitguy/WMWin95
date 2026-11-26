@@ -547,7 +547,7 @@ def file_notice(parent, state, filename):
         dialog.destroy()
 
 
-def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageType.WARNING):
+def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageType.WARNING, profile=None):
     assets, frame, font = art
     ident = {Gtk.MessageType.ERROR:103,Gtk.MessageType.QUESTION:102,
              Gtk.MessageType.WARNING:101,Gtk.MessageType.INFO:104}.get(kind,104)
@@ -555,18 +555,23 @@ def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageTy
     icon = cairo.ImageSurface.create_from_png(str(path)) if path.is_file() else None
     preserve = (title == 'Notepad' and text ==
                 'The text in the Untitled file has changed.\n\nDo you want to save the changes?')
+    shortcut=profile=='shortcut'
+    width=374 if shortcut else 266
+    text_top=38 if shortcut else 31
+    text_width=300 if shortcut else 196
+    close_x=width-(21 if shortcut else 22)
     lines = []
     for paragraph in text.splitlines():
         line = ''
         for word in paragraph.split():
             candidate = f'{line} {word}' if line else word
-            if line and font.width(candidate) > 196:
+            if line and font.width(candidate) > text_width:
                 lines.append(line)
                 line = word
             else:
                 line = candidate
         lines.append(line)
-    height = max(126, 82+len(lines)*13)
+    height = 119 if shortcut else max(126, 82+len(lines)*13)
     if preserve:
         height = 126
     dialog = Gtk.Dialog(title=title, transient_for=parent, modal=True)
@@ -582,10 +587,10 @@ def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageTy
         if preserve:
             p.image(frame, 0, 0)
         else:
-            p.window_frame(0,0,266,height)
-            p.fill(3,3,260,18,NAVY)
+            p.window_frame(0,0,width,height)
+            p.fill(3,3,width-6,18,NAVY)
             p.text(title,5,5,LIGHT,bold=True)
-            p.caption_button('close',244,5)
+            p.caption_button('close',close_x,5)
             context.save()
             context.rectangle(12,30,33,35)
             context.clip()
@@ -595,22 +600,24 @@ def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageTy
                 p.image(frame,0,0)
             context.restore()
             context.save()
-            context.rectangle(62,31,197,height-65)
+            context.rectangle(62,text_top,text_width,height-65)
             context.clip()
             for index, line in enumerate(lines):
-                p.text(line,62,31+index*13)
+                p.text(line,62,text_top+index*13)
             context.restore()
         for label, response, button, x in controls:
             if not preserve or selected != default:
-                p.fill(x-1,height-38,77,25,FACE)
-                p.button(label.lstrip('_'),x,height-37,75,23,default=response==selected,
+                p.fill(x-1,button_y-1,77,25,FACE)
+                p.button(label.lstrip('_'),x,button_y,75,23,default=response==selected,
                          pressed=bool(button.get_state_flags() & Gtk.StateFlags.ACTIVE))
         return False
 
-    fixed, canvas = fixed_canvas(dialog, 266, height, draw)
+    button_y=height-(36 if shortcut else 37)
+    fixed, canvas = fixed_canvas(dialog, width, height, draw)
     for index,(label,response) in enumerate(buttons):
-        x = (266-(len(buttons)*75+(len(buttons)-1)*6))//2+index*81
-        button = artwork_button(fixed,canvas,label.lstrip('_'),(x,height-37,75,23),
+        gap=3 if shortcut else 6
+        x = (width-(len(buttons)*75+(len(buttons)-1)*gap))//2+index*(75+gap)
+        button = artwork_button(fixed,canvas,label.lstrip('_'),(x,button_y,75,23),
                                 lambda _button, response=response: dialog.response(response))
         controls.append((label,response,button,x))
         def focused(widget, _event, response=response):
@@ -621,7 +628,7 @@ def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageTy
         button.connect('notify::has-focus', focused)
     responses = {response for _,response in buttons}
     cancel = Gtk.ResponseType.CANCEL if Gtk.ResponseType.CANCEL in responses else Gtk.ResponseType.NO if Gtk.ResponseType.NO in responses else default
-    artwork_button(fixed,canvas,'Close',(244,4,18,16),lambda *_: dialog.response(cancel))
+    artwork_button(fixed,canvas,'Close',(close_x,4,18,16),lambda *_: dialog.response(cancel))
     def key(_dialog,event):
         if event.keyval == Gdk.KEY_Escape:
             dialog.response(cancel)
@@ -644,10 +651,10 @@ def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageTy
 
 
 def message_box(parent, title, text, kind, buttons=(('OK', Gtk.ResponseType.OK),),
-                default=Gtk.ResponseType.OK):
+                default=Gtk.ResponseType.OK, *, profile=None):
     art = dialog_art(parent, 'close')
     if art:
-        return native_prompt(parent, title, text, buttons, default, art, kind)
+        return native_prompt(parent, title, text, buttons, default, art, kind, profile)
     dialog = Gtk.Dialog(title=title, transient_for=parent, modal=True)
     dialog.set_decorated(False)
     dialog.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)

@@ -11,9 +11,10 @@ class NamespaceTests(unittest.TestCase):
         disk=computer_file_rows(selection='(C:)')
         panel=computer_file_rows(selection='Control Panel')
         self.assertTrue(all(not row.enabled for row in empty[:4]))
-        self.assertTrue(disk[0].enabled);self.assertTrue(disk[3].enabled)
-        self.assertTrue(panel[0].enabled);self.assertFalse(panel[3].enabled)
-        self.assertFalse(panel[1].enabled)
+        disk={row.command:row for row in disk if row};panel={row.command:row for row in panel if row}
+        self.assertTrue(disk['open'].default);self.assertTrue(disk['properties'].enabled)
+        self.assertTrue(panel['shortcut'].enabled);self.assertFalse(panel['properties'].enabled)
+        self.assertFalse(panel['delete'].enabled)
     def test_shortcuts_round_trip_and_do_not_overwrite(self):
         with TemporaryDirectory() as root:
             first=create_shortcut(root,'Control Panel');second=create_shortcut(root,'Control Panel')

@@ -52,3 +52,20 @@ Original Windows assets and VM images stay private. Report links can point to lo
 ## Sprint 2 candidates
 
 General X11 window management, remaining Explorer views and property sheets, file associations and shortcuts, fuller WordPad behavior, comprehensive sound event mapping, and end-to-end boot/reboot timing.
+
+## Active follow-up — selection, command context, Edit, navigation, Mouse
+
+Preserve the November 25 Explorer iteration as the baseline. Current user requests extend it with:
+
+1. Selection-dependent Web View details, original template/resource research, original Verdana raster, and same-state comparisons.
+2. Working namespace, file and folder shortcuts; native creation prompt; icons/overlays; cancellation, duplicates, reopen, rename/move/copy/trash/restore and broken-link tests. Explain the desktop-Link versus symlink distinction.
+3. Modular selection-dependent File profiles; default verbs, capabilities, empty/single/multiple/mixed/protected contexts. Record native and unverified states separately.
+4. Edit-menu native captures and per-command unit, interaction, failure, cancellation and persistence regressions. Require screenshots and explain the process.
+5. Native single-window browsing and the real Folder Options preference, while retaining explicit new-window opening and independent-window state.
+6. Mouse Properties with original Win95 tabs, original available pointer schemes and additional appropriate schemes. Every exposed setting must affect the guest session, Apply/Cancel/persistence must work, and pixel/input tests must substantiate acceptance.
+
+Keep requests cumulative. Do not conflate selecting Control Panel with opening it: inspect native double-click behavior and its folder-browsing setting. Push completed iterations using the repository's configured WMWin95 SSH key, excluding all private original assets and VM data.
+
+## Overnight assignment — November 25–26
+
+Complete and independently recheck the cumulative user requests above; commit and push validated iterations to main. Expand working Control Panel applets where feasible, with original-control screenshots, multi-path unit/regression/interaction tests and explicit hardware/implementation gaps. Take VM snapshots before broader changes. Establish a separate classic Windows 95 reference without IE4 Desktop Update where existing licensed media/snapshots permit. Measure UI and boot performance before claiming improvements. Research DOS-launch choices extensively (FreeDOS, other DOS implementations, DOSBox variants, Linux shells and PowerShell aliases); do not implement the DOS feature in this iteration. Report completed work, evidence, remaining issues and next priorities. Preserve private assets, user preferences and non-admin guest boundaries.

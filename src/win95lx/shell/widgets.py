@@ -16,6 +16,19 @@ class Painter:
     def __init__(self,cr,font):self.cr=cr;self.font=font;cr.set_antialias(cairo.ANTIALIAS_NONE)
     def fill(self,x,y,w,h,color):
         self.cr.set_source_rgb(*(v/255 for v in color));self.cr.rectangle(int(x),int(y),int(w),int(h));self.cr.fill()
+    def selected_image(self,image,x,y):
+        import sys
+        self.image(image,x,y)
+        width,height=image.get_width(),image.get_height()
+        stride=cairo.ImageSurface.format_stride_for_width(cairo.FORMAT_A8,width)
+        mask=bytearray(stride*height);data=image.get_data();source_stride=image.get_stride()
+        for yy in range(height):
+            for xx in range(width):
+                alpha=255 if image.get_format()==cairo.FORMAT_RGB24 else data[yy*source_stride+xx*4+(3 if sys.byteorder=='little' else 0)]
+                if (xx+yy)%2==0:mask[yy*stride+xx]=alpha if isinstance(alpha,int) else alpha[0]
+        surface=cairo.ImageSurface.create_for_data(mask,cairo.FORMAT_A8,width,height,stride)
+        self.cr.save();self.cr.set_source_rgb(0,0,.5);self.cr.mask_surface(surface,x,y);self.cr.restore()
+
     def text(self,text,x,y,color=BLACK,bold=False):
         self.cr.set_source_rgb(*(v/255 for v in color))
         for char in text:
@@ -26,7 +39,7 @@ class Painter:
     def menu_text(self,label,x,y,color=BLACK,mnemonic=None):
         self.text(label,x,y,color)
         if mnemonic:
-            index=label.casefold().find(mnemonic.casefold())
+            index=mnemonic if isinstance(mnemonic,int) else label.casefold().find(mnemonic.casefold())
             if index>=0:
                 self.fill(x+self.font.width(label[:index]),y+12,self.font.width(label[index]),1,color)
 

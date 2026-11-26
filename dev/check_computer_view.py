@@ -40,8 +40,8 @@ def main():
         assert [r.label for r in computer_file_rows() if r]==['Create Shortcut','Delete','Rename','Properties','My Computer','Work Offline','Close']
         assert len(shell.drive_menu_rows)==3
         assert not any(r.enabled for r in computer_file_rows(selection=None)[:4])
-        assert computer_file_rows(selection='(C:)')[3].enabled
-        assert not computer_file_rows(selection='Control Panel')[3].enabled
+        assert next(row for row in computer_file_rows(selection='(C:)') if row and row.command=='properties').enabled
+        assert not next(row for row in computer_file_rows(selection='Control Panel') if row and row.command=='properties').enabled
         assert shell.popup[:2]==(11,40),shell.popup
         if shell.width==800:
             compare(opened,'complete open File menubar','native-computer-file-full.png',(0,18,800,22),(0,18))
@@ -72,14 +72,14 @@ def main():
         # Selection changes the live command targets, rather than a static disabled picture.
         shell.item_selection=(win,'(C:)')
         shell.action(('window-menu',win,'File',24));capture('file-menu-drive-selected-after')
-        assert {r[2] for r in shell.drive_menu_rows}=={'shortcut','properties','computer','offline','close'}
+        assert {r[2] for r in shell.drive_menu_rows}=={'open','explore','find','format','shortcut','properties','computer','offline','close'}
         with patch('win95lx.apps.dialogs.message_box',return_value=Gtk.ResponseType.OK) as prompt:
             shell.action(('explorer-tool',win,'properties'))
             assert prompt.call_args.args[1]=='(C:) Properties'
         shell.item_selection=(win,'Control Panel')
         shell.action(('window-menu',win,'File',24))
         capture('file-menu-control-selected-after')
-        assert {r[2] for r in shell.drive_menu_rows}=={'shortcut','computer','offline','close'}
+        assert {r[2] for r in shell.drive_menu_rows}=={'open','shortcut','computer','offline','close'}
         shell.drive_menu_key('Escape',False)
         shell.action(('explorer-address',win));assert shell.address_window is win
         shell.address_window=None
@@ -99,9 +99,12 @@ def main():
             shell.action(('computer-view-toggle',win,band));capture('hidden-'+band)
             assert not getattr(win,band)
             shell.action(('computer-view-toggle',win,band));assert getattr(win,band)
-        compare(normal,'Web View description','native-computer-web-full.png',(20,218,165,32),(20,218))
-        compare(normal,'C drive icon and label','native-computer-web-clean.png',(330,175,50,50),(330,175))
-        compare(normal,'Control Panel icon and label','native-computer-web-clean.png',(245,245,70,60),(245,245))
+        # The 30% information column wraps differently at wider client sizes.
+        # Only the 800px capture is a full-description reference.
+        if shell.width==800:
+            compare(normal,'Web View description','native-computer-web-full.png',(20,218,165,32),(20,218))
+        compare(normal,'C drive icon and label','native-computer-web-clean.png',(330,175,50,50),(330+round((shell.width-4)*.3)-239,175))
+        compare(normal,'Control Panel icon and label','native-computer-web-clean.png',(245,245,70,60),(245+round((shell.width-4)*.3)-239,245))
         shell.disconnect_by_func(Gtk.main_quit);shell.destroy()
     digest=hashlib.sha256()
     for path in sorted((ROOT/'src').rglob('*.py')):

@@ -24,8 +24,9 @@ SUBMENUS = {
     1: (('My Computer', 'computer', ('open', 'computer')),
         ('Control Panel', 36, ('open', 'control'))),
     2: (('(C:)', 9, ('open', 'drive')),),
-    3: (('Control Panel', 36, ('open', 'control')),
-        ('Display Properties', 'display', ('open', 'display'))),
+    # Other native Settings entries remain hidden until their applets work.
+    # Display belongs inside Control Panel, not directly in this submenu.
+    3: (('Control Panel', 36, ('open', 'control')),),
     4: (('Files or Folders...', 23, ('find',)),),
 }
 FALLBACK_ICONS = {'favorites': 4, 'settings': 22, 'find': 23}

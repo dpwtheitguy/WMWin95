@@ -25,6 +25,9 @@ def geometry(win):
 def draw(shell,p,win):
     x,y,w,h=geometry(win)
     left=x+4; width=w-8
+    computer=win.kind=='computer'
+    entries=((9,'(C:)','drive'),(36,'Control Panel','control')) if computer else (('display','Display','display'),)
+    small_icon='computer' if computer else 36
     if shell.popup and isinstance(shell.popup[2],tuple) and shell.popup[2]==(win,'File'):
         p.bevel(left+11,y+26,32,19,True)
         p.menu_text('File',left+20,y+30,BLACK,'f')
@@ -37,7 +40,7 @@ def draw(shell,p,win):
         grip=surface(shell,'toolbar-grip')
         if grip:p.image(grip,left,top)
         for command,start,end in BUTTONS:
-            image=surface(shell,'toolbar-'+command)
+            image=surface(shell,('control-toolbar-' if (command=='up' and not computer or command=='back' and win.back_history) else 'toolbar-')+command)
             if image:p.image(image,left+start,top)
             if start<width:shell.hit(left+start,top+2,min(end,width)-start,42,('explorer-tool',win,command))
         ending=surface(shell,'toolbar-end')
@@ -61,7 +64,11 @@ def draw(shell,p,win):
             p.cr.save();p.cr.set_source_surface(middle,left+76,top)
             p.cr.get_source().set_extend(cairo.EXTEND_REPEAT)
             p.cr.rectangle(left+76,top,width-100,26);p.cr.fill();p.cr.restore()
-        label=shell.address_text if shell.address_window is win else 'My Computer'
+        if not computer:
+            p.fill(left+56,top+1,20,17,LIGHT)
+            icon=shell.small_images.get(small_icon)
+            if icon:p.image(icon,left+57,top+2)
+        label=shell.address_text if shell.address_window is win else win.title
         p.cr.save();p.cr.rectangle(left+76,top+1,width-100,17);p.cr.clip()
         if shell.address_window is win:
             a,b=shell.address_entry.selection
@@ -83,23 +90,35 @@ def draw(shell,p,win):
     p.fill(left+2,top+2,width-4,bottom-top-4,LIGHT)
     origin=left+2,top+2
     if win.web_view:
-        for name,dx,dy in (('web-computer',2,2),('web-heading',108,20)):
-            image=surface(shell,name)
-            if image:p.image(image,origin[0]+dx,origin[1]+dy)
-        p.fill(origin[0]+84,origin[1]+44,width-88,1,BLACK)
-        description=surface(shell,'web-description')
-        if description:p.image(description,left+20,top+104)
-        icon_left=origin[0]+245;icon_top=origin[1]+58
+        compact=bottom-top<200
+        panel_visible=width-4>=400
+        if compact:
+            image=surface(shell,'web-heading' if computer else 'control-web-heading')
+            if image:
+                p.cr.save();p.cr.rectangle(origin[0]+14,origin[1]+4,image.get_width(),23);p.cr.clip()
+                p.image(image,origin[0]+14,origin[1]+4);p.cr.restore()
+        else:
+            for name,dx,dy in (('web-computer',2,2),('web-heading',108,20)):
+                image=surface(shell,name if computer else 'control-'+name)
+                if image:p.image(image,origin[0]+dx,origin[1]+dy)
+            p.fill(origin[0]+84,origin[1]+44,width-88,1,BLACK)
+        from win95lx.shell.webview_panel import draw as draw_panel
+        if panel_visible:
+            if not draw_panel(shell,p,win,left,top,width,bottom-top,panel_top=32 if compact else 88):
+                description=surface(shell,'web-description')
+                if description:p.image(description,left+20,top+104)
+        icon_left=origin[0]+(round((width-4)*.3)+6 if panel_visible else 6)
+        icon_top=origin[1]+(34 if compact else 58)
         step=75
     else:
         icon_left=origin[0]+10;icon_top=origin[1]+10;step=102
-    for index,(ident,label,target) in enumerate(((9,'(C:)','drive'),(36,'Control Panel','control'))):
+    for index,(ident,label,target) in enumerate(entries):
         # Namespace contents reflect the Linux machine; no fictitious A: or Windows CD.
         if win.web_view:
-            dx,dy=((step,0),(0,75))[index]
+            dx,dy=((step,0),(0,75))[index] if computer else (0,0)
         else:dx,dy=index*step,0
         shell.icon(p,ident,label,icon_left+dx,icon_top+dy,
-                   ('item',win,target,label,(dx,dy)),shell.item_selection in ((win,label),(win,None)),
+                   ('item',win,target,label,(dx,dy)),shell.item_selection in ((win,label),(win,None)) and shell.state.active is win and shell.popup is None,
                    image_offset=-1 if win.web_view else 0,label_offset=1 if win.web_view and index==0 else 0)
     sy=y+h-23
     if shell.popup and isinstance(shell.popup[2],tuple) and shell.popup[2]==(win,'File'):
@@ -115,7 +134,8 @@ def draw(shell,p,win):
     first=max(120,round(width*.30));last=max(first+60,width-215)
     for a,b in ((0,first),(first+2,last),(last+2,width)):
         p.bevel(left+a,sy,b-a,18,True)
-    p.text('2 object(s)',left+3,sy+2)
-    icon=shell.small_images.get('computer')
+    count=len(entries) if shell.item_selection==(win,None) else 1 if shell.item_selection and shell.item_selection[0] is win else 0
+    p.text(f'{count} object(s) selected' if count else f'{len(entries)} object(s)',left+3,sy+2)
+    icon=shell.small_images.get(small_icon)
     if icon:p.image(icon,left+last+5,sy+1)
-    p.text('My Computer',left+last+24,sy+2)
+    p.text(win.title,left+last+24,sy+2)

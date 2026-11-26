@@ -70,6 +70,9 @@ class Shell(Gtk.Window):
         self.cursors = {}
         self.menu_hit_start = 0
         self.start_context = None
+        from win95lx.explorer.browsing import BrowsingPreferences
+        self.browsing_path=Path.home()/'.config/win95lx/folders.json'
+        self.browsing_preferences=BrowsingPreferences.load(self.browsing_path)
         self.window_operation = None
         self.shortcut_folders = ShortcutFolders()
         self.shortcut_drop = None
@@ -237,13 +240,32 @@ class Shell(Gtk.Window):
     def tick(self):self.area.queue_draw();return True
     def hit(self,x,y,w,h,action):self.hits.append((x,y,w,h,action))
     def button(self,p,label,x,y,w,h,action,pressed=False):p.button(label,x,y,w,h,pressed);self.hit(x,y,w,h,action)
+    def shortcut_image(self,path,default):
+        from win95lx.explorer.namespace import read_shortcut
+        link=read_shortcut(path)
+        if not link:return default
+        if link.kind=='namespace':return {'control':36,'computer':'computer','drive':9,'display':'display'}[link.target]
+        target=Path(link.target)
+        return 4 if target.is_dir() else self.drive_file_icon(target.name)
+
     def icon(self,p,ident,label,x,y,action,selected=False,*,image_offset=0,label_offset=0):
+        shortcut=label.casefold().endswith('.desktop')
+        if shortcut:
+            if action[0]=='item' and action[1].kind=='drive':
+                browser=self.browser_for(action[1]);ident=self.shortcut_image(browser.view.resolve(browser.directory/label),ident)
         image = self.images.get('folder-selected') if ident == 4 and selected else self.images.get(ident)
-        if image is not None:p.image(image,x+16+image_offset,y)
-        elif ident in self.small_images:p.image(self.small_images[ident],x+24,y+8)
-        label = taskbar.title_that_fits(self.font, label, ICON_WIDTH-4, False)
+        if image is not None:
+            if selected and ident!=4:p.selected_image(image,x+16+image_offset,y)
+            else:p.image(image,x+16+image_offset,y)
+        if shortcut and 29 in self.images:p.image(self.images[29],x+16+image_offset,y)
+        if image is None and ident in self.small_images:p.image(self.small_images[ident],x+24,y+8)
+        from win95lx.explorer.namespace import display_name
+        label = taskbar.title_that_fits(self.font, display_name(label), ICON_WIDTH-4, False)
         width=self.font.width(label)
-        if selected:p.fill(x+(64-width)//2-2,y+35,width+4,15,NAVY)
+        if selected:
+            if action[0]=='item' and action[1].kind=='computer' and action[1].focus_item in (None,action[3]):
+                p.fill(x+(64-width)//2-2+label_offset,y+36,width+4,15,(255,255,0))
+            p.fill(x+(64-width)//2-1+label_offset,y+37,width+2,13,NAVY)
         p.text(label,x+(64-width)//2+label_offset,y+36,LIGHT if selected else BLACK);self.hit(x,y,70,54,action)
     @property
     def drive(self):
@@ -295,6 +317,34 @@ class Shell(Gtk.Window):
             self.open('drive', relative)
         else:
             self.open_drive_file(relative)
+
+    def navigate_namespace(self,win,kind,folder=None,*,new_window=False):
+        if kind not in ('computer','control','drive') or new_window or not self.browsing_preferences.single_window:
+            self.open(kind,folder)
+            return
+        from copy import deepcopy
+        browser=None
+        if kind=='drive':
+            browser=DriveBrowser(self._drive.view.root)
+            try:browser.navigate(folder or '.')
+            except (OSError,ValueError,RuntimeError) as error:
+                from win95lx.apps.dialogs import message_box
+                message_box(self,'Explorer',str(error),Gtk.MessageType.ERROR)
+                return
+        win.back_history.append((win.kind,win.title,win.folder,deepcopy(win.browser)))
+        win.forward_history.clear()
+        win.kind=kind;win.folder=folder;win.browser=browser
+        win.title=browser.title if browser else {'computer':'My Computer','control':'Control Panel'}[kind]
+        self.item_selection=None;win.focus_item=None;self.popup=None
+        self.state.windows.remove(win);self.state.windows.append(win)
+
+    def navigate_history(self,win,back=True):
+        from copy import deepcopy
+        source,destination=(win.back_history,win.forward_history) if back else (win.forward_history,win.back_history)
+        if source:
+            destination.append((win.kind,win.title,win.folder,deepcopy(win.browser)))
+            win.kind,win.title,win.folder,win.browser=source.pop()
+            self.item_selection=None;win.focus_item=None;self.popup=None
 
     def open(self,kind,folder=None):
         if kind == 'drive':
@@ -403,9 +453,14 @@ class Shell(Gtk.Window):
             x, y = self.desktop_icons.position(kind, width, height, self.desktop_file_defaults.get(kind))
             if self.icon_drag and self.icon_drag[0] == kind and self.icon_drag_point is not None:
                 x, y = self.icon_drag_point
+            shortcut=kind.startswith('file:') and label.casefold().endswith('.desktop')
+            if shortcut:ident=self.shortcut_image(self.desktop_folder/label,ident)
             if ident in self.images:
-                p.image(self.images[ident], x+21, y)
-            label = taskbar.title_that_fits(self.font, label, ICON_WIDTH-4, False)
+                if self.state.selection==kind:p.selected_image(self.images[ident],x+21,y)
+                else:p.image(self.images[ident], x+21, y)
+            if shortcut and 29 in self.images:p.image(self.images[29],x+21,y)
+            from win95lx.explorer.namespace import display_name
+            label = taskbar.title_that_fits(self.font, display_name(label), ICON_WIDTH-4, False)
             label_width=self.font.width(label)
             label_x=x+37-label_width//2
             selected=self.state.selection==kind
@@ -503,7 +558,7 @@ class Shell(Gtk.Window):
         p.text('Start',25,bar+8,bold=True)
     def window(self,p,win):
         browser = self.browser_for(win) if win.kind == 'drive' else None
-        x, y, w, h = computer_view.geometry(win) if win.kind=='computer' else (win.x,win.y,win.width,win.height)
+        x, y, w, h = computer_view.geometry(win) if win.kind in ('computer','control') else (win.x,win.y,win.width,win.height)
         explorer = win.kind in ('computer','control','drive','recycle','start-folder')
         resizable = explorer or win.kind == 'notepad'
         active = win is self.state.active
@@ -537,11 +592,11 @@ class Shell(Gtk.Window):
                 (w-39,'restore' if win.restored_bounds else 'maximize','maximize'),
             ))
         for offset, symbol, action in buttons:
-            if win.kind=='computer' and win.restored_bounds is not None:offset-=1
+            if win.kind in ('computer','control') and win.restored_bounds is not None:offset-=1
             p.caption_button(symbol,x+offset,y+6)
             self.hit(x+offset,y+6,16,14,(action,win))
         if explorer:
-            if win.kind=='computer' and (win.toolbar or win.address_bar or win.web_view):
+            if win.kind in ('computer','control') and (win.toolbar or win.address_bar or win.web_view):
                 from copy import copy
                 frame=copy(win);frame.x,frame.y,frame.width,frame.height=x,y,w,h
                 explorer_chrome.draw(p,frame,self.explorer_menu_art,
@@ -656,6 +711,14 @@ class Shell(Gtk.Window):
         directory = browser.directory
         sources = tuple(directory/name for name in sorted(browser.selection))
         self.popup = None
+        if command in ('open','explore'):
+            for source in sources:
+                if browser.view.resolve(source).is_dir():self.open('drive',source)
+                else:self.open_drive_file(source)
+            return
+        if command=='find':
+            self.action(('find',))
+            return
         if command in ('cut', 'copy'):
             if sources:
                 self.file_clipboard = FileClipboard(sources, command == 'cut')
@@ -665,7 +728,15 @@ class Shell(Gtk.Window):
             browser.selection = all_names if command == 'select-all' else all_names-browser.selection
             return
         try:
-            if command == 'paste' and self.file_clipboard.sources:
+            if command=='shortcut':
+                from win95lx.explorer.namespace import create_file_shortcut
+                for source in sources:create_file_shortcut(browser.view.resolve(directory),browser.view.resolve(source))
+                self.refresh_file_views()
+            elif command=='paste-shortcut':
+                from win95lx.explorer.namespace import create_file_shortcut
+                for source in self.file_clipboard.sources:create_file_shortcut(browser.view.resolve(directory),browser.view.resolve(source))
+                self.refresh_file_views()
+            elif command == 'paste' and self.file_clipboard.sources:
                 remaining = self.transfer_files(self.file_clipboard.sources, directory,
                                                 copy=not self.file_clipboard.move)
                 if self.file_clipboard.move:
@@ -673,13 +744,16 @@ class Shell(Gtk.Window):
             elif command in ('new-folder','rename') and (command == 'new-folder' or len(sources) == 1):
                 folder = browser.view.resolve(directory)
                 original = sources[0].name if command == 'rename' else 'New Folder'
+                shortcut_rename=command=='rename' and original.casefold().endswith('.desktop')
+                if shortcut_rename:original=Path(original).stem
                 label = 'Rename' if command == 'rename' else 'New Folder'
                 from win95lx.apps.dialogs import name_dialog
                 name = name_dialog(self, label, original)
                 if name is not None and (command != 'rename' or name != original):
+                    if shortcut_rename and not name.casefold().endswith('.desktop'):name+='.desktop'
                     target = folder/child_name(name)
                     if command == 'rename':
-                        move_entry(folder/original, target)
+                        move_entry(folder/sources[0].name, target)
                     else:
                         target.mkdir()
                     self.refresh_file_views()
@@ -702,15 +776,17 @@ class Shell(Gtk.Window):
         suffix = Path(name).suffix.casefold()
         if suffix == '.rtf':
             return 'wordpad'
-        if suffix in ('.txt', '.ini', '.conf', '.log', '.md'):
-            return 'notepad'
+        if suffix=='.txt':return 152
+        if suffix=='.ini':return 151
+        if suffix in ('.conf', '.log', '.md'):
+            return 152
         return 1
 
-    def open_drive_entry(self, win, name, directory):
+    def open_drive_entry(self, win, name, directory, new_window=False):
 
         relative = self.browser_for(win).directory/name
         if directory:
-            self.open('drive', relative)
+            self.navigate_namespace(win,'drive',relative,new_window=new_window)
         else:
             self.open_drive_file(relative)
 
@@ -725,11 +801,17 @@ class Shell(Gtk.Window):
             message_box(self, '(C:)', str(error), Gtk.MessageType.ERROR)
             return
         if path.suffix.casefold()=='.desktop':
-            from win95lx.explorer.namespace import shortcut_target
-            target=shortcut_target(path)
-            if target:
-                self.open(target)
-                return
+            from win95lx.explorer.namespace import resolve_shortcut
+            try:
+                target=resolve_shortcut(path)
+                if target.kind=='namespace':self.open(target.target)
+                else:
+                    destination=Path(target.target).relative_to(self._drive.view.root)
+                    if Path(target.target).is_dir():self.open('drive',destination)
+                    else:self.open_drive_file(destination)
+            except (OSError,ValueError,RuntimeError) as error:
+                message_box(self,'Problem with Shortcut',str(error),Gtk.MessageType.ERROR)
+            return
         if path.suffix.casefold() == '.rtf':
             kind, load = 'wordpad', 'load'
         elif path.suffix.casefold() in ('.txt', '.ini', '.conf', '.log', '.md'):
@@ -863,14 +945,20 @@ class Shell(Gtk.Window):
         else:
             self.action(menu.ROWS[index][3])
 
+    def namespace_file_rows(self,win):
+        selection=(self.item_selection[1] or '*') if self.item_selection and self.item_selection[0] is win else None
+        if win.kind=='computer':return explorer_menu.computer_file_rows(self.work_offline,selection)
+        from win95lx.explorer.commands import Context,Item,file_commands
+        names=() if selection is None else ('Display',) if selection=='*' else (selection,)
+        return file_commands(Context('control',tuple(Item('applet',name,False) for name in names)))
+
     def context(self,p,x,y,kind):
         if isinstance(kind, tuple):
             win, menu = kind
             browser = self.browser_for(win) if win.kind == 'drive' else None
-            if win.kind == 'computer' and menu == 'File':
+            if win.kind in ('computer','control') and menu == 'File':
                 self.drive_menu_rows = explorer_menu.draw(
-                    p,x,y,explorer_menu.computer_file_rows(self.work_offline,
-                        (self.item_selection[1] or '*') if self.item_selection and self.item_selection[0] is win else None),
+                    p,x,y,self.namespace_file_rows(win),
                     self.drive_menu_highlight,self.images.get('menu-check'),self.hit,win)
                 return
             options = {
@@ -924,15 +1012,22 @@ class Shell(Gtk.Window):
                           ('Paste','Ctrl+V','paste',bool(self.file_clipboard.sources)))
         file_rows = (('New Folder','','new-folder',True), ('Delete','','trash',selected),
                      ('Rename','','rename',single), ('Properties','','properties',single))
+        if selected and menu=='File':
+            from win95lx.explorer.commands import Context,Item,file_commands
+            entries=tuple(Item('folder' if browser.view.resolve(browser.directory/name).is_dir() else 'shortcut' if name.casefold().endswith('.desktop') else 'file',name) for name in sorted(browser.selection))
+            profile=file_commands(Context('filesystem',entries))
+            file_rows=tuple(None if row is None else (row.label,'',row.command,row.enabled) for row in profile[:-2])
+        from win95lx.explorer.edit_commands import EditContext,edit_rows
+        import os
+        edit_context=EditContext(len(browser.selection),len(browser.entries),
+            bool(self.file_clipboard.sources),os.access(browser.view.resolve(browser.directory),os.W_OK))
         rows = {
-            'Edit': (('Undo','Ctrl+Z','',False), None, *cut_copy_paste,
-                     ('Paste Shortcut','','',False), None,
-                     ('Select All','Ctrl+A','select-all',True), ('Invert Selection','','invert',True)),
+            'Edit': edit_rows(edit_context),
             'File': (*file_rows, None, ('Close','','close',True)),
             'Item': (*cut_copy_paste, None, *file_rows),
         }[menu]
-        width = 122 if menu == 'File' else 156
-        height = 4+sum(9 if row is None else 17 for row in rows)
+        width = 122 if menu == 'File' else 154 if menu == 'Edit' else 156
+        height = (5 if menu=='Edit' else 4)+sum(9 if row is None else 17 for row in rows)
         x, y = max(0,min(x,self.width-width)), max(0,min(y,self.height-height))
         p.window_frame(x,y,width,height)
         self.drive_menu_rows = []
@@ -940,8 +1035,8 @@ class Shell(Gtk.Window):
         top = y+2
         for row in rows:
             if row is None:
-                p.fill(x+2,top+4,width-4,1,SHADOW)
-                p.fill(x+2,top+5,width-4,1,LIGHT)
+                p.fill(x+2,top+(3 if menu=='Edit' else 4),width-4,1,SHADOW)
+                p.fill(x+2,top+(4 if menu=='Edit' else 5),width-4,1,LIGHT)
                 top += 9
                 continue
             label, shortcut, command, enabled = row
@@ -953,13 +1048,15 @@ class Shell(Gtk.Window):
             if selected:
                 p.fill(x+2,top,width-4,17,NAVY)
             color = LIGHT if selected else BLACK if enabled else SHADOW
-            if not enabled:
-                p.text(label,x+25,top+1,LIGHT)
-                p.text(shortcut,x+107,top+1,LIGHT)
+            tx,ty=(-1,1) if menu=='Edit' else (0,0)
             mnemonic={'new-folder':'n','trash':'d','rename':'m','properties':'r','close':'c',
-                      'undo':'u','cut':'t','copy':'c','paste':'p','select-all':'a','invert':'i'}.get(command)
-            p.menu_text(label,x+24,top,color,mnemonic)
-            p.text(shortcut,x+106,top,color)
+                      'undo':'u','cut':'t','copy':'c','paste':'p','paste-shortcut':6,'select-all':'a','invert':'i'}.get(command)
+            if not enabled:
+                p.menu_text(label,x+25+tx,top+1+ty,LIGHT,mnemonic)
+                p.text(shortcut,x+107+tx,top+1+ty,LIGHT)
+            if command=='open':p.text(label,x+24,top,color,bold=True)
+            else:p.menu_text(label,x+24+tx,top+ty,color,mnemonic)
+            p.text(shortcut,x+106+tx,top+ty,color)
             if action:
                 self.drive_menu_rows.append((x+2,top,command,action))
             top += 17
@@ -1096,9 +1193,11 @@ class Shell(Gtk.Window):
         elif kind=='drive-edit':
             self.drive_edit(*action[1:])
         elif kind=='drive-entry':
-            self.open_drive_entry(*action[1:])
+            self.open_drive_entry(*action[1:],new_window=bool(event and getattr(event,'state',0)&Gdk.ModifierType.SHIFT_MASK))
         elif kind=='drive-navigate':
             self.navigate_drive(*action[1:])
+        elif kind=='info-scroll':
+            action[1].info_scroll=max(0,min(action[1].info_scroll_max,action[1].info_scroll+action[2]))
         elif kind=='drive-scroll':
             browser = self.browser_for(action[1])
             browser.scroll += action[2]
@@ -1156,7 +1255,16 @@ class Shell(Gtk.Window):
                 window.present()
         elif kind=='item':
             win, target, label, point = action[1:]
+            previous=self.item_selection
+            win.focus_item=label
+            win.info_scroll=0
             self.item_selection = (win, label)
+            if win.kind=='computer' and event and getattr(event,'state',0)&Gdk.ModifierType.CONTROL_MASK:
+                if previous==(win,None):self.item_selection=(win,'Control Panel' if label=='(C:)' else '(C:)')
+                elif previous==(win,label):self.item_selection=None
+                elif previous and previous[0] is win:self.item_selection=(win,None)
+            elif win.kind=='computer' and event and getattr(event,'state',0)&Gdk.ModifierType.SHIFT_MASK and previous and previous[0] is win:
+                self.item_selection=(win,None)
             self.state.selection = None
             if win.kind == 'recycle':
                 self.trash_selection = {target[1]}
@@ -1169,7 +1277,7 @@ class Shell(Gtk.Window):
                 if isinstance(target, tuple):
                     self.action(target)
                 else:
-                    self.open(target)
+                    self.navigate_namespace(win,target,new_window=bool(getattr(event,'state',0)&Gdk.ModifierType.SHIFT_MASK)) if win.kind in ('computer','control') else self.open(target)
             elif event and event.button == 1 and win.kind == 'drive':
                 self.state.windows.remove(win)
                 self.state.windows.append(win)
@@ -1293,7 +1401,7 @@ class Shell(Gtk.Window):
             menu,offset=action[2:] if kind=='window-menu' else ('File',7)
             self.drive_menu_highlight = None
             left = offset-8 if win.kind == 'drive' and menu == 'Edit' else offset-9 if menu == 'File' else offset-5
-            dx,dy=(-4,-5) if win.kind=='computer' and win.restored_bounds is not None else (0,0)
+            dx,dy=(-4,-5) if win.kind in ('computer','control') and win.restored_bounds is not None else (0,0)
             self.popup=(win.x+left+dx,win.y+explorer_chrome.POPUP_TOP+dy,(win,menu))
         elif kind=='computer-view-toggle':
             setattr(action[1],action[2],not getattr(action[1],action[2]))
@@ -1307,13 +1415,19 @@ class Shell(Gtk.Window):
             elif command=='properties':
                 if self.item_selection==(win,'(C:)'):
                     self.action(('computer-menu',win,'properties'))
-                elif not self.item_selection or self.item_selection[0] is not win:
+                elif self.item_selection==(win,'Display'):
+                    self.open('display')
+                elif win.kind=='computer' and (not self.item_selection or self.item_selection[0] is not win):
                     self.state.open('system')
-            elif command in ('back','up'):
-                pass  # My Computer is the namespace root.
+            elif command=='back':
+                self.navigate_history(win,True)
+            elif command=='forward':
+                self.navigate_history(win,False)
+            elif command=='up' and win.kind=='control':
+                self.navigate_namespace(win,'computer')
         elif kind=='explorer-address':
             self.address_window=action[1]
-            self.address_text='My Computer'
+            self.address_text=action[1].title
             self.address_entry.text=self.address_text
             self.address_entry.select_all()
         elif kind=='explorer-locations':
@@ -1323,8 +1437,20 @@ class Shell(Gtk.Window):
             self.popup=None
             if action[2]=='offline':
                 self.work_offline=not self.work_offline
+            elif action[2] in ('open','explore'):
+                selection=self.item_selection[1] if self.item_selection and self.item_selection[0] is action[1] else None
+                labels=(selection,) if selection else (('Display',) if action[1].kind=='control' else ('(C:)','Control Panel'))
+                for label in labels:
+                    self.navigate_namespace(action[1],{'(C:)':'drive','Control Panel':'control','Display':'display'}[label],new_window=action[2]=='explore' or len(labels)>1)
+            elif action[2]=='find':
+                self.action(('find',))
+            elif action[2]=='format':
+                from win95lx.apps.dialogs import message_box
+                message_box(self,'Format',"Windows cannot format this drive because it is in use.",Gtk.MessageType.ERROR)
             elif action[2]=='computer':
                 self.item_selection=None
+            elif action[2]=='properties' and self.item_selection==(action[1],'Display'):
+                self.open('display')
             elif action[2]=='properties' and self.item_selection and self.item_selection==(action[1],'(C:)'):
                 import shutil
                 from win95lx.apps.dialogs import message_box
@@ -1332,11 +1458,11 @@ class Shell(Gtk.Window):
                 message_box(self,'(C:) Properties',f'Type: Local Disk\nUsed space: {usage.used:,} bytes\nFree space: {usage.free:,} bytes\nCapacity: {usage.total:,} bytes',Gtk.MessageType.INFO)
             elif action[2]=='shortcut' and self.item_selection and self.item_selection[0] is action[1]:
                 from win95lx.apps.dialogs import message_box, YES_NO
-                answer=message_box(self,'Create Shortcut','Windows cannot create a shortcut here. Do you want the shortcut to be placed on the desktop instead?',Gtk.MessageType.QUESTION,YES_NO,Gtk.ResponseType.YES)
+                answer=message_box(self,'Shortcut','Windows cannot create a shortcut here.\nDo you want the shortcut to be placed on the desktop instead?',Gtk.MessageType.QUESTION,YES_NO,Gtk.ResponseType.YES,profile='shortcut')
                 if answer==Gtk.ResponseType.YES:
                     from win95lx.explorer.namespace import create_shortcut
                     try:
-                        labels=(self.item_selection[1],) if self.item_selection[1] else ('(C:)','Control Panel')
+                        labels=(self.item_selection[1],) if self.item_selection[1] else (('Display',) if action[1].kind=='control' else ('(C:)','Control Panel'))
                         for label in labels:create_shortcut(self.desktop_folder,label)
                         self.refresh_desktop_files()
                     except (OSError,KeyError) as error:
@@ -1712,6 +1838,11 @@ class Shell(Gtk.Window):
         if self.pointer_scale != 1:
             event = ScaledPointer(event, self.pointer_scale)
         win = self.state.active
+        if win and win.kind in ('computer','control') and win.web_view and not self.state.start_open and not self.state.dialog and not self.popup:
+            left,top,width,height=computer_view.geometry(win)
+            if left<=event.x<left+width*.3 and top+118<=event.y<top+height-24 and event.direction in (Gdk.ScrollDirection.UP,Gdk.ScrollDirection.DOWN):
+                self.action(('info-scroll',win,-39 if event.direction==Gdk.ScrollDirection.UP else 39))
+                return True
         if (win and win.kind=='drive' and not self.state.start_open and not self.state.dialog
                 and win.x <= event.x < win.x+win.width
                 and win.y+explorer_chrome.PANE_Y <= event.y < win.y+win.height-explorer_chrome.PANE_BOTTOM
@@ -2100,7 +2231,7 @@ class Shell(Gtk.Window):
             win,dx,dy=self.drag;win.x=max(0,min(int(event.x-dx),self.width-80));win.y=max(0,min(int(event.y-dy),self.height-55));self.area.queue_draw()
         elif self.is_drive_menu_open():
             self.drive_menu_highlight = next((command for x,y,command,_ in self.drive_menu_rows
-                                              if x <= event.x < x+(118 if self.popup[2][0].kind=='computer' else 152) and y <= event.y < y+17), None)
+                                              if x <= event.x < x+(118 if self.popup[2][0].kind in ('computer','control') else 152) and y <= event.y < y+17), None)
             self.area.queue_draw()
         elif self.state.start_open:
             for depth, (x, y, width, height) in reversed(list(enumerate(self.submenu_geometry()))):
@@ -2125,26 +2256,26 @@ class Shell(Gtk.Window):
         if not self.popup:
             return False
         context = self.popup[2]
-        return isinstance(context, tuple) and (context[0].kind == 'drive' and context[1] in ('Edit','File','Item') or context[0].kind == 'computer' and context[1]=='File')
+        return isinstance(context, tuple) and (context[0].kind == 'drive' and context[1] in ('Edit','File','Item') or context[0].kind in ('computer','control') and context[1]=='File')
 
     def drive_menu_key(self, name, alt):
         win = self.state.active
-        if not win or win.kind not in ('drive','computer') or self.state.dialog or self.state.start_open:
+        if not win or win.kind not in ('drive','computer','control') or self.state.dialog or self.state.start_open:
             return False
         if alt and name.lower() in (('e','f') if win.kind=='drive' else ('f',)):
             label, offset = ('Edit',55) if name.lower() == 'e' else ('File',24)
             self.action(('window-menu',win,label,offset))
-            if win.kind=='computer':
+            if win.kind in ('computer','control'):
                 selection=(self.item_selection[1] or '*') if self.item_selection and self.item_selection[0] is win else None
-                self.drive_menu_highlight=next(row.command for row in explorer_menu.computer_file_rows(self.work_offline,selection) if row and row.enabled)
+                self.drive_menu_highlight=next(row.command for row in self.namespace_file_rows(win) if row and row.enabled)
             else:
                 self.drive_menu_highlight = 'new-folder' if label=='File' else 'undo'
             return True
         if alt or not self.is_drive_menu_open():
             return False
-        if win.kind=='computer' and len(name)==1:
+        if win.kind in ('computer','control') and len(name)==1:
             selection=(self.item_selection[1] or '*') if self.item_selection and self.item_selection[0] is win else None
-            row=next((row for row in explorer_menu.computer_file_rows(self.work_offline,selection)
+            row=next((row for row in self.namespace_file_rows(win)
                       if row and row.enabled and row.mnemonic==name.lower()),None)
             if row:
                 self.action(('close',win) if row.command=='close' else ('computer-menu',win,row.command))

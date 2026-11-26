@@ -197,6 +197,20 @@ def main():
             shell.action(('close',win))
             shell.open('display')
             assert shell.pending_display.tray
+            # A fresh shell must respect the saved preference, not reapply its default.
+            restarted=Shell(args.assets)
+            restarted.show_all();flush_draws(Gtk)
+            image=cairo.ImageSurface(cairo.FORMAT_RGB24,restarted.width,restarted.height)
+            restarted.draw(restarted.area,cairo.Context(image))
+            image.write_to_png(str(args.output/'tray-restarted-enabled.png'))
+            assert restarted.display_preferences.tray
+            assert any(action==('display-tray-open',) for *_,action in restarted.hits)
+            restarted.disconnect_by_func(Gtk.main_quit);restarted.destroy()
+            shell.action(('display-tray',))
+            shell.action(('resolution-apply',shell.state.active,False))
+            assert not DisplayPreferences.load(shell.display_preferences_path).tray
+            render('tray-disabled-after-apply')
+            assert not any(action==('display-tray-open',) for *_,action in shell.hits)
 
         @scenario('S1-005 full rendered palette color counts')
         def palettes():

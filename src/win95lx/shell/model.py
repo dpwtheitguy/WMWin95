@@ -1,5 +1,5 @@
 """UI state independent of GTK. Prototype geometry remains unmeasured."""
-from dataclasses import dataclass
+from dataclasses import dataclass,field
 from pathlib import Path
 @dataclass
 class Window:
@@ -16,6 +16,11 @@ class Window:
     toolbar: bool = True
     address_bar: bool = True
     web_view: bool = True
+    focus_item: str | None = None
+    info_scroll: int = 0
+    info_scroll_max: int = 0
+    back_history: list = field(default_factory=list)
+    forward_history: list = field(default_factory=list)
 class DesktopState:
     def __init__(self):
         self.windows=[];self.start_open=False;self.menu_index=0;self.selection=None;self.dialog=None

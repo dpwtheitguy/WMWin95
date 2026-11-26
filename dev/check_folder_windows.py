@@ -41,6 +41,9 @@ def main():
         for index in range(40):
             (root/'Source'/f'z{index:02d}.txt').write_text(str(index))
         shell = Shell(args.assets)
+        # This suite deliberately covers the explicit separate-window mode.
+        from win95lx.explorer.browsing import BrowsingPreferences
+        shell.browsing_preferences=BrowsingPreferences(single_window=False)
         shell._drive = DriveBrowser(root)
         shell.desktop_folder = root/'Desktop'
         shell.refresh_desktop_files()
