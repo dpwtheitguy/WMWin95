@@ -1,6 +1,7 @@
 """Classic captions for GTK accessories in the standalone X11 session."""
 
 from importlib import import_module
+from pathlib import Path
 
 from gi.repository import Gdk, GdkPixbuf, GLib, Gtk, GObject
 
@@ -21,6 +22,70 @@ APPLICATIONS = {
     'calc': ('calculator', 'build_window'),
     'winmine': ('minesweeper', 'build_window'),
 }
+
+# Explicit GTK gadget-node backgrounds prevent theme white/transparent troughs.
+# The generated RGB tile is checked as actual GTK pixels at1x/2x scale.
+# Default gray stipple is a requested policy; some reference versions
+# expose white tracks and must be recorded as explicit visual exceptions.
+def _scrollbar_style():
+    roots=('scrollbar.win95-app-scrollbar','.win95-scrollbars scrollbar','scrollbar.notepad-scrollbar','.win95-wordpad scrollbar','.win95-file scrollbar','.win95-native-file scrollbar')
+    resource=Path(__file__).parent/'resources/scrollbar-track.png'
+    double=resource.with_name('scrollbar-track@2.png')
+    image='-gtk-scaled(url("'+resource.as_uri()+'"),url("'+double.as_uri()+'"))' if resource.is_file() and double.is_file() else 'none'
+    def rule(suffix,body):return ', '.join(root+suffix for root in roots)+' {'+body+'}\n'
+    css=rule('', '-GtkScrollbar-has-backward-stepper:true;-GtkScrollbar-has-forward-stepper:true;border:0;padding:0;margin:0;border-radius:0;opacity:1;transition:none;animation:none;')
+    background='background-color:#c0c0c0;background-image:'+image+';background-repeat:repeat;background-size:2px 2px;border-radius:0;box-shadow:none;opacity:1;transition:none;animation:none;'
+    for suffix in ('',' contents',' trough'):css+=rule(suffix,background)
+    css+=rule(' slider','background:#c0c0c0;border:1px solid;border-color:#fff #000 #000 #fff;border-radius:0;box-shadow:inset -1px -1px #808080;min-width:6px;min-height:6px;margin:0;padding:0;opacity:1;transition:none;animation:none;')
+    css+=rule(' button','background:#c0c0c0;color:#000;border:1px solid;border-color:#fff #000 #000 #fff;border-radius:0;box-shadow:inset -1px -1px #808080;min-width:14px;min-height:14px;margin:0;padding:0;opacity:1;transition:none;animation:none;')
+    css+=rule(' button:disabled','color:#808080;opacity:1;')
+    css+=rule('.win95-unscrollable slider','background:none;border-color:transparent;box-shadow:none;opacity:0;')
+    css+=rule('.win95-unscrollable button','color:#808080;')
+    css+=rule(' button:active','border-color:#808080 #fff #fff #808080;box-shadow:inset 1px 1px #000;')
+    css+=rule('.vertical','min-width:16px;')+rule('.horizontal','min-height:16px;')
+    css+=rule('.vertical slider','min-width:14px;')+rule('.horizontal slider','min-height:14px;')
+    # Explicit native IE4 profiles: exposed tracks measured solid white in
+    # Notepad, WordPad and the common file dialog. Do not infer all controls
+    # share one color just because the global default is stippled gray.
+    white=('scrollbar.notepad-scrollbar','.win95-wordpad scrollbar','.win95-file scrollbar','.win95-native-file scrollbar')
+    for suffix in ('',' contents',' trough'):
+        css+=', '.join(root+suffix for root in white)+' {background-color:#fff;background-image:none;}\n'
+    return css.encode()
+
+SCROLLBAR_STYLE=_scrollbar_style()
+
+def style_scrollbars(scroller):
+    """Track native no-range appearance without disabling a text editor.
+
+    GTK does not mark a range with upper==page_size insensitive: its slider
+    fills the track. Native editors hide that thumb. Adjustment changes update
+    only a CSS class; value changes do not cause repeated style invalidations.
+    """
+    if getattr(scroller,'_win95_scrollbar_styled',False):return
+    scroller._win95_scrollbar_styled=True;bindings=[];notify=[]
+    scroller._win95_scrollbar_connections=bindings
+    def update(*_):
+        for bar,adjustment in ((scroller.get_hscrollbar(),scroller.get_hadjustment()),(scroller.get_vscrollbar(),scroller.get_vadjustment())):
+            context=bar.get_style_context();context.add_class('win95-app-scrollbar')
+            absent=adjustment.get_upper()-adjustment.get_lower()<=adjustment.get_page_size()+1e-9
+            if absent and not context.has_class('win95-unscrollable'):context.add_class('win95-unscrollable')
+            elif not absent and context.has_class('win95-unscrollable'):context.remove_class('win95-unscrollable')
+    def clear():
+        for adjustment,handler in bindings:
+            if adjustment.handler_is_connected(handler):adjustment.disconnect(handler)
+        bindings.clear()
+    def bind(*_):
+        clear()
+        for adjustment in(scroller.get_hadjustment(),scroller.get_vadjustment()):bindings.append((adjustment,adjustment.connect('changed',update)))
+        update()
+    def cleanup(*_):
+        clear()
+        for handler in notify:
+            if scroller.handler_is_connected(handler):scroller.disconnect(handler)
+        notify.clear();scroller._win95_scrollbar_styled=False
+    notify.extend(scroller.connect('notify::'+name,bind)for name in('hadjustment','vadjustment'))
+    scroller.connect('destroy',cleanup);bind()
+
 
 MENU_STYLE = b"""
 .win95-app-menubar, .win95-app-menu {
@@ -68,7 +133,7 @@ MENU_STYLE = b"""
 }
 .win95-app-menu > menuitem > check:not(:checked) { opacity: 0; }
 cursor-handle { opacity: 0; }
-""".replace(b"@GUTTER@", str(POPUP_GUTTER-1).encode())
+""".replace(b"@GUTTER@", str(POPUP_GUTTER-1).encode()) + SCROLLBAR_STYLE
 
 
 _menu_sound_hook=None
@@ -126,6 +191,9 @@ def install_menu_style(screen):
 
 
 def build(kind, shell):
+    if kind=='accessibility':
+        from win95lx.apps.accessibility import AccessibilityWindow
+        return AccessibilityWindow(shell)
     if kind=='fonts':
         from win95lx.apps.fonts import FontsWindow
         return FontsWindow(shell)

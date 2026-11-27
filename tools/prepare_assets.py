@@ -465,6 +465,10 @@ from stage_sound_library import stage as stage_sound_library
 records.extend(stage_sound_library(output))
 from stage_command_button_assets import stage as stage_command_button_assets
 records.extend(stage_command_button_assets(output))
+from stage_accessibility_assets import stage as stage_accessibility_assets
+records.extend(stage_accessibility_assets(output))
+from stage_printers_assets import stage as stage_printers_assets
+records.extend(stage_printers_assets(output))
 from stage_fonts_assets import stage as stage_fonts_assets
 records.extend(stage_fonts_assets(output))
 from collect_font_library import collect as collect_font_library

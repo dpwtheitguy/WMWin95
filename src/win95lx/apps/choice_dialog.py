@@ -4,6 +4,7 @@ from gi.repository import Gtk,Gdk
 from win95lx.shell.widgets import Painter,BLACK,LIGHT,NAVY,FACE,SHADOW
 from win95lx.shell.scrollbar import VerticalScrollbar
 from win95lx.shell.command_button import draw_command_button
+from win95lx.apps.popup_events import dismiss_and_replay,local_point
 
 class ChoicePopup(Gtk.Window):
     def __init__(self,parent,rect,choices,value,callback):
@@ -18,7 +19,14 @@ class ChoicePopup(Gtk.Window):
         self.area.add_events(Gdk.EventMask.BUTTON_PRESS_MASK|Gdk.EventMask.POINTER_MOTION_MASK|Gdk.EventMask.SCROLL_MASK)
         self.area.connect('draw',self.draw);self.area.connect('button-press-event',self.press);self.area.connect('motion-notify-event',self.motion);self.area.connect('scroll-event',self.wheel)
         self.connect('realize',lambda *_:self.get_window().set_cursor(self.shell.cursor_for('arrow')))
-        self.connect('key-press-event',self.key);self.connect('focus-out-event',lambda *_:self.finish(None))
+        # GTK redirects an outside click to the grabbed Window, not its child
+        # DrawingArea. Listening only on the area leaves the popup trapped.
+        self.connect('button-press-event',self.press)
+        self.connect('key-press-event',self.key)
+        self.connect('focus-out-event',lambda *_:self.finish(None,restore_focus=False))
+        self.connect('grab-broken-event',lambda *_:self.finish(None,restore_focus=False))
+        self.connect('destroy',self.cleanup)
+        self.parent_destroy=self.parent.connect('destroy',lambda *_:self.finish(None,restore_focus=False))
         self.show_all();self.grab_add();self.present();self.get_window().focus(Gdk.CURRENT_TIME)
     def draw(self,_area,cr):
         p=Painter(cr,self.shell.font);p.fill(0,0,self.width,self.height,BLACK);p.fill(1,1,self.width-2,self.height-2,LIGHT)
@@ -29,27 +37,49 @@ class ChoicePopup(Gtk.Window):
             p.text(label,3,y,LIGHT if selected else BLACK)
         if gutter:VerticalScrollbar(self.height-2,len(self.choices)-self.visible).draw(p,self.width-17,1,self.scroll)
         return False
-    def finish(self,value):
+    def cleanup(self,*_):
+        self.finished=True
+        if self.has_grab():self.grab_remove()
+        handler=getattr(self,'parent_destroy',None)
+        if handler and self.parent is not None and self.parent.handler_is_connected(handler):self.parent.disconnect(handler)
+        self.parent_destroy=None;self.callback=None;self.parent=None
+    def finish(self,value,*,restore_focus=True):
         if self.finished:return False
-        self.finished=True;self.grab_remove();self.destroy();self.parent.present()
-        if value is not None:self.callback(value)
+        parent,callback=self.parent,self.callback
+        self.finished=True;self.cleanup();self.destroy()
+        if restore_focus and parent.get_visible():parent.present()
+        if value is not None and parent.get_visible():callback(value)
         return False
+    def outside(self,event):
+        # Preserve the initiating click: after removing the GTK grab, dispatch
+        # it to the actual window under the pointer, then its normal release.
+        return dismiss_and_replay(event,lambda:self.finish(None,restore_focus=False))
     def press(self,_area,event):
+        if self.finished:return True
+        local_x,local_y=local_point(self,event)
+        if not 0<=local_x<self.width or not 0<=local_y<self.height:return self.outside(event)
         if event.button!=1:return self.finish(None)
-        if not 0<=event.x<self.width or not 0<=event.y<self.height:return self.finish(None)
-        if len(self.choices)>self.visible and event.x>=self.width-17:
-            delta=-1 if event.y<17 else 1 if event.y>=self.height-17 else self.visible*(-1 if event.y<self.height/2 else 1)
+        if len(self.choices)>self.visible and local_x>=self.width-17:
+            delta=-1 if local_y<17 else 1 if local_y>=self.height-17 else self.visible*(-1 if local_y<self.height/2 else 1)
             self.scroll=max(0,min(len(self.choices)-self.visible,self.scroll+delta));self.area.queue_draw();return True
-        index=self.scroll+int((event.y-1)//13)
+        index=self.scroll+int((local_y-1)//13)
         if 0<=index<len(self.choices):self.finish(index)
         return True
     def motion(self,_area,event):
-        if 1<=event.y<self.height-1 and 1<=event.x<self.width-17:
+        if self.finished:return True
+        gutter=16 if len(self.choices)>self.visible else 0
+        if 1<=event.y<self.height-1 and 1<=event.x<self.width-1-gutter:
             self.value=self.scroll+int((event.y-1)//13);self.area.queue_draw()
     def wheel(self,_area,event):
+        if self.finished:return True
         self.scroll=max(0,min(len(self.choices)-self.visible,self.scroll+(1 if event.direction==Gdk.ScrollDirection.DOWN else -1)));self.area.queue_draw();return True
     def key(self,_window,event):
+        if self.finished:return True
         name=Gdk.keyval_name(event.keyval)
+        if name in ('Tab','ISO_Left_Tab'):
+            parent=self.parent;self.finish(self.value);parent.key(parent,event);return True
+        if name=='Escape' and getattr(event,'state',0)&Gdk.ModifierType.CONTROL_MASK or name=='F4' and getattr(event,'state',0)&Gdk.ModifierType.MOD1_MASK:
+            parent=self.parent;self.finish(None,restore_focus=False);parent.key(parent,event);return True
         if name in ('Escape','F4'):return self.finish(None)
         if name in ('Return','KP_Enter','space'):return self.finish(self.value)
         if name in ('Up','Down','Home','End','Page_Up','Page_Down'):
@@ -88,7 +118,7 @@ class LanguageDialog(Gtk.Dialog):
         return True
     def key(self,_window,event):
         name=Gdk.keyval_name(event.keyval)
-        if name=='Escape' and event.state&Gdk.ModifierType.CONTROL_MASK:
+        if name=='Escape' and getattr(event,'state',0)&Gdk.ModifierType.CONTROL_MASK:
             self.shell.key(self.shell,event);return True
         if name=='Escape':self.response(Gtk.ResponseType.CANCEL);return True
         if name in ('Return','KP_Enter'):self.response(Gtk.ResponseType.CANCEL if self.focus==2 else Gtk.ResponseType.OK);return True

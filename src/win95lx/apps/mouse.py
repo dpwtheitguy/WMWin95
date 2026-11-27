@@ -7,6 +7,7 @@ from gi.repository import Gtk,Gdk,GdkPixbuf,GLib
 from win95lx.control_panel.mouse_preferences import MouseController,MousePreferences,X11Mouse,SCHEMES,ROLES
 from win95lx.shell.widgets import Painter,FACE,BLACK,LIGHT,NAVY,SHADOW
 from win95lx.shell.combo_box import ComboBox
+from win95lx.shell.command_button import draw_command_button,parse_label,resolve_default
 
 class MouseWindow(Gtk.Window):
     def __init__(self,shell,backend=None):
@@ -16,6 +17,7 @@ class MouseWindow(Gtk.Window):
         self.controller=MouseController(Path.home()/'.config/win95lx/mouse.json',backend or X11Mouse(),self.apply_session)
         self.tab=0;self.role=0;self.scroll=0;self.hits=[];self.focus=0;self.focus_action=('hand',False);self.pressed=None;self.dragging=None;self.caption_active=True;self.caption_drag=None;self.test_open=False;self.last_test_click=None;self.animation_frame=None;self.animation_timer=None
         self.animation=[cairo.ImageSurface.create_from_png(str(self.assets/f'mouse-test-{index:02}.png')) for index in range(32)]
+        self.button_specs=[];self.command_actions=set();self.command_mnemonics={};self.press_inside=True;self.default_command=None
         self.scheme_choices=shell.pointer_library.names;self.scheme_scroll=0;self.scheme_drag=None
         if self.controller.pending.scheme not in self.scheme_choices:self.controller.pending=replace(self.controller.pending,scheme='(None)')
         self.combo=ComboBox(self.scheme_choices,self.scheme_choices.index(self.controller.pending.scheme));self.preview_cache={}
@@ -43,10 +45,10 @@ class MouseWindow(Gtk.Window):
         self.controller.pending=replace(self.controller.pending,**kwargs);self.area.queue_draw()
     def hit(self,rect,action):self.hits.append((rect,action))
     def button(self,p,label,rect,action,enabled=True):
-        if enabled:self.hit(rect,action)
-        p.button(label,*rect,pressed=self.pressed==action)
-        if not enabled:
-            x,y,w,h=rect;p.fill(x+3,y+3,w-6,h-6,FACE);p.text(label,x+(w-p.font.width(label))//2+1,y+6,LIGHT);p.text(label,x+(w-p.font.width(label))//2,y+5,SHADOW)
+        # Defer all command painting until the complete enabled/default set is
+        # known. The source frame's old default border is replaced inside HWND.
+        self.button_specs.append((label,rect,action,enabled))
+        if enabled:self.hit(rect,action);self.command_actions.add(action)
     def sprite(self,p,frame,source,x,y):
         sx,sy,w,h=source;p.cr.save();p.cr.rectangle(x,y,w,h);p.cr.clip();p.image(frame,x-sx,y-sy);p.cr.restore()
     def slider(self,p,frame,rect,value,default,thumb,maximum=10):
@@ -73,14 +75,15 @@ class MouseWindow(Gtk.Window):
             self.preview_cache[key]=im
         return self.preview_cache[key]
     def draw(self,_widget,cr):
-        self.hits=[];p=Painter(cr,self.shell.font);prefs=self.controller.pending;frame=self.frames[('buttons','pointers','motion','general')[self.tab]];p.image(frame,0,0)
+        self.hits=[];self.button_specs=[];self.command_actions=set();self.command_mnemonics={};p=Painter(cr,self.shell.font);prefs=self.controller.pending;frame=self.frames[('buttons','pointers','motion','general')[self.tab]];p.image(frame,0,0)
         if not self.caption_active:
             p.fill(3,3,398,17,SHADOW);p.text('Mouse Properties',5,4,LIGHT,bold=True)
             self.sprite(p,frame,(365,4,16,15),365,4);self.sprite(p,frame,(383,4,16,15),383,4)
         for index,(x,w) in enumerate(((10,49),(59,52),(111,43),(154,48))):self.hit((x,29,w,22),('tab',index))
         self.hit((383,4,16,15),('cancel',));self.hit((365,4,16,15),('help',));self.hit((3,3,359,20),('caption',))
-        self.hit((158,415,75,23),('ok',));self.hit((239,415,75,23),('cancel',))
-        if prefs!=self.controller.applied:self.button(p,'Apply',(320,415,75,23),('apply',))
+        self.button(p,'OK',(158,415,75,23),('ok',))
+        self.button(p,'Cancel',(239,415,75,23),('cancel',))
+        self.button(p,'&Apply',(320,415,75,23),('apply',),prefs!=self.controller.applied)
         if self.tab==0:
             for left,xx in ((False,34),(True,134)):
                 self.hit((xx,85,99,20),('hand',left))
@@ -108,37 +111,47 @@ class MouseWindow(Gtk.Window):
             from win95lx.shell.scrollbar import VerticalScrollbar
             bar=VerticalScrollbar(205,len(ROLES)-6,thumb=74)
             def artwork(painter,x,y,part):self.sprite(painter,frame,{'up':(362,157,16,16),'down':(362,346,16,16),'thumb':(362,173,16,74)}[part],x,y)
-            bar.draw(p,362,157,self.scroll,artwork)
+            bar.draw(p,362,157,self.scroll,artwork,track="window")
             thumb_top=157+bar.thumb_top(self.scroll)
             self.hit((362,173,16,max(0,thumb_top-173)),('scroll',-6))
             self.hit((362,thumb_top+74,16,max(0,346-thumb_top-74)),('scroll',6))
             self.hit((362,thumb_top,16,74),('pointer-thumb',))
             self.hit((362,157,16,16),('scroll',-1));self.hit((362,346,16,16),('scroll',1))
-            self.button(p,'Browse...',(304,370,75,23),('browse',))
-            self.button(p,'Use Default',(223,370,75,23),('default',),ROLES[self.role][0] in prefs.overrides)
+            self.button(p,'&Browse...',(304,370,75,23),('browse',))
+            self.button(p,'Use De&fault',(223,370,75,23),('default',),ROLES[self.role][0] in prefs.overrides)
             # Custom scheme management is not yet accepted; retain disabled controls.
-            self.button(p,'Save As...',(124,114,75,23),('save-scheme',),False)
-            self.button(p,'Delete',(205,114,75,23),('delete-scheme',),False)
-            if self.combo.expanded:
-                from win95lx.shell.scrollbar import VerticalScrollbar
-                visible=ComboBox(self.scheme_choices[self.scheme_scroll:self.scheme_scroll+12],self.combo.value-self.scheme_scroll)
-                visible.draw_list(p,34,85,230)
-                VerticalScrollbar(158,max(0,len(self.scheme_choices)-12),thumb=47).draw(p,264,106,self.scheme_scroll)
+            self.button(p,'Sa&ve As...',(124,114,75,23),('save-scheme',),False)
+            self.button(p,'&Delete',(205,114,75,23),('delete-scheme',),False)
         elif self.tab==2:
             self.hit((134,94,184,27),('speed',));self.slider(p,frame,(134,94,184,23),prefs.speed-1,4,(221,94,11,23),9)
             # X11 has no core pointer-trails equivalent; do not fake a global setting.
             p.fill(97,180,13,13,FACE);p.bevel(97,180,13,13,True);p.text('Show pointer trails',119,180,SHADOW)
         else:
             p.fill(26,134,269,19,FACE);p.text('System pointing device',28,135)
-            self.button(p,'Change...',(304,132,75,23),('driver',),False)
+            self.button(p,'&Change...',(304,132,75,23),('driver',),False)
         if self.focus_action!=('hand',False):
             if self.tab==0:
                 for rect in ((50,88,69,1),(50,101,69,1),(50,88,1,14),(118,88,1,14)):p.fill(*rect,FACE)
             for (x,y,w,h),action in self.hits:
-                if action==self.focus_action and action[0]!='caption':
+                if action==self.focus_action and action[0]!='caption' and action not in self.command_actions:
                     for xx in range(x+3,x+w-3,2):p.fill(xx,y+3,1,1,BLACK);p.fill(xx,y+h-4,1,1,BLACK)
                     for yy in range(y+3,y+h-3,2):p.fill(x+3,yy,1,1,BLACK);p.fill(x+w-4,yy,1,1,BLACK)
+        self.draw_commands(p)
+        if self.tab==1 and self.combo.expanded:
+            from win95lx.shell.scrollbar import VerticalScrollbar
+            visible=ComboBox(self.scheme_choices[self.scheme_scroll:self.scheme_scroll+12],self.combo.value-self.scheme_scroll)
+            visible.draw_list(p,34,85,230)
+            VerticalScrollbar(158,max(0,len(self.scheme_choices)-12),thumb=47).draw(p,264,106,self.scheme_scroll)
         return False
+    def draw_commands(self,p):
+        enabled={action:active for _,_,action,active in self.button_specs}
+        self.default_command=resolve_default(('ok',),self.focus_action,enabled)
+        for label,rect,action,active in self.button_specs:
+            draw_command_button(p,label,rect,enabled=active,default=action==self.default_command,
+                                focused=self.caption_active and action==self.focus_action,
+                                pressed=action==self.pressed and self.press_inside)
+            text,index=parse_label(label)
+            if active and index is not None:self.command_mnemonics[text[index].casefold()]=action
     def action(self,action):
         kind=action[0]
         if kind=='tab':
@@ -193,7 +206,7 @@ class MouseWindow(Gtk.Window):
             if x<=e.x<x+w and y<=e.y<y+h:
                 if action[0]=='caption':
                     x,y=self.get_position();self.caption_drag=(e.x_root-x,e.y_root-y);return True
-                self.focus_action=action;self.pressed=action
+                self.focus_action=action;self.pressed=action;self.press_inside=True
                 if action[0]=='pointer-thumb':
                     from win95lx.shell.scrollbar import VerticalScrollbar
                     self.dragging=('pointer-thumb',e.y-157-VerticalScrollbar(205,len(ROLES)-6,thumb=74).thumb_top(self.scroll))
@@ -210,6 +223,9 @@ class MouseWindow(Gtk.Window):
         if action and any(a==action and x<=e.x<x+w and y<=e.y<y+h for (x,y,w,h),a in self.hits):self.action(action)
         self.area.queue_draw();return True
     def motion(self,_area,e):
+        if self.pressed in self.command_actions:
+            inside=any(a==self.pressed and x<=e.x<x+w and y<=e.y<y+h for (x,y,w,h),a in self.hits)
+            if inside!=self.press_inside:self.press_inside=inside;self.area.queue_draw()
         if self.scheme_drag is not None:
             from win95lx.shell.scrollbar import VerticalScrollbar
             self.scheme_scroll=VerticalScrollbar(158,len(self.scheme_choices)-12,thumb=47).value_at(e.y-106-self.scheme_drag);self.area.queue_draw();return
@@ -249,6 +265,9 @@ class MouseWindow(Gtk.Window):
     def caption_focus(self,active):
         self.caption_active=active;self.area.queue_draw();return False
     def key(self,_window,e):
+        name=Gdk.keyval_name(e.keyval)
+        if e.state&Gdk.ModifierType.MOD1_MASK and name and name.casefold() in self.command_mnemonics:
+            action=self.command_mnemonics[name.casefold()];self.focus_action=action;self.action(action);return True
         if e.state&Gdk.ModifierType.CONTROL_MASK and e.keyval==Gdk.KEY_Escape:
             self.shell.key(self.shell,e);return True
         if e.state&Gdk.ModifierType.MOD1_MASK and e.keyval==Gdk.KEY_F4:self.action(('cancel',));return True
@@ -285,6 +304,6 @@ class MouseWindow(Gtk.Window):
             return True
         if e.keyval in (Gdk.KEY_Return,Gdk.KEY_KP_Enter):
             if self.combo.expanded:self.combo.expanded=False;self.update(scheme=self.scheme_choices[self.combo.value],overrides={})
-            else:self.action(('ok',))
+            else:self.action(self.focus_action if self.focus_action in self.command_actions else ('ok',))
             return True
         return False

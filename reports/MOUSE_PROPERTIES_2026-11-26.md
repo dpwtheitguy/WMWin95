@@ -57,3 +57,7 @@ Acceleration readback does not prove physical response: an absolute VM tablet ma
 The intended visible set is Win95LX plus three Windows references: IE4, pre-IE4 classic and Plus!. The temporary headless probe is stopped. Plus! installed successfully in its own copied disk and rebooted; `plus95-desktop-working` and `plus95-pointer-preview-working` checkpoints are retained. The classic disk completed installation from its repaired local C: setup source. Its 800×600, 256-color desktop and pre-IE4 Explorer/Shell32 versions are verified, with `classic-pre-ie4-verified` saved. See the reference-set report for final status.
 
 Reference launchers default to visible GTK windows. Normal launches preserve the latest disk; restoring a snapshot is an explicit recovery action. Visible instruction-clock references use real-time sleep pacing for meaningful animation comparisons. Copyrighted media, original art, fonts, registry data and VM disks are excluded from Git.
+
+## Typed command follow-up
+
+Mouse command rendering now uses the measured shared renderer with deferred specifications, raw native mnemonics, unique enabled default, disabled-state painting and correct held-pointer/Enter behavior. See `MOUSE_COMMAND_BUTTONS_2026-11-26.md`:64 independent native state cases,11 passing unit tests,61 exact pixel comparisons plus14 recorded behavior groups at each of800×600 and1280×720. Full default Buttons sheet remains zero differences. Source controller/animation/pointer behavior and explicit native white track are retained; other capability gaps above remain open.

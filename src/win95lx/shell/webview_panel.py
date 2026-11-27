@@ -15,7 +15,11 @@ def draw(shell,p,win,left,top,width,height,*,panel_top=88):
     selected=None
     if shell.item_selection and shell.item_selection[0] is win:
         selected=[shell.item_selection[1]] if shell.item_selection[1] is not None else (list(control_labels()) if win.kind=='control' else ['(C:)','Control Panel'])
-    if win.kind=='control':
+    if win.kind=='printers':
+        from win95lx.explorer.webview_details import Details
+        label=selected[0] if selected else None
+        details=Details(label or '',shell.printer_namespace().description(label) if label else 'This folder contains information about your current printers. To see documents waiting to print, open a printer.')
+    elif win.kind=='control':
         from win95lx.explorer.webview_details import Details
         if selected and selected[0]=='Display':details=Details('Display','Changes settings for your display.')
         elif selected and selected[0]=='Mouse':details=Details('Mouse','Changes settings for your mouse.')

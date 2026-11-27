@@ -36,7 +36,7 @@ def stage(output):
         'keyboard':(('speed','language','general'),(66,66,404,448)),
         'regional':(('regional','number','currency','time','date'),(110,110,404,448)),
         'datetime':(('datetime','timezone'),(132,132,404,341)),
-        'system':(('general','devices','hardware-profiles','performance'),(0,0,408,448)),
+        'system':(('general','devices','hardware-profiles','performance'),(0,0,410,448)),
     }
     for applet,(tabs,rect) in definitions.items():
         for tab in tabs:

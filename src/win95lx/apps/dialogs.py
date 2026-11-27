@@ -7,6 +7,7 @@ from gi.repository import Gdk, GdkPixbuf, Gtk, Pango
 import cairo
 
 from win95lx.assets.bitmap import BitmapFont
+from win95lx.shell.accessories import SCROLLBAR_STYLE,style_scrollbars
 from win95lx.shell.widgets import BLACK, FACE, LIGHT, NAVY, Painter
 
 
@@ -35,7 +36,7 @@ STYLE = b"""
 .win95-file entry { min-height: 20px; padding: 0 4px; border: 1px solid #808080; }
 .win95-file treeview:selected { background: #000080; color: white; }
 .win95-file .caption { background: #000080; color: white; font-weight: bold; padding: 2px 4px; }
-"""
+""" + SCROLLBAR_STYLE
 
 
 NATIVE_STYLE = b"""
@@ -53,7 +54,7 @@ NATIVE_STYLE = b"""
     background: #c0c0c0; border: 1px solid; border-color: white black black white;
     border-radius: 0; min-height: 15px; min-width: 12px;
 }
-"""
+""" + SCROLLBAR_STYLE
 
 
 def dialog_art(parent, state):
@@ -158,8 +159,9 @@ class FileDialog(Gtk.Dialog):
         self.view.append_column(Gtk.TreeViewColumn('Name', Gtk.CellRendererText(), text=0))
         self.view.connect('row-activated', self.activate_row)
         self.view.get_selection().connect('changed', self.select_file)
-        scroller = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN, vexpand=True)
+        scroller = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN, vexpand=True, overlay_scrolling=False)
         scroller.add(self.view)
+        style_scrollbars(scroller)
         grid.attach(scroller, 0, 1, 3, 1)
 
         self.filename = Gtk.Entry(text=name)
@@ -221,6 +223,7 @@ class FileDialog(Gtk.Dialog):
         scroll = Gtk.ScrolledWindow(overlay_scrolling=False)
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.add(self.view)
+        style_scrollbars(scroll)
         scroll.set_size_request(403, 133)
         self.fixed.put(scroll, 11, 57)
         self.filename = Gtk.Entry(text=name, width_chars=1)

@@ -48,3 +48,10 @@ def reveal(layout,index):
     if y<sy+layout.header:sy=max(0,y-layout.header)
     elif y+ch>sy+vh:sy=y+ch-vh
     return max(0,min(sx,max(0,layout.extent[0]-vw))),max(0,min(sy,max(0,layout.extent[1]-vh)))
+
+def drag_position(point,start,pointer,initial_scroll,scroll,viewport,cell):
+    """Pane-relative manual position, retaining pointer grab offset and scroll."""
+    x=round(point[0]+pointer[0]-start[0]+scroll[0]-initial_scroll[0])
+    y=round(point[1]+pointer[1]-start[1]+scroll[1]-initial_scroll[1])
+    return (max(0,min(x,max(0,scroll[0]+viewport[0]-cell[0]))),
+            max(0,min(y,max(0,scroll[1]+viewport[1]-cell[1]))))

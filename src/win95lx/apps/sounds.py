@@ -47,7 +47,7 @@ class SoundsWindow(PropertySheet):
             # Native arrow and thumb sprites; preserve the actual white tree
             # background instead of assuming every scrollbar track is gray.
             bar=VerticalScrollbar(120,len(EVENTS)-7,16,16)
-            bar.draw(p,324,80,self.scroll,lambda painter,x,y,part:self.sprite(painter,{'up':(324,80,16,16),'down':(324,184,16,16),'thumb':(324,96,16,16)}[part],x,y))
+            bar.draw(p,324,80,self.scroll,lambda painter,x,y,part:self.sprite(painter,{'up':(324,80,16,16),'down':(324,184,16,16),'thumb':(324,96,16,16)}[part],x,y),track="window")
         for row in range(min(7,len(EVENTS)-self.scroll)):self.hit((26,80+row*16,298,16),('event',self.scroll+row))
         self.hit((324,80,16,120),('scroll',))
         enabled=self.event is not None

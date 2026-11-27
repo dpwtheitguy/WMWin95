@@ -60,3 +60,29 @@ Finish the original Windows installation, confirm installed edition/shell state,
 ## Latest evidence
 
 Current root-owned release: `30207fbbfbf6ee7e`. The `desktop-milestone-002` offline snapshot contains that release and has been reboot-tested. The final implementation capture set is `private/screenshots/implementation/run-004/`; `private/screenshots/development/milestone-final.png` shows the running shell after the final reboot. Fifteen tests pass. The first user-supplied OEM number has now been accepted and the reference installation is proceeding; Linux work remains independently available.
+
+
+## Applet handoff policy (2026-11-27)
+
+The user authorized refreshing the visible test VM after each completed applet.
+Complete the applet-specific unit, rendered-reference and real-backend checks
+first; disabled unsupported capabilities must explain their limits. Do not deploy
+mock operations as working features. Root coordinates deployment so parallel
+workers do not reset the user's session or copy unfinished shared source.
+
+Before activation, verify a recovery checkpoint and stage the exact tested source
+and assets as an immutable release. Restart the guest desktop session, verify the
+new applet through Control Panel, capture its visible state, and save a verified
+working checkpoint. Tell the user what changed and what to test. Preserve user
+files and preferences: a test-VM reset means refreshing/restarting the session,
+not restoring an older disk or erasing user data.
+
+Current human-test handoff: release `e2eba49627fce294`, ten Control Panel entries,
+checkpoint `controls-ten-applets-ready-20261127`. Add/Remove Programs, Network and
+Printers are not registered in that release. Earlier milestone notes above are
+historical, not the current deployment inventory.
+
+Latest handoff supersedes the ten-entry build above: release
+`59dbd3dd304c5c52`,11 Control Panel entries including supported existing-printer
+management, namespace rearrangement and corrected shortcut overlay. See
+`reports/LUNCH_DELIVERY_2026-11-27.md` for evidence and unfinished wizard scope.

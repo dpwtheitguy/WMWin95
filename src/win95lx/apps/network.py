@@ -12,6 +12,29 @@ from win95lx.shell.widgets import FACE,BLACK,LIGHT,NAVY,SHADOW
 SHARING='File and printer sharing is unavailable: the sharing service and its configuration integration are not installed.'
 COMPONENTS='Installing Windows network components is unavailable. Network devices and connection profiles are managed by the running system.'
 
+def draw_network_radio(p,raw_label,rect,images,*,checked=False,enabled=True,focused=False,pressed=False):
+    """Measured single-line Win95 USER radio profile; not a generic OCX skin.
+
+    Native scope: standard colors,96dpi,13px MS Sans Serif,16px HWND height.
+    Source-state glyphs include normal/pressed/disabled checked and unchecked.
+    """
+    from win95lx.shell.command_button import parse_label
+    label,mnemonic=parse_label(raw_label);x,y,w,h=rect
+    if h!=16 or p.font.height!=13:raise ValueError('Unsupported Network radio font/height profile')
+    state='disabled' if not enabled else 'pressed' if pressed else 'normal'
+    key=state+('-checked' if checked else '-unchecked')
+    p.cr.save();p.cr.rectangle(x,y,w,h);p.cr.clip();p.fill(x,y,w,h,FACE)
+    p.image(images[key],x,y+1)
+    if not enabled:p.menu_text(label,x+19,y+2,LIGHT,mnemonic)
+    p.menu_text(label,x+18,y+1,BLACK if enabled else SHADOW,mnemonic)
+    focus=(x+17,y,p.font.width(label)+2,h) if focused and enabled else None
+    if focus:
+        fx,fy,fw,fh=focus
+        p.fill(fx,fy,fw,1,BLACK);p.fill(fx,fy+fh-1,fw,1,BLACK);p.fill(fx,fy,1,fh,BLACK);p.fill(fx+fw-1,fy,1,fh,BLACK)
+    p.cr.restore()
+    return {'label':label,'mnemonic':mnemonic,'text_origin':(x+18,y+1),'focus_rect':focus,'rect':tuple(rect)}
+
+
 class NetworkWindow(PropertySheet):
     title='Network';asset_prefix='network';size=(366,460)
     tabs=('configuration','identification','access')
@@ -84,27 +107,34 @@ class TCPIPWindow(PropertySheet):
         super().__init__(parent.shell);self.set_transient_for(parent);self.set_modal(True);self.tab=6
         from win95lx.shell.text_entry import TextEntry
         self.pending=connection.ipv4;self.dns_selection=0;self.search_selection=0;self.text_entries={'host':TextEntry(text=self.pending.dhcp_hostname),'domain':TextEntry(),'suffix':TextEntry()};self.entries={'address':IPv4Entry(self.pending.address),'netmask':IPv4Entry(self.pending.netmask),'gateway':IPv4Entry(self.pending.gateway),'dns':IPv4Entry()}
+        from win95lx.assets.bitmap import BitmapFont
+        self.ip_font=BitmapFont((self.assets/'network-ip-system.fnt').read_bytes())
+        import cairo
+        self.radio_images={state:cairo.ImageSurface.create_from_png(str(self.assets/f'network-radio-{state}.png')) for state in ('normal-unchecked','normal-checked','pressed-unchecked','pressed-checked','disabled-unchecked','disabled-checked')}
         self.focus_action=None
-    def radio(self,p,label,rect,action,checked):
-        x,y,w,h=rect;p.fill(x,y,w,h,FACE)
-        p.cr.set_source_rgb(0,0,0);p.cr.arc(x+6,y+7,5,0,6.283);p.cr.stroke()
-        p.cr.set_source_rgb(1,1,1);p.cr.arc(x+6,y+7,4,0,6.283);p.cr.fill()
-        if checked:p.cr.set_source_rgb(0,0,0);p.cr.arc(x+6,y+7,2,0,6.283);p.cr.fill()
-        p.text(label,x+19,y+1);self.hit(rect,action)
+    def radio(self,p,label,rect,action,checked,enabled=True):
+        geometry=draw_network_radio(p,label,rect,self.radio_images,checked=checked,enabled=enabled,
+            focused=self.caption_active and self.focus_action==action,
+            pressed=self.pressed==action and self.press_inside)
+        if enabled:
+            self.hit(rect,action)
+            if geometry['mnemonic'] is not None:self.command_mnemonics[geometry['label'][geometry['mnemonic']].casefold()]=action
     def ip_entry(self,p,name,rect,enabled=True):
         x,y,w,h=rect;p.bevel(x,y,w,h,True);p.fill(x+2,y+2,w-4,h-4,LIGHT if enabled else FACE)
+        from win95lx.shell.widgets import Painter
+        text_painter=Painter(p.cr,self.ip_font)
         editor=self.entries[name]
         for i,field in enumerate(editor.fields):
             left=x+2+i*33
             if enabled:self.hit((left,y+2,29,h-4),('ip',name,i))
-            p.text(field.text,left+max(0,(29-p.font.width(field.text))//2),y+3,BLACK if enabled else SHADOW)
-            if i<3:p.text('.',left+29,y+3,BLACK if enabled else SHADOW)
+            text_painter.text(field.text,left+max(0,(29-self.ip_font.width(field.text))//2),y+2,BLACK if enabled else SHADOW)
+            if i<3:text_painter.text('.',left+29,y+2,BLACK if enabled else SHADOW)
             if enabled and self.focus_action==('ip',name,i):
                 a,b=field.selection
-                tx=left+max(0,(29-p.font.width(field.text))//2)
+                tx=left+max(0,(29-self.ip_font.width(field.text))//2)
                 if a!=b:
-                    p.fill(tx,y+3,p.font.width(field.text),13,NAVY);p.text(field.text,tx,y+3,LIGHT)
-                else:p.fill(tx+p.font.width(field.text[:field.cursor]),y+3,1,13,BLACK)
+                    p.fill(tx,y+2,self.ip_font.width(field.text),17,NAVY);text_painter.text(field.text,tx,y+2,LIGHT)
+                else:p.fill(tx+self.ip_font.width(field.text[:field.cursor]),y+2,1,17,BLACK)
     def draw_content(self,p):
         # Source two-row tabs rotate their selected row to the bottom.
         row_a=(('Bindings',0),('Advanced',1),('NetBIOS',2));row_b=(('DNS Configuration',3),('Gateway',4),('WINS Configuration',5),('IP Address',6))
@@ -113,8 +143,8 @@ class TCPIPWindow(PropertySheet):
             for (label,index),(x,width) in zip(row,geometry):self.hit((x,y,width,21),('tab',index))
         if self.tab==6:
             manual=self.pending.method=='manual'
-            self.radio(p,'Obtain an IP address automatically',(36,173,248,16),('method','auto'),not manual)
-            self.radio(p,'Specify an IP address',(36,197,125,16),('method','manual'),manual)
+            self.radio(p,'&Obtain an IP address automatically',(36,173,248,16),('method','auto'),not manual)
+            self.radio(p,'&Specify an IP address:',(36,197,125,16),('method','manual'),manual)
             for name,label,y in (('address','IP Address:',232),('netmask','Subnet Mask:',267)):
                 p.fill(57,y,80,20,FACE);p.text(label,58,y+1,BLACK if manual else SHADOW);self.ip_entry(p,name,(141,y,135,21),manual)
         elif self.tab==4:
@@ -125,8 +155,8 @@ class TCPIPWindow(PropertySheet):
             self.button(p,'Remove',(187,256,75,23),('gateway-remove',),bool(self.pending.gateway),'No gateway is installed.')
         elif self.tab==3:
             enabled=self.pending.manual_dns
-            self.radio(p,'Disable DNS',(36,85,87,16),('dns-mode',False),not enabled)
-            self.radio(p,'Enable DNS',(36,111,78,16),('dns-mode',True),enabled)
+            self.radio(p,'D&isable DNS',(36,85,87,16),('dns-mode',False),not enabled)
+            self.radio(p,'&Enable DNS',(36,111,78,16),('dns-mode',True),enabled)
             for label,x,y,w in (('Host:',36,144,27),('DNS Server Search Order',36,180,126),('Domain Suffix Search Order',37,301,132)):
                 p.fill(x,y,w,15,FACE)
                 if not enabled:p.text(label,x+1,y+1,LIGHT)
@@ -200,6 +230,11 @@ class TCPIPWindow(PropertySheet):
         from win95lx.apps.dialogs import message_box
         message_box(self,self.title,'Choose OK to keep these edits pending in Network. Choose OK in Network to apply them. Cancel discards the edits in this dialog. Unavailable controls explain the missing integration when pointed at.',Gtk.MessageType.INFO)
     def entry_click(self,action,event):self.text_entries[action[1]].select_all()
+    def motion(self,area,event):
+        if self.pressed and self.pressed[0] in ('method','dns-mode'):
+            inside=any(action==self.pressed and self.contains(rect,event.x,event.y) for rect,action in self.hits)
+            if inside!=self.press_inside:self.press_inside=inside;self.area.queue_draw()
+        return super().motion(area,event)
     def focus_order(self):
         order=[]
         for action in super().focus_order():
@@ -212,6 +247,10 @@ class TCPIPWindow(PropertySheet):
     def key(self,window,event):
         name=Gdk.keyval_name(event.keyval)
         ctrl=bool(event.state&Gdk.ModifierType.CONTROL_MASK)
+        if event.state&Gdk.ModifierType.MOD1_MASK:return super().key(window,event)
+        if self.focus_action and self.focus_action[0] in ('method','dns-mode') and name in ('Left','Right','Up','Down'):
+            kind=self.focus_action[0];value=('manual' if self.focus_action[1]=='auto' else 'auto') if kind=='method' else not self.focus_action[1]
+            self.focus_action=(kind,value);self.action(self.focus_action);return True
         if self.focus_action and self.focus_action[0]=='ip':
             editor=self.entries[self.focus_action[1]]
             if name in ('Tab','ISO_Left_Tab'):self.focus_action=('ip',self.focus_action[1],0)

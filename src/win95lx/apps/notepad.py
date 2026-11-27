@@ -15,6 +15,7 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, GLib, Gtk, Pango
 from win95lx.recent_documents import record_document
+from win95lx.shell.accessories import SCROLLBAR_STYLE,style_scrollbars
 from win95lx.shell.menu_layout import NOTEPAD_HELP_ROWS
 from win95lx.apps.dialogs import SAVE_CHANGES, about_dialog, choose_file, message_box, run_dialog
 
@@ -36,28 +37,6 @@ MENU_STYLE = b"""
     background: #000080;
     color: #fff;
 }
-scrollbar.notepad-scrollbar {
-    -GtkScrollbar-has-backward-stepper: true;
-    -GtkScrollbar-has-forward-stepper: true;
-    background: #e0e0e0;
-}
-scrollbar.notepad-scrollbar slider, scrollbar.notepad-scrollbar button {
-    background: #c0c0c0;
-    color: #000;
-    border: 1px solid;
-    border-color: #fff #404040 #404040 #fff;
-    border-radius: 0;
-    margin: 0;
-    padding: 0;
-    box-shadow: inset -1px -1px #808080;
-}
-scrollbar.notepad-scrollbar button:disabled { color: #808080; }
-scrollbar.notepad-scrollbar.vertical slider, scrollbar.notepad-scrollbar.vertical button {
-    min-width: 14px;
-}
-scrollbar.notepad-scrollbar.horizontal slider, scrollbar.notepad-scrollbar.horizontal button {
-    min-height: 14px;
-}
 .notepad-editor {
     font-family: monospace;
     font-size: 10pt;
@@ -75,7 +54,7 @@ menu.notepad-menu {
     border-width: 2px;
     border-color: #fff #404040 #404040 #fff;
 }
-"""
+""" + SCROLLBAR_STYLE
 
 
 def read_document(path):
@@ -213,6 +192,7 @@ class NotepadWindow(Gtk.Window):
             context.add_class('notepad-scrollbar')
             context.add_provider(self.menu_style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         self.scroller.add(self.view)
+        style_scrollbars(self.scroller)
         frame = Gtk.Box()
         for widget, style_class in ((frame, "notepad-editor-frame"),
                                     (self.scroller, "notepad-editor-scroll")):

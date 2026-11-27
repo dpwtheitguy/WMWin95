@@ -31,7 +31,7 @@ class DesktopState:
     def __init__(self):
         self.windows=[];self.start_open=False;self.menu_index=0;self.selection=None;self.dialog=None
     def open(self,kind,folder=None):
-        titles={'computer':'My Computer','control':'Control Panel','display':'Display Properties','system':'System Properties','notepad':'Untitled - Notepad','drive':'(C:)','recycle':'Recycle Bin','start-folder':'Start Menu'}
+        titles={'printers':'Printers','computer':'My Computer','control':'Control Panel','display':'Display Properties','system':'System Properties','notepad':'Untitled - Notepad','drive':'(C:)','recycle':'Recycle Bin','start-folder':'Start Menu'}
         existing=next((w for w in self.windows if w.kind==kind and w.folder==folder),None)
         if existing:self.windows.remove(existing);existing.minimized=False;self.windows.append(existing)
         else:

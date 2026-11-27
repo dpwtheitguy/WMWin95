@@ -1,5 +1,5 @@
 PYTHON ?= python3
-.PHONY: check-control-panel-layout check-command-buttons check test check-ui check-menu-seams check-sprint-controls check-computer-view check-mouse check-pointer-catalog check-selection-details check-control-panel check-sounds check-multimedia check-volume-popup check-fonts stage reference-plan native
+.PHONY: check-printers-shell check-namespace-rearrange check-dnd-feel check-popup-dismissal check-gtk-scrollbars check-accessibility check-scrollbar-tracks check-control-panel-layout check-command-buttons check test check-ui check-menu-seams check-sprint-controls check-computer-view check-mouse check-pointer-catalog check-selection-details check-control-panel check-sounds check-multimedia check-volume-popup check-fonts stage reference-plan native
 native:
 	$(PYTHON) dev/build_native.py
 check:
@@ -26,7 +26,7 @@ check-pointer-catalog:
 check-control-panel:
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_control_panel.py --output private/screenshots/control-panel-$$(date +%s%N)-800
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_control_panel.py --output private/screenshots/control-panel-$$(date +%s%N)-1280
-check-ui: check-control-panel-layout check-command-buttons check-fonts check-multimedia check-volume-popup check-sounds check-control-panel check-pointer-catalog check-mouse check-menu-seams check-sprint-controls check-computer-view check-selection-details
+check-ui: check-namespace-rearrange check-printers-shell check-dnd-feel check-popup-dismissal check-gtk-scrollbars check-accessibility check-scrollbar-tracks check-control-panel-layout check-command-buttons check-fonts check-multimedia check-volume-popup check-sounds check-control-panel check-pointer-catalog check-mouse check-menu-seams check-sprint-controls check-computer-view check-selection-details
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_folder_windows.py
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_folder_windows.py
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_file_dialogs.py
@@ -61,3 +61,33 @@ check-command-buttons:
 check-control-panel-layout:
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/research/check_control_panel_layout.py --output private/screenshots/control-layout-$$(date +%s%N)-800
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/research/check_control_panel_layout.py --output private/screenshots/control-layout-$$(date +%s%N)-1280
+
+check-scrollbar-tracks:
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_scrollbar_tracks.py --output private/screenshots/scrollbar-tracks-$$(date +%s%N)-800
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_scrollbar_tracks.py --output private/screenshots/scrollbar-tracks-$$(date +%s%N)-1280
+
+check-accessibility:
+	GDK_BACKEND=x11 $(PYTHON) dev/check_accessibility.py --resolution 800x600 --output private/screenshots/accessibility-$$(date +%s%N)-800
+	GDK_BACKEND=x11 $(PYTHON) dev/check_accessibility.py --resolution 1280x800 --output private/screenshots/accessibility-$$(date +%s%N)-1280
+
+check-popup-dismissal:
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_popup_dismissal.py --output private/screenshots/popup-dismissal-$$(date +%s%N)-800
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_popup_dismissal.py --output private/screenshots/popup-dismissal-$$(date +%s%N)-1280
+
+check-gtk-scrollbars:
+	GDK_BACKEND=x11 GDK_SCALE=1 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_gtk_scrollbars.py --output private/screenshots/gtk-scrollbars-$$(date +%s%N)-800-1x
+	GDK_BACKEND=x11 GDK_SCALE=1 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_gtk_scrollbars.py --output private/screenshots/gtk-scrollbars-$$(date +%s%N)-1280-1x
+	GDK_BACKEND=x11 GDK_SCALE=2 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_gtk_scrollbars.py --output private/screenshots/gtk-scrollbars-$$(date +%s%N)-800-2x
+	GDK_BACKEND=x11 GDK_SCALE=2 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_gtk_scrollbars.py --output private/screenshots/gtk-scrollbars-$$(date +%s%N)-1280-2x
+
+check-dnd-feel:
+	GDK_BACKEND=x11 $(PYTHON) dev/check_dnd_feel.py --resolution 800x600 --output private/screenshots/dnd-feel-$$(date +%s%N)-800
+	GDK_BACKEND=x11 $(PYTHON) dev/check_dnd_feel.py --resolution 1280x800 --output private/screenshots/dnd-feel-$$(date +%s%N)-1280
+
+check-printers-shell:
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_printers_shell.py --output private/screenshots/printers-shell-$$(date +%s%N)-800
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_printers_shell.py --output private/screenshots/printers-shell-$$(date +%s%N)-1280
+
+check-namespace-rearrange:
+	env -u WAYLAND_DISPLAY GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_namespace_rearrange.py --output private/screenshots/namespace-rearrange-$$(date +%s%N)-800
+	env -u WAYLAND_DISPLAY GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_namespace_rearrange.py --output private/screenshots/namespace-rearrange-$$(date +%s%N)-1280

@@ -10,7 +10,7 @@ class Applet:
     implemented:bool=False
 
 CATALOG=(
-    Applet('accessibility','Accessibility Options','control access.cpl','XKB AccessX and session accessibility'),
+    Applet('accessibility','Accessibility Options','control access.cpl','XKB AccessX and session accessibility',True),
     Applet('hardware','Add New Hardware','control sysdm.cpl add new hardware','udev device discovery and driver inventory'),
     Applet('addremove','Add/Remove Programs','control appwiz.cpl','dpkg/APT package management'),
     Applet('datetime','Date/Time','control timedate.cpl','system clock and zoneinfo',True),
@@ -25,7 +25,7 @@ CATALOG=(
     Applet('network','Network','control netcpl.cpl','NetworkManager'),
     Applet('passwords','Passwords','control password.cpl','PAM and account password tools'),
     Applet('power','Power','control power','DPMS, UPower and logind'),
-    Applet('printers','Printers','control printers','CUPS'),
+    Applet('printers','Printers','control printers','CUPS',True),
     Applet('regional','Regional Settings','control intl.cpl','per-user formatting and locale',True),
     Applet('sounds','Sounds','control mmsys.cpl @1','sound event mappings and audio playback',True),
     Applet('system','System','control sysdm.cpl','procfs, sysfs and system diagnostics',True),

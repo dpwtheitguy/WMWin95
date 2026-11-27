@@ -1,0 +1,475 @@
+{
+  "schema_version": 1,
+  "status": "catalogue_and_design_only",
+  "date": "2026-11-26",
+  "runtime_integration": false,
+  "entry_point": {
+    "applet": "Add/Remove Programs",
+    "tab": "Windows Setup",
+    "new_default_control_panel_icon": false,
+    "optional_installed_program_entry": "Desktop Enhancements"
+  },
+  "axes": {
+    "shell_generation": [
+      "classic",
+      "ie4_desktop_update"
+    ],
+    "plus95": [
+      false,
+      true
+    ]
+  },
+  "presets": [
+    {
+      "id": "classic",
+      "label": "Windows 95",
+      "shell_generation": "classic",
+      "plus95": false,
+      "whole_profile_accepted": false,
+      "reference_configuration_available": true
+    },
+    {
+      "id": "classic-plus",
+      "label": "Windows 95 with Plus!",
+      "shell_generation": "classic",
+      "plus95": true,
+      "whole_profile_accepted": false,
+      "reference_configuration_available": false
+    },
+    {
+      "id": "ie4",
+      "label": "Windows 95 with IE4 Desktop Update",
+      "shell_generation": "ie4_desktop_update",
+      "plus95": false,
+      "whole_profile_accepted": false,
+      "reference_configuration_available": true
+    },
+    {
+      "id": "ie4-plus",
+      "label": "Windows 95 with IE4 Desktop Update and Plus!",
+      "shell_generation": "ie4_desktop_update",
+      "plus95": true,
+      "whole_profile_accepted": false,
+      "reference_configuration_available": true
+    }
+  ],
+  "performance_contract": {
+    "read_configuration": "once at session/profile activation",
+    "hot_path": "immutable resolved in-memory values",
+    "apt_queries_on_input_or_paint": false,
+    "package_inventory": "background refresh after component transactions",
+    "live_change": "notify only affected consumers once; otherwise mark reopen/session/reboot required"
+  },
+  "features": [
+    {
+      "id": "explorer.classic_layout",
+      "label": "Classic Explorer layout",
+      "group": "explorer",
+      "implementation": "planned",
+      "evidence": "reports/EXPLORER_DEVELOPMENT_PLAN.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.toolbar",
+      "label": "Explorer toolbar",
+      "group": "explorer",
+      "implementation": "per_window",
+      "evidence": "src/win95lx/shell/model.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.address_bar",
+      "label": "Address bar",
+      "group": "explorer",
+      "implementation": "per_window",
+      "evidence": "src/win95lx/shell/model.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.web_view",
+      "label": "Web-style folder presentation",
+      "group": "explorer",
+      "implementation": "per_window_partial",
+      "evidence": "src/win95lx/shell/computer_view.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.details_panel",
+      "label": "Selected-item description panel",
+      "group": "explorer",
+      "implementation": "partial",
+      "evidence": "src/win95lx/shell/webview_panel.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.ie_corner",
+      "label": "Internet Explorer corner logo",
+      "group": "explorer",
+      "implementation": "fixed_on",
+      "evidence": "src/win95lx/shell/explorer_chrome.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.ie_animation",
+      "label": "Animated corner indicator",
+      "group": "explorer",
+      "implementation": "planned",
+      "evidence": "reports/EXPLORER_DEVELOPMENT_PLAN.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.go_favorites",
+      "label": "Go and Favorites menu profile",
+      "group": "explorer",
+      "implementation": "fixed_profile",
+      "evidence": "reports/EXPLORER_DEVELOPMENT_PLAN.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.folder_tree",
+      "label": "Explorer folder tree",
+      "group": "explorer",
+      "implementation": "model_only",
+      "evidence": "src/win95lx/explorer/tree_model.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.same_window",
+      "label": "Browse folders in the same window",
+      "group": "explorer",
+      "implementation": "implemented_partial",
+      "evidence": "reports/EXPLORER_PARITY_2026-11-25.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.view_modes",
+      "label": "Icon, Small Icons, List and Details views",
+      "group": "explorer",
+      "implementation": "namespace_only",
+      "evidence": "src/win95lx/shell/namespace_view.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.single_click",
+      "label": "Single-click activation",
+      "group": "explorer",
+      "implementation": "planned",
+      "evidence": "reports/EXPLORER_DEVELOPMENT_PLAN.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "explorer.quick_launch",
+      "label": "Quick Launch band",
+      "group": "taskbar",
+      "implementation": "planned",
+      "evidence": "reports/EXPLORER_DEVELOPMENT_PLAN.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "desktop.active_content",
+      "label": "Active Desktop web content",
+      "group": "desktop",
+      "implementation": "planned",
+      "evidence": "reports/EXPLORER_DEVELOPMENT_PLAN.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "desktop.wallpaper",
+      "label": "Wallpaper selection and placement",
+      "group": "desktop",
+      "implementation": "implemented_partial",
+      "evidence": "src/win95lx/control_panel/background.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "desktop.patterns",
+      "label": "Desktop patterns",
+      "group": "desktop",
+      "implementation": "implemented",
+      "evidence": "src/win95lx/control_panel/pattern_dialog.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "desktop.themes",
+      "label": "Whole desktop themes",
+      "group": "desktop",
+      "implementation": "assets_partial",
+      "evidence": "reports/MOUSE_PROPERTIES_2026-11-26.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "desktop.plus_pointers",
+      "label": "Plus! pointer schemes",
+      "group": "desktop",
+      "implementation": "implemented_partial",
+      "evidence": "reports/MOUSE_PROPERTIES_2026-11-26.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "desktop.system_colors",
+      "label": "System color scheme",
+      "group": "desktop",
+      "implementation": "planned",
+      "evidence": "docs/CONTROL_TOOLBOX.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "desktop.high_color_icons",
+      "label": "High-color icon option",
+      "group": "desktop",
+      "implementation": "research",
+      "evidence": "reports/EXPLORER_DEVELOPMENT_PLAN.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "desktop.font_smoothing",
+      "label": "TrueType font smoothing option",
+      "group": "desktop",
+      "implementation": "research",
+      "evidence": "reports/FONTS_2026-11-26.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "desktop.full_window_drag",
+      "label": "Show contents while dragging windows",
+      "group": "desktop",
+      "implementation": "fixed_behavior",
+      "evidence": "src/win95lx/shell/app.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "desktop.screensavers",
+      "label": "Screensaver selection and settings",
+      "group": "desktop",
+      "implementation": "assets_partial",
+      "evidence": "reports/WINDOWS98_REFERENCE_2026-11-26.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "fonts.collection",
+      "label": "Install optional original fonts",
+      "group": "fonts",
+      "implementation": "implemented_partial",
+      "evidence": "reports/FONTS_2026-11-26.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "sound.schemes",
+      "label": "Sound schemes and individual events",
+      "group": "sound",
+      "implementation": "implemented_partial",
+      "evidence": "src/win95lx/apps/sounds.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "sound.plus95",
+      "label": "Plus! 95 sound collection",
+      "group": "sound",
+      "implementation": "imported",
+      "evidence": "tools/stage_sound_library.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "sound.plus98",
+      "label": "Plus! 98 sound collection",
+      "group": "sound",
+      "implementation": "imported_private",
+      "evidence": "reports/WINDOWS98_REFERENCE_2026-11-26.md",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "boot.artwork",
+      "label": "Startup artwork profile",
+      "group": "startup",
+      "implementation": "fixed_profile",
+      "evidence": "dev/guest_install_boot_theme.sh",
+      "global_binding": "planned",
+      "apply_mode": "reboot",
+      "user_selectable": false
+    },
+    {
+      "id": "boot.sound",
+      "label": "Startup sound",
+      "group": "startup",
+      "implementation": "implemented_partial",
+      "evidence": "src/win95lx/sound/__init__.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "menus.organization",
+      "label": "Start menu organization profile",
+      "group": "menus",
+      "implementation": "fixed_profile",
+      "evidence": "config/explorer-feature-matrix.json",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "menus.timing",
+      "label": "Menu timing preference",
+      "group": "menus",
+      "implementation": "fixed_behavior",
+      "evidence": "src/win95lx/shell/app.py",
+      "global_binding": "planned",
+      "apply_mode": "reopen_window",
+      "user_selectable": false
+    },
+    {
+      "id": "controls.native_profile",
+      "label": "Native widget and window-frame profile",
+      "group": "controls",
+      "implementation": "partial",
+      "evidence": "config/control-defaults-inventory.json",
+      "global_binding": "planned",
+      "apply_mode": "session_restart",
+      "user_selectable": false
+    },
+    {
+      "id": "components.classic_games",
+      "label": "Classic Games components",
+      "group": "components",
+      "implementation": "research",
+      "evidence": "reports/CLASSIC_WINDOWS_GAMES_INVENTORY.md",
+      "global_binding": "planned",
+      "apply_mode": "component_transaction",
+      "user_selectable": false,
+      "package_ids": [],
+      "installable": false
+    },
+    {
+      "id": "components.entertainment_pack",
+      "label": "Optional Entertainment Packs",
+      "group": "components",
+      "implementation": "research",
+      "evidence": "reports/CLASSIC_WINDOWS_GAMES_INVENTORY.md",
+      "global_binding": "planned",
+      "apply_mode": "component_transaction",
+      "user_selectable": false,
+      "package_ids": [],
+      "installable": false
+    },
+    {
+      "id": "components.plus95_games",
+      "label": "Plus! 95 games",
+      "group": "components",
+      "implementation": "research",
+      "evidence": "reports/CLASSIC_WINDOWS_GAMES_INVENTORY.md",
+      "global_binding": "planned",
+      "apply_mode": "component_transaction",
+      "user_selectable": false,
+      "package_ids": [],
+      "installable": false
+    },
+    {
+      "id": "components.plus98_games",
+      "label": "Plus! 98 games",
+      "group": "components",
+      "implementation": "research",
+      "evidence": "reports/CLASSIC_WINDOWS_GAMES_INVENTORY.md",
+      "global_binding": "planned",
+      "apply_mode": "component_transaction",
+      "user_selectable": false,
+      "package_ids": [],
+      "installable": false
+    },
+    {
+      "id": "components.later_games",
+      "label": "Selected later Windows classics",
+      "group": "components",
+      "implementation": "research",
+      "evidence": "reports/CLASSIC_WINDOWS_GAMES_INVENTORY.md",
+      "global_binding": "planned",
+      "apply_mode": "component_transaction",
+      "user_selectable": false,
+      "package_ids": [],
+      "installable": false
+    },
+    {
+      "id": "components.dos_prompt",
+      "label": "MS-DOS Prompt environment",
+      "group": "components",
+      "implementation": "research",
+      "evidence": "docs/DOS_PROMPT_RESEARCH.md",
+      "global_binding": "planned",
+      "apply_mode": "component_transaction",
+      "user_selectable": false,
+      "package_ids": [],
+      "installable": false
+    },
+    {
+      "id": "components.office_suite",
+      "label": "Future Office-style software",
+      "group": "components",
+      "implementation": "future",
+      "evidence": "WIN95LX_PLAN.md",
+      "global_binding": "planned",
+      "apply_mode": "component_transaction",
+      "user_selectable": false,
+      "package_ids": [],
+      "installable": false
+    }
+  ],
+  "notes": [
+    "Existing implementation does not imply a working global toggle. All toggles remain unavailable until their consumer binding and acceptance tests exist.",
+    "Preset axes describe design intent; the classic-plus combined reference has not yet been independently prepared.",
+    "Do not invent historical differences to reach an arbitrary feature count.",
+    "No package installation, Office implementation, runtime profile switch or new Control Panel icon is introduced by this catalogue."
+  ]
+}

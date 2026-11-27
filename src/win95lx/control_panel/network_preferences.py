@@ -269,9 +269,22 @@ class NetworkController:
     def apply(self):
         self.pending.validate();before=self.applied
         self.backend.apply(self.pending,before)
-        try:current=self.backend.preferences()
+        changed={c.uuid for c in self.pending.connections
+                 if c.uuid in {old.uuid for old in before.connections}
+                 and next(old for old in before.connections if old.uuid==c.uuid)!=c}
+        rollback=replace(before,connections=tuple(c for c in before.connections if c.uuid in changed))
+        try:
+            current=self.backend.preferences()
+            actual={c.uuid:c for c in current.connections}
+            for expected in self.pending.connections:
+                if expected.uuid in changed:
+                    observed=actual.get(expected.uuid)
+                    if observed is None or observed.ipv4!=expected.ipv4 or observed.autoconnect!=expected.autoconnect:
+                        raise NetworkError('The network service did not retain the requested settings.')
+            if self.pending.hostname!=before.hostname and current.hostname!=self.pending.hostname:
+                raise NetworkError('The network service did not retain the requested computer name.')
         except (NetworkError,ValueError,OSError) as error:
-            try:self.backend.restore(before)
+            try:self.backend.restore(rollback)
             except (NetworkError,ValueError,OSError) as rollback:
                 raise NetworkError('The changed network settings could not be verified or fully restored. Reopen Network to check the current connection.') from rollback
             raise NetworkError('The changed network settings could not be verified. The previous connection settings were restored.') from error

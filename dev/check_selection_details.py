@@ -82,7 +82,7 @@ def main():
    target=resolve_shortcut(path)
    resource=36 if target.target=='control' else 9 if target.target=='drive' else 4 if Path(target.target).is_dir() else 152
    _,_,base=read(ROOT/'private/shell-assets'/('explorer-folder-32.png' if resource==4 else f'shell32-group-{resource}.png'))
-   _,_,arrow=read(ROOT/'private/shell-assets/shell32-group-29.png')
+   _,_,arrow=read(ROOT/'private/shell-assets/shell32-group-30.png')
    x,y=shell.desktop_file_defaults['file:'+path.name]
    for yy in range(32):
     for xx in range(32):

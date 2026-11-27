@@ -140,7 +140,7 @@ def draw_scrollbar(p, shell, win, frame, static):
             source_y, height = {'up':(287,ARROW), 'thumb':(303,THUMB_HEIGHT),
                                 'down':(363,ARROW)}[part]
             copy_rect(painter, frame, dest_x, dest_y, (265,source_y,ARROW,height))
-        control.draw(p, x, y+LIST_Y, shell.wallpaper_scroll, artwork if frame else None)
+        control.draw(p, x, y+LIST_Y, shell.wallpaper_scroll, artwork if frame else None, track="window")
     shell.hit(x, y+LIST_Y, ARROW, ARROW, ('wallpaper-scroll', -1))
     shell.hit(x, y+TRACK_Y, ARROW, thumb-TRACK_Y, ('wallpaper-scroll', -VISIBLE_ROWS))
     shell.hit(x, y+thumb, ARROW, THUMB_HEIGHT, ('wallpaper-thumb', win, y+thumb))

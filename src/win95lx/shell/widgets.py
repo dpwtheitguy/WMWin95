@@ -38,9 +38,9 @@ class Painter:
         self.cr.fill()
     def menu_text(self,label,x,y,color=BLACK,mnemonic=None):
         self.text(label,x,y,color)
-        if mnemonic:
+        if mnemonic is not None and mnemonic != '':
             index=mnemonic if isinstance(mnemonic,int) else label.casefold().find(mnemonic.casefold())
-            if index>=0:
+            if 0<=index<len(label):
                 self.fill(x+self.font.width(label[:index]),y+12,self.font.width(label[index]),1,color)
 
     def bevel(self,x,y,w,h,sunken=False):

@@ -10,11 +10,6 @@ def bar(shell,p,win,x,y,length,maximum,value,axis,page):
     if axis==0:p.cr.translate(x,y+16);p.cr.rotate(-1.5707963267948966);bx,by=0,0
     else:bx,by=x,y
     b.draw(p,bx,by,value)
-    # Native classic track is gray/white stipple, never a solid white trough.
-    p.fill(bx,by+16,16,length-32,FACE)
-    for yy in range(16,length-16):
-        for xx in range(yy%2,16,2):p.fill(bx+xx,by+yy,1,1,LIGHT)
-    p.bevel(bx,by+b.thumb_top(value),16,b.thumb)
     p.cr.restore()
     def hit(offset,size,delta):
         rect=(x+offset,y,size,16) if axis==0 else (x,y+offset,16,size)
@@ -27,19 +22,32 @@ def bar(shell,p,win,x,y,length,maximum,value,axis,page):
     end=thumb+b.thumb
     if end<length-16:hit(end,length-16-end,page)
 
-def draw(shell,p,win,entries,x,y,width,height):
+def draw(shell,p,win,entries,x,y,width,height,*,defaults=None):
     labels=[label for _,label,_ in entries];longest=max((p.font.width(t) for t in labels),default=0)
+    key=('namespace:'+win.kind,win.namespace_view)
+    if getattr(win,'namespace_key',None)!=key:
+        win.namespace_key=key;win.namespace_positions=()
+        saved=shell.shortcut_icons.position(key[0],'$auto',(0 if win.kind=='computer' else int(win.namespace_auto),0))
+        win.namespace_auto=bool(saved[0])
+    positions=win.namespace_positions
+    if not win.namespace_auto and win.namespace_view in ('large','small'):
+        seed=positions or defaults or arrange(len(entries),max(0,width),max(0,height),win.namespace_view,label_width=longest).positions
+        positions=tuple(shell.shortcut_icons.position(key[0]+':'+key[1],label,point) for label,point in zip(labels,seed))
+    if defaults is not None and win.namespace_view=='large' and (win.namespace_auto or not positions):positions=defaults
     layout=arrange(len(entries),max(0,width),max(0,height),win.namespace_view,win.namespace_scroll,
-                   auto=win.namespace_auto,positions=win.namespace_positions,label_width=longest)
+                   auto=win.namespace_auto and defaults is None,positions=positions,label_width=longest)
     win.namespace_layout=layout;win.namespace_positions=layout.positions;win.namespace_scroll=layout.scroll
     vw,vh=layout.viewport;sx,sy=layout.scroll;win.namespace_viewport=(x,y,vw,vh)
     p.cr.save();p.cr.rectangle(x,y,vw,vh);p.cr.clip()
     for i,(ident,label,target) in enumerate(entries):
-        dx,dy=layout.positions[i];xx,yy=x+dx-sx,y+dy-sy
+        dx,dy=layout.positions[i]
+        drag=getattr(shell,'namespace_item_drag',None)
+        if drag and drag[0] is win and drag[1]==label and getattr(shell,'namespace_item_point',None) is not None:dx,dy=shell.namespace_item_point
+        xx,yy=x+dx-sx,y+dy-sy
         selected=shell.item_selection in ((win,label),(win,None)) and shell.state.active is win and shell.popup is None
         action=('item',win,target,label,(dx,dy))
         if win.namespace_view=='large':
-            count=len(shell.hits);shell.icon(p,ident,label,xx,yy,action,selected)
+            count=len(shell.hits);shell.icon(p,ident,label,xx,yy,action,selected,image_offset=-1 if win.kind=='computer' and win.web_view else 0,label_offset=1 if win.kind=='computer' and win.web_view and i==0 else 0)
             new=shell.hits[count:];del shell.hits[count:]
             for hx,hy,hw,hh,act in new:
                 clipped=clipped_hit((hx,hy,hw,hh),(x,y,vw,vh))

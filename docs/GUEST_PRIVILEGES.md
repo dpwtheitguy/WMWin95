@@ -22,3 +22,14 @@ Keep the desktop account non-admin. Install only guest-scoped permissions and he
 | Network/hardware/account administration | Per-operation guest service/policy | Planned | Define required calls alongside each applet and test normal UI and rollback |
 
 The future manifest should identify the operation, beneficiary account/group, exact policy/helper or directory/device ACL, installer action, rollback/removal action, and a test proving the real non-admin UI works. It must distinguish required grants from unimplemented applets and hardware absence. Developer SSH/sudo is maintenance tooling, not the desktop interaction.
+
+## Printer binding development install (2026-11-27)
+
+`dev/guest_install_printers.sh` installs only the distribution `python3-cups`
+binding after the existing guest identity guard and root UID check. It does not
+create queues, change defaults, install authorization policy or grant desktop
+administration. The existing guest CUPS service is retained. Actual installer
+packaging must declare this dependency instead of relying on development setup.
+Read-only GetServerSettings success is not evidence that a user can administer
+queues; privileged action capability and actual server errors require separate
+validation. Test-page output syntax needs validation beyond raw byte receipt.

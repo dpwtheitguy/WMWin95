@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-26",
+  "base": "Xubuntu 24.04 LTS amd64",
+  "targets": [
+    {
+      "model": "Lenovo ThinkPad T480",
+      "priority": "primary",
+      "preferred_reference_configuration": "8th-generation Intel Core i5, integrated graphics, matte 1920x1080 IPS; exact machine type and BOM to be selected",
+      "status": "planned_not_hardware_validated"
+    },
+    {
+      "model": "Lenovo ThinkPad L570",
+      "priority": "secondary",
+      "preferred_reference_configuration": "Integrated graphics, optional installed SATA DVD drive; exact machine type and panel to be selected",
+      "status": "planned_not_hardware_validated"
+    },
+    {
+      "model": "Lenovo ThinkPad T14 AMD",
+      "priority": "modern_secondary",
+      "preferred_reference_configuration": "Exact generation, machine type and device BOM not selected",
+      "status": "planned_not_hardware_validated"
+    }
+  ],
+  "compatibility_policy": "Broad x86-64 Linux support; these are validation reference machines, not an installer vendor allowlist",
+  "gaming": {
+    "steam": "optional_future_component",
+    "installed_by_this_plan": false,
+    "performance_claims": false
+  }
+}

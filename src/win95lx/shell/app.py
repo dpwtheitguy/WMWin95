@@ -67,6 +67,7 @@ class Shell(Gtk.Window):
             icon=assets/(name+'-icon.png')
             if icon.exists():self.small_images[name]=cairo.ImageSurface.create_from_png(str(icon))
         self.namespace_drag = None
+        self.namespace_item_drag = self.namespace_item_point = None
         self.task_order = []
         self.active_task = None
         self.desktop_icons = DesktopIcons()
@@ -203,6 +204,10 @@ class Shell(Gtk.Window):
                 if icon.exists():
                     mapping['cpl-'+applet.key]=cairo.ImageSurface.create_from_png(str(icon))
                     mapping[applet.key]=mapping['cpl-'+applet.key]
+        for name in ('printer','printer-default','printer-add'):
+            for size,mapping in ((32,self.images),(16,self.small_images)):
+                path=assets/f'{name}-{size}.png'
+                if path.exists():mapping[name]=cairo.ImageSurface.create_from_png(str(path))
         for ident, filename in (
             ('banner', 'start-banner.png'), ('computer', 'my-computer-32.png'),
             ('favorites', 'start-favorites.png'), ('settings', 'start-settings.png'),
@@ -247,6 +252,11 @@ class Shell(Gtk.Window):
                 controller=PreferenceController(keyboard_path,X11Keyboard(),KeyboardPreferences,lambda prefs:apply_session(Gtk.Settings.get_default(),prefs))
                 controller.apply();self.keyboard_preferences=controller.applied
             except (OSError,RuntimeError,ValueError,subprocess.SubprocessError) as error:print('Could not restore keyboard settings:',error,flush=True)
+        access_path=Path.home()/'.config/win95lx/accessibility.json'
+        if access_path.exists():
+            from win95lx.control_panel.access_preferences import apply_saved_session,XKBAccess
+            try:apply_saved_session(access_path,XKBAccess())
+            except (OSError,RuntimeError,ValueError,TypeError) as error:print('Could not restore accessibility settings:',error,flush=True)
         self.connect('realize',self.cursor)
         GLib.timeout_add_seconds(1,self.tick)
     def resize_to_display(self, screen):
@@ -258,7 +268,7 @@ class Shell(Gtk.Window):
         for window in self.state.windows:
             if window.restored_bounds is not None:
                 window.width, window.height = width, height-28
-            window.x,window.y,window.width,window.height=fit_bounds((window.x,window.y,window.width,window.height),(width,height),resizable=window.kind in ('computer','control','drive','recycle','start-folder'))
+            window.x,window.y,window.width,window.height=fit_bounds((window.x,window.y,window.width,window.height),(width,height),resizable=window.kind in ('computer','control','printers','drive','recycle','start-folder'))
 
     def cursor_for(self, name):
         prefs=self.mouse_preferences
@@ -317,7 +327,7 @@ class Shell(Gtk.Window):
         if image is not None:
             if selected and ident!=4:p.selected_image(image,x+16+image_offset,y)
             else:p.image(image,x+16+image_offset,y)
-        if shortcut and 29 in self.images:p.image(self.images[29],x+16+image_offset,y)
+        if shortcut and 30 in self.images:p.image(self.images[30],x+16+image_offset,y)
         if image is None and ident in self.small_images:p.image(self.small_images[ident],x+24,y+8)
         from win95lx.explorer.namespace import display_name
         if action[0]=='item' and action[1].kind=='control':
@@ -334,7 +344,7 @@ class Shell(Gtk.Window):
             if action[0]=='item' and action[1].kind=='computer' and action[1].focus_item in (None,action[3]):
                 p.fill(x+(64-width)//2-2+label_offset,y+36,width+4,15,(255,255,0))
             p.fill(x+(64-width)//2-1+label_offset,y+37,width+2,13,NAVY)
-        p.text(label,x+(64-width)//2+label_offset,y+36,LIGHT if selected else BLACK);self.hit(x,y,70,54,action)
+        p.text(label,x+(64-width)//2+label_offset,y+36,SHADOW if ident=='printer-add' else LIGHT if selected else BLACK);self.hit(x,y,70,54,action)
     @property
     def drive(self):
         win = self.state.active
@@ -387,8 +397,8 @@ class Shell(Gtk.Window):
             self.open_drive_file(relative)
 
     def navigate_namespace(self,win,kind,folder=None,*,new_window=False):
-        if kind in cpl_catalog.BY_KEY and kind!='display':self.open(kind);return
-        if kind not in ('computer','control','drive') or new_window or not self.browsing_preferences.single_window:
+        if kind in cpl_catalog.BY_KEY and kind not in ('display','printers'):self.open(kind);return
+        if kind not in ('computer','control','printers','drive') or new_window or not self.browsing_preferences.single_window:
             self.open(kind,folder)
             return
         from copy import deepcopy
@@ -403,8 +413,9 @@ class Shell(Gtk.Window):
         win.back_history.append((win.kind,win.title,win.folder,deepcopy(win.browser)))
         win.forward_history.clear()
         win.kind=kind;win.folder=folder;win.browser=browser
-        win.title=browser.title if browser else {'computer':'My Computer','control':'Control Panel'}[kind]
+        win.title=browser.title if browser else {'computer':'My Computer','control':'Control Panel','printers':'Printers'}[kind]
         self.item_selection=None;win.focus_item=None;self.popup=None
+        if kind=='printers':self.refresh_printers()
         self.state.windows.remove(win);self.state.windows.append(win)
 
     def navigate_history(self,win,back=True):
@@ -416,7 +427,7 @@ class Shell(Gtk.Window):
             self.item_selection=None;win.focus_item=None;self.popup=None
 
     def open(self,kind,folder=None):
-        if kind in cpl_catalog.targets().values() and kind!='display':
+        if kind in cpl_catalog.targets().values() and kind not in ('display','printers'):
             self.launch_accessory(kind);return
         if kind == 'drive':
             try:
@@ -450,8 +461,30 @@ class Shell(Gtk.Window):
             self.reset_display_combos()
             self.resolution_focus = None
             self.resolution_error = ''
+        if kind=='printers':self.refresh_printers()
         self.resize_to_display(self.get_screen())
         self.area.queue_draw()
+    def printer_namespace(self):
+        if not hasattr(self,'printer_provider'):
+            from win95lx.apps.printers import PrinterNamespace
+            self.printer_provider=PrinterNamespace()
+        return self.printer_provider
+
+    def refresh_printers(self):
+        if getattr(self,'printer_loading',False):return
+        provider=self.printer_namespace();self.printer_loading=True
+        def work():
+            try:result,error=provider.load(),None
+            except Exception as exc:result,error=None,str(exc)
+            def publish():
+                self.printer_loading=False
+                if not self.get_realized():return False
+                if error:provider.error=error;provider.printers=()
+                else:provider.publish(result)
+                self.area.queue_draw();return False
+            GLib.idle_add(publish)
+        Thread(target=work,name='win95lx-printer-inventory',daemon=True).start()
+
     def apply_mouse_preferences(self,prefs):
         prefs.validate()
         if prefs.scheme not in self.pointer_library.names:raise ValueError('The selected pointer scheme is not installed.')
@@ -557,7 +590,7 @@ class Shell(Gtk.Window):
             if ident in self.images:
                 if self.state.selection==kind:p.selected_image(self.images[ident],x+21,y)
                 else:p.image(self.images[ident], x+21, y)
-            if shortcut and 29 in self.images:p.image(self.images[29],x+21,y)
+            if shortcut and 30 in self.images:p.image(self.images[30],x+21,y)
             from win95lx.explorer.namespace import display_name
             label = taskbar.title_that_fits(self.font, display_name(label), ICON_WIDTH-4, False)
             label_width=self.font.width(label)
@@ -674,8 +707,8 @@ class Shell(Gtk.Window):
         p.text('Start',25,bar+8,bold=True)
     def window(self,p,win):
         browser = self.browser_for(win) if win.kind == 'drive' else None
-        x, y, w, h = computer_view.geometry(win) if win.kind in ('computer','control') else (win.x,win.y,win.width,win.height)
-        explorer = win.kind in ('computer','control','drive','recycle','start-folder')
+        x, y, w, h = computer_view.geometry(win) if win.kind in ('computer','control','printers') else (win.x,win.y,win.width,win.height)
+        explorer = win.kind in ('computer','control','printers','drive','recycle','start-folder')
         resizable = explorer or win.kind == 'notepad'
         active = win is self.state.active
         p.window_frame(x,y,w,h)
@@ -686,7 +719,7 @@ class Shell(Gtk.Window):
         p.text(win.title,x+(24 if resizable else 7),y+(6 if resizable else 4),LIGHT,bold=True)
         p.cr.restore()
         ident = {'computer':'computer' if 'computer' in self.images else 16,'control':36,
-                 'drive':9,'notepad':2,'recycle':32,'start-folder':4}.get(win.kind)
+                 'printers':'cpl-printers','drive':9,'notepad':2,'recycle':32,'start-folder':4}.get(win.kind)
         if resizable and ident in self.small_images:
             p.cr.save()
             p.cr.rectangle(x+5,y+5,15 if win.kind=='computer' else 16,16);p.cr.clip()
@@ -708,11 +741,11 @@ class Shell(Gtk.Window):
                 (w-39,'restore' if win.restored_bounds else 'maximize','maximize'),
             ))
         for offset, symbol, action in buttons:
-            if win.kind in ('computer','control') and win.restored_bounds is not None:offset-=1
+            if win.kind in ('computer','control','printers') and win.restored_bounds is not None:offset-=1
             p.caption_button(symbol,x+offset,y+6)
             self.hit(x+offset,y+6,16,14,(action,win))
         if explorer:
-            if win.kind=='control' or win.kind=='computer' and (win.toolbar or win.address_bar or win.web_view):
+            if win.kind in ('control','printers') or win.kind=='computer' and (win.toolbar or win.address_bar or win.web_view):
                 from copy import copy
                 frame=copy(win);frame.x,frame.y,frame.width,frame.height=x,y,w,h
                 explorer_chrome.draw(p,frame,self.explorer_menu_art,
@@ -1068,7 +1101,9 @@ class Shell(Gtk.Window):
     def namespace_file_rows(self,win):
         selection=(self.item_selection[1] or '*') if self.item_selection and self.item_selection[0] is win else None
         if win.kind=='computer':return explorer_menu.computer_file_rows(self.work_offline,selection)
-        from win95lx.explorer.commands import Context,Item,file_commands
+        from win95lx.explorer.commands import Context,Item,file_commands,Command
+        if win.kind=='printers':
+            return (Command('Open','open','o',selection is not None),None,Command('Close','close','c',True))
         names=() if selection is None else cpl_catalog.labels() if selection=='*' else (selection,)
         return file_commands(Context('control',tuple(Item('applet',name,False) for name in names)))
 
@@ -1076,7 +1111,7 @@ class Shell(Gtk.Window):
         if isinstance(kind, tuple):
             win, menu = kind
             browser = self.browser_for(win) if win.kind == 'drive' else None
-            if win.kind in ('computer','control') and menu == 'File':
+            if win.kind in ('computer','control','printers') and menu == 'File':
                 self.drive_menu_rows = explorer_menu.draw(
                     p,x,y,self.namespace_file_rows(win),
                     self.drive_menu_highlight,self.images.get('menu-check'),self.hit,win)
@@ -1087,16 +1122,18 @@ class Shell(Gtk.Window):
                 'View': ([('Standard Buttons',('computer-view-toggle',win,'toolbar')),
                           ('Address Bar',('computer-view-toggle',win,'address_bar')),
                           ('as Web Page',('computer-view-toggle',win,'web_view')),
-                          ('Refresh',('dismiss',))] if win.kind in ('computer','control') else [('Refresh',('dismiss',))]),
+                          ('Refresh',('dismiss',))] if win.kind in ('computer','control','printers') else [('Refresh',('dismiss',))]),
                 'Go': [('My Computer',('open','computer')),('(C:)',('open','drive'))],
                 'Favorites': [('Control Panel',('open','control'))],
                 'Help': [('About Win95LX',('about',))],
                 'Item': [],
             }[menu]
-            if win.kind=='control' and menu=='View':
+            if win.kind in ('computer','control','printers') and menu=='View':
                 options=options[:-1]+[(label,('namespace-view',win,mode)) for mode,label in
                     (('large','Large Icons'),('small','Small Icons'),('list','List'),('details','Details'))]+[
                     ('Auto Arrange',('namespace-auto',win)),('Refresh',('dismiss',))]
+            if win.kind=='printers' and menu=='View':
+                options=[(label,('printer-refresh',) if action==('dismiss',) else action) for label,action in options]
             if win.kind == 'recycle' and menu == 'File':
                 options = [('Restore',('trash-command','restore')),
                            ('Empty Recycle Bin',('trash-command','empty')),
@@ -1256,6 +1293,19 @@ class Shell(Gtk.Window):
 
     def action(self,action,event=None):
         kind=action[0]
+        if kind=='printer-queue':
+            key='printer:'+action[1]
+            existing=self.accessory_windows.get(key)
+            if existing is not None:existing.present();return
+            window=self.printer_namespace().open(self,action[1])
+            self.accessory_windows[key]=window
+            window.connect('destroy',lambda *_:self.accessory_windows.pop(key,None) if self.accessory_windows.get(key) is window else None)
+            return
+        if kind=='printer-refresh':self.refresh_printers();return
+        if kind=='printer-add':
+            from win95lx.apps.dialogs import message_box
+            message_box(self,'Add Printer','The Add Printer Wizard is not implemented yet. Existing printers configured on this computer can be opened and managed here.',Gtk.MessageType.INFO)
+            return
         if self.state.dialog == 'shutdown':
             if kind == 'shutdown-option':
                 self.shutdown_dialog.selection = action[1]
@@ -1400,12 +1450,13 @@ class Shell(Gtk.Window):
                 self.state.windows.remove(win)
                 self.state.windows.append(win)
             if event and event.type == Gdk.EventType._2BUTTON_PRESS and target:
+                self.namespace_item_drag=self.namespace_item_point=None
                 self.file_drag = None
                 self.shortcut_drag = self.shortcut_drag_point = None
                 if isinstance(target, tuple):
                     self.action(target)
                 else:
-                    self.navigate_namespace(win,target,new_window=bool(getattr(event,'state',0)&Gdk.ModifierType.SHIFT_MASK)) if win.kind in ('computer','control') else self.open(target)
+                    self.navigate_namespace(win,target,new_window=bool(getattr(event,'state',0)&Gdk.ModifierType.SHIFT_MASK)) if win.kind in ('computer','control','printers') else self.open(target)
             elif event and event.button == 1 and win.kind == 'drive':
                 self.state.windows.remove(win)
                 self.state.windows.append(win)
@@ -1417,6 +1468,10 @@ class Shell(Gtk.Window):
                 self.file_drag_point = None
                 self.file_drag_origin = label, point, event.x, event.y
                 self.file_drag = win, label, event.x, event.y
+            elif event and event.button == 1 and win.kind in ('computer','control','printers'):
+                if not win.namespace_auto and win.namespace_view in ('large','small'):
+                    self.namespace_item_drag=(win,label,point,event.x,event.y,win.namespace_scroll)
+                    self.namespace_item_point=None
             elif event and event.button == 1 and win.kind == 'start-folder':
                 self.state.windows.remove(win)
                 self.state.windows.append(win)
@@ -1559,13 +1614,15 @@ class Shell(Gtk.Window):
             menu,offset=action[2:] if kind=='window-menu' else ('File',7)
             self.drive_menu_highlight = None
             left = offset-8 if win.kind == 'drive' and menu == 'Edit' else offset-9 if menu == 'File' else offset-5
-            dx,dy=(-4,-5) if win.kind in ('computer','control') and win.restored_bounds is not None else (0,0)
+            dx,dy=(-4,-5) if win.kind in ('computer','control','printers') and win.restored_bounds is not None else (0,0)
             self.popup=(win.x+left+dx,win.y+explorer_chrome.POPUP_TOP+dy,(win,menu))
             play_event(self.assets,'MenuPopup')
         elif kind=='namespace-view':
             win,mode=action[1:];win.namespace_view=mode;win.namespace_scroll=(0,0);win.namespace_positions=();self.popup=None
         elif kind=='namespace-auto':
             win=action[1];win.namespace_auto=not win.namespace_auto;self.popup=None
+            try:self.shortcut_icons.move('namespace:'+win.kind,'$auto',(int(win.namespace_auto),0))
+            except OSError as error:print(f'Could not save namespace arrangement: {error}',flush=True)
         elif kind=='namespace-thumb':
             win,axis,x,y,length,maximum,thumb=action[1:]
             coordinate=(event.x-x if axis==0 else event.y-y) if event else thumb
@@ -1592,8 +1649,9 @@ class Shell(Gtk.Window):
                 self.navigate_history(win,True)
             elif command=='forward':
                 self.navigate_history(win,False)
-            elif command=='up' and win.kind=='control':
-                self.navigate_namespace(win,'computer')
+            elif command=='up' and win.kind in ('control','printers'):
+                self.navigate_namespace(win,'control' if win.kind=='printers' else 'computer')
+            elif command=='refresh' and win.kind=='printers':self.refresh_printers()
         elif kind=='explorer-address':
             self.address_window=action[1]
             self.address_text=action[1].title
@@ -1607,6 +1665,11 @@ class Shell(Gtk.Window):
             self.popup=None
             if action[2]=='offline':
                 self.work_offline=not self.work_offline
+            elif action[2] in ('open','explore') and action[1].kind=='printers':
+                win=action[1]
+                selection=self.item_selection[1] if self.item_selection and self.item_selection[0] is win else None
+                target=next((target for _,label,target in self.printer_namespace().entries() if label==selection),None)
+                if target:self.action(target)
             elif action[2] in ('open','explore'):
                 selection=self.item_selection[1] if self.item_selection and self.item_selection[0] is action[1] else None
                 labels=(selection,) if selection else (cpl_catalog.labels() if action[1].kind=='control' else ('(C:)','Control Panel'))
@@ -1710,7 +1773,7 @@ class Shell(Gtk.Window):
 
     @staticmethod
     def system_profile(win):
-        resizable = win.kind in ('computer','control','drive','recycle','start-folder')
+        resizable = win.kind in ('computer','control','printers','drive','recycle','start-folder')
         return system_options(resizable=resizable, minimizable=resizable,
                               maximized=win.restored_bounds is not None)
 
@@ -2008,12 +2071,12 @@ class Shell(Gtk.Window):
         if self.pointer_scale != 1:
             event = ScaledPointer(event, self.pointer_scale)
         win = self.state.active
-        if win and win.kind=='control' and not self.state.start_open and not self.state.dialog and not self.popup:
+        if win and win.kind in ('control','printers') and not self.state.start_open and not self.state.dialog and not self.popup:
             x,y,w,h=win.namespace_viewport
             if x<=event.x<x+w and y<=event.y<y+h and event.direction in (Gdk.ScrollDirection.UP,Gdk.ScrollDirection.DOWN):
                 axis=0 if win.namespace_view=='list' or win.namespace_layout and not win.namespace_layout.vertical else 1
                 self.action(('namespace-scroll',win,axis,-51 if event.direction==Gdk.ScrollDirection.UP else 51));return True
-        if win and win.kind in ('computer','control') and win.web_view and not self.state.start_open and not self.state.dialog and not self.popup:
+        if win and win.kind in ('computer','control','printers') and win.web_view and not self.state.start_open and not self.state.dialog and not self.popup:
             left,top,width,height=computer_view.geometry(win)
             if left<=event.x<left+width*.3 and top+118<=event.y<top+height-24 and event.direction in (Gdk.ScrollDirection.UP,Gdk.ScrollDirection.DOWN):
                 self.action(('info-scroll',win,-39 if event.direction==Gdk.ScrollDirection.UP else 39))
@@ -2290,7 +2353,7 @@ class Shell(Gtk.Window):
             return
         target_win, folder = destination
         copy = bool(getattr(event,'state',0) & Gdk.ModifierType.CONTROL_MASK)
-        if target_win is win and folder == browser.directory:
+        if target_win is win and folder == browser.directory and not copy:
             if not copy and self.file_drag_origin:
                 label, point, start_x, start_y = self.file_drag_origin
                 x = max(0,min(int(point[0]+event.x-start_x),win.width-90))
@@ -2303,15 +2366,27 @@ class Shell(Gtk.Window):
         self.transfer_files(sources, folder, copy)
 
     def release(self, _area, event):
-        if self.pointer_scale != 1 and (self.file_drag or self.shortcut_drag or self.icon_drag):
+        if self.pointer_scale != 1 and (self.file_drag or self.shortcut_drag or self.icon_drag or self.namespace_item_drag):
             event = ScaledPointer(event, self.pointer_scale)
+        if event.button==1 and self.namespace_item_drag:
+            win,label,point,start_x,start_y,initial_scroll=self.namespace_item_drag
+            started=self.namespace_item_point is not None or drag_started(event.x-start_x,event.y-start_y)
+            if started and not win.namespace_auto and win.namespace_view in ('large','small') and contains(win.namespace_viewport,event.x,event.y):
+                from win95lx.explorer.namespace_layout import drag_position
+                position=drag_position(point,(start_x,start_y),(event.x,event.y),initial_scroll,win.namespace_scroll,win.namespace_layout.viewport,win.namespace_layout.cell)
+                try:
+                    self.shortcut_icons.move('namespace:'+win.kind+':'+win.namespace_view,label,position)
+                    self.namespace_item_point=position
+                except OSError as error:print(f'Could not save namespace icon position: {error}',flush=True)
+            self.namespace_item_drag=self.namespace_item_point=None
+            self.area.queue_draw()
         if event.button == 1:
             self.namespace_drag = None
             self.wallpaper_drag = self.drive_scroll_drag = self.resolution_drag = None
         if event.button == 1 and self.file_drag:
             win, label, start_x, start_y = self.file_drag
             self.file_drag = None
-            if drag_started(event.x-start_x,event.y-start_y):
+            if self.file_drag_point is not None or drag_started(event.x-start_x,event.y-start_y):
                 self.drop_drive_selection(win, event)
             elif self.file_drag_toggle:
                 self.browser_for(win).selection.discard(label)
@@ -2319,8 +2394,10 @@ class Shell(Gtk.Window):
                 self.edit_drive_selection(label, 0)
             self.file_drag_origin = self.file_drag_point = self.file_hover = None
         if event.button == 1 and self.shortcut_drag:
-            win, label, target, *_ = self.shortcut_drag
+            win, label, target, point, start_x, start_y = self.shortcut_drag
             if self.shortcut_drag_point is not None:
+                dx,dy=int(event.x-start_x),int(event.y-start_y)
+                self.shortcut_drag_point=self.clamp_shortcut(win,point[0]+dx,point[1]+dy)
                 try:
                     destination = self.shortcut_drop_target(event.x, event.y)
                     if (target[0] == 'accessory' and destination is not None
@@ -2335,6 +2412,9 @@ class Shell(Gtk.Window):
             self.area.queue_draw()
         if event.button == 1 and self.icon_drag:
             if self.icon_drag_point is not None:
+                _kind,point,start_x,start_y=self.icon_drag
+                dx,dy=int(event.x-start_x),int(event.y-start_y)
+                self.icon_drag_point=self.desktop_icons.clamp(point[0]+dx,point[1]+dy,self.width,self.height)
                 try:
                     kind = self.icon_drag[0]
                     source = (self.desktop_folder.relative_to(self._drive.view.root)/kind[5:]
@@ -2356,6 +2436,13 @@ class Shell(Gtk.Window):
     def motion(self,area,event):
         if self.pointer_scale != 1:
             event = ScaledPointer(event, self.pointer_scale)
+        if self.namespace_item_drag:
+            win,label,point,start_x,start_y,initial_scroll=self.namespace_item_drag
+            if self.namespace_item_point is not None or drag_started(event.x-start_x,event.y-start_y):
+                from win95lx.explorer.namespace_layout import drag_position
+                self.namespace_item_point=drag_position(point,(start_x,start_y),(event.x,event.y),initial_scroll,win.namespace_scroll,win.namespace_layout.viewport,win.namespace_layout.cell)
+                self.area.queue_draw()
+            return True
         if self.namespace_drag:
             win,axis,x,y,length,maximum,offset=self.namespace_drag
             value=VerticalScrollbar(length,maximum).value_at((event.x-x if axis==0 else event.y-y)-offset)
@@ -2386,7 +2473,7 @@ class Shell(Gtk.Window):
             self.area.queue_draw()
         elif self.file_drag:
             _,_,start_x,start_y = self.file_drag
-            if drag_started(event.x-start_x,event.y-start_y):
+            if self.file_drag_point is not None or drag_started(event.x-start_x,event.y-start_y):
                 self.file_drag_point = event.x,event.y
                 win,_,_,_ = self.file_drag
                 browser = self.browser_for(win)
@@ -2413,7 +2500,7 @@ class Shell(Gtk.Window):
             win,dx,dy=self.drag;win.x=max(0,min(int(event.x-dx),self.width-80));win.y=max(0,min(int(event.y-dy),self.height-55));self.area.queue_draw()
         elif self.is_drive_menu_open():
             self.drive_menu_highlight = next((command for x,y,command,_ in self.drive_menu_rows
-                                              if x <= event.x < x+(118 if self.popup[2][0].kind in ('computer','control') else 152) and y <= event.y < y+17), None)
+                                              if x <= event.x < x+(118 if self.popup[2][0].kind in ('computer','control','printers') else 152) and y <= event.y < y+17), None)
             self.area.queue_draw()
         elif self.state.start_open:
             for depth, (x, y, width, height) in reversed(list(enumerate(self.submenu_geometry()))):
@@ -2438,16 +2525,16 @@ class Shell(Gtk.Window):
         if not self.popup:
             return False
         context = self.popup[2]
-        return isinstance(context, tuple) and (context[0].kind == 'drive' and context[1] in ('Edit','File','Item') or context[0].kind in ('computer','control') and context[1]=='File')
+        return isinstance(context, tuple) and (context[0].kind == 'drive' and context[1] in ('Edit','File','Item') or context[0].kind in ('computer','control','printers') and context[1]=='File')
 
     def drive_menu_key(self, name, alt):
         win = self.state.active
-        if not win or win.kind not in ('drive','computer','control') or self.state.dialog or self.state.start_open:
+        if not win or win.kind not in ('drive','computer','control','printers') or self.state.dialog or self.state.start_open:
             return False
         if alt and name.lower() in (('e','f') if win.kind=='drive' else ('f',)):
             label, offset = ('Edit',55) if name.lower() == 'e' else ('File',24)
             self.action(('window-menu',win,label,offset))
-            if win.kind in ('computer','control'):
+            if win.kind in ('computer','control','printers'):
                 selection=(self.item_selection[1] or '*') if self.item_selection and self.item_selection[0] is win else None
                 self.drive_menu_highlight=next(row.command for row in self.namespace_file_rows(win) if row and row.enabled)
             else:
@@ -2455,7 +2542,7 @@ class Shell(Gtk.Window):
             return True
         if alt or not self.is_drive_menu_open():
             return False
-        if win.kind in ('computer','control') and len(name)==1:
+        if win.kind in ('computer','control','printers') and len(name)==1:
             selection=(self.item_selection[1] or '*') if self.item_selection and self.item_selection[0] is win else None
             row=next((row for row in self.namespace_file_rows(win)
                       if row and row.enabled and row.mnemonic==name.lower()),None)
@@ -2538,6 +2625,7 @@ class Shell(Gtk.Window):
         elif not ctrl and self.wallpaper_combo_key(name, alt):
             pass
         elif name=='Escape' and not ctrl:
+            self.namespace_item_drag=self.namespace_item_point=None
             self.shortcut_drag = self.shortcut_drag_point = self.shortcut_drop = None
             self.file_drag = self.file_drag_origin = self.file_drag_point = self.file_hover = None
             self.icon_drag = self.icon_drag_point = None
@@ -2592,9 +2680,9 @@ class Shell(Gtk.Window):
                 match=next((i for i,row in enumerate(menu.ROWS) if row[2]==name.lower()),None)
                 if match is not None:
                     self.choose_menu_row(match)
-        elif self.state.active and self.state.active.kind=='control' and name in ('Left','Right','Up','Down','Home','End'):
+        elif self.state.active and self.state.active.kind in ('computer','control','printers') and name in ('Left','Right','Up','Down','Home','End'):
             from win95lx.explorer.namespace_layout import reveal
-            win=self.state.active;labels=list(cpl_catalog.labels());layout=win.namespace_layout
+            win=self.state.active;labels=[label for _,label,_ in self.printer_namespace().entries()] if win.kind=='printers' else list(cpl_catalog.labels()) if win.kind=='control' else ['(C:)','Control Panel'];layout=win.namespace_layout
             if labels and layout:
                 current=labels.index(win.focus_item) if win.focus_item in labels else 0
                 if name=='Home':index=0
@@ -2616,6 +2704,7 @@ class Shell(Gtk.Window):
                 self.navigate_drive(win, self.drive.directory)
             else:
                 self.action(('drive-edit', win, command))
+        elif name=='F5' and self.state.active and self.state.active.kind=='printers':self.refresh_printers()
         elif name=='F5' and not self.state.active:
             self.action(('desktop-refresh',))
         elif alt and name=='Return' and self.state.selection=='computer':self.open('system')
@@ -2628,6 +2717,9 @@ class Shell(Gtk.Window):
             self.action(('start-folder', parent))
         elif name=='Return' and self.item_selection and self.item_selection[0] is self.state.active:
             active=self.state.active.kind;label=self.item_selection[1]
+            if active=='printers':
+                target=next((target for _,caption,target in self.printer_namespace().entries() if caption==label),None)
+                if target:self.action(target)
             if active == 'drive':
                 entry = next((item for item in self.drive.entries if item[0]==label), None)
                 if entry:

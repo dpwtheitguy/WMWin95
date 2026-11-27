@@ -28,6 +28,8 @@ def main():
     import json
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--socket',type=Path,required=True);p.add_argument('name');a=p.parse_args()
     q=QMP(a.socket)
+    # Saving several GiB of guest RAM can exceed the normal 15-second RPC timeout.
+    q.socket.settimeout(120)
     try:print(json.dumps(save_checkpoint(q,a.name),indent=2))
     finally:q.close()
 if __name__=='__main__':main()

@@ -157,3 +157,40 @@ class IPv4EntryTests(unittest.TestCase):
         self.assertEqual(e.index,0);e.key('a',ctrl=True);e.key('','10');self.assertEqual(e.text,'10.0.2.10')
 
 if __name__=='__main__':unittest.main()
+
+class NetworkReadbackAcceptanceTests(unittest.TestCase):
+    def test_successful_read_with_wrong_value_is_not_accepted(self):
+        before=NetworkState('win95lx-dev',(profile(),))
+        class Backend:
+            def __init__(self):self.restored=None
+            def preferences(self):return before
+            def apply(self,pending,baseline):pass
+            def restore(self,value):self.restored=value
+        backend=Backend();controller=NetworkController(backend);controller.pending=before.change_connection(UUID,ipv4=replace(before.connections[0].ipv4,address='192.0.2.22'))
+        with self.assertRaisesRegex(NetworkError,'were restored'):controller.apply()
+        self.assertEqual(backend.restored,before);self.assertEqual(controller.applied,before)
+    def test_failed_readback_restores_only_edited_profile(self):
+        other=replace(profile(),uuid='4c390e1e-c79e-4626-bbea-c95d9794010d',name='Untouched adapter')
+        before=NetworkState('win95lx-dev',(profile(),other))
+        class Backend:
+            def __init__(self):self.reads=0;self.restored=None
+            def preferences(self):
+                self.reads+=1
+                if self.reads>1:raise NetworkError('read failed')
+                return before
+            def apply(self,pending,baseline):pass
+            def restore(self,value):self.restored=value
+        backend=Backend();controller=NetworkController(backend);controller.pending=before.change_connection(UUID,ipv4=replace(before.connections[0].ipv4,address='192.0.2.22'))
+        with self.assertRaisesRegex(NetworkError,'were restored'):controller.apply()
+        self.assertEqual(tuple(c.uuid for c in backend.restored.connections),(UUID,))
+    def test_missing_edited_profile_after_apply_is_not_accepted(self):
+        before=NetworkState('win95lx-dev',(profile(),))
+        class Backend:
+            def __init__(self):self.reads=0;self.restored=None
+            def preferences(self):
+                self.reads+=1;return before if self.reads==1 else replace(before,connections=())
+            def apply(self,pending,baseline):pass
+            def restore(self,value):self.restored=value
+        backend=Backend();controller=NetworkController(backend);controller.pending=before.change_connection(UUID,ipv4=replace(before.connections[0].ipv4,address='192.0.2.22'))
+        with self.assertRaisesRegex(NetworkError,'were restored'):controller.apply()
+        self.assertEqual(backend.restored,before)

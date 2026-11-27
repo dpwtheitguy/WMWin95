@@ -6,12 +6,13 @@ from win95lx.shell.widgets import FACE,BLACK,LIGHT,NAVY,SHADOW
 from win95lx.shell.scrollbar import VerticalScrollbar
 
 class SystemWindow(PropertySheet):
-    title='System Properties';asset_prefix='system';size=(408,448)
+    title='System Properties';asset_prefix='system';size=(410,448)
     tabs=('general','devices','hardware-profiles','performance')
     tab_rects=((10,29,49,22),(59,29,92,22),(151,29,95,22),(246,29,73,22))
     buttons=((245,415,75,23),(326,415,75,23))
     def __init__(self,shell):
-        super().__init__(shell);self.summary=system_summary();self.devices=inventory();self.selection=0;self.scroll=0;self.by_connection=False
+        super().__init__(shell);self.summary=system_summary();self.devices=inventory();self.selection=0;self.scroll=0;self.by_connection=False;self.device_drag=None
+        self.area.connect('scroll-event',self.wheel)
     def rows(self):
         rows=[('Computer',None)]
         if self.by_connection:return rows+[(device.name,device) for device in self.devices]
@@ -20,6 +21,7 @@ class SystemWindow(PropertySheet):
             if device.category!=category:category=device.category;rows.append((category,None))
             rows.append((device.name,device))
         return rows
+    def device_bar(self):return VerticalScrollbar.for_page(263,max(0,len(self.rows())-16),16)
     def draw_content(self,p):
         info=self.summary
         if self.tab==0:
@@ -30,18 +32,24 @@ class SystemWindow(PropertySheet):
                 p.text(label,x,y,bold=bold)
         elif self.tab==1:
             rows=self.rows();self.selection=min(self.selection,len(rows)-1);self.scroll=min(self.scroll,max(0,len(rows)-16))
-            p.fill(30,92,332,262,LIGHT)
-            for row,(label,device) in enumerate(rows[self.scroll:self.scroll+16]):
+            p.fill(30,92,349,263,LIGHT)
+            p.cr.save();p.cr.rectangle(30,92,333,263);p.cr.clip()
+            for row,(label,device) in enumerate(rows[self.scroll:self.scroll+17]):
                 index=self.scroll+row;y=93+row*16;x=49 if device is None else 68
                 image=(30,92,16,16) if index==0 else (49,140,16,16) if device is None else (68,189,16,16)
                 self.sprite(p,image,x-19,y)
                 width=min(360-x,p.font.width(label)+2)
                 if index==self.selection:p.fill(x,y,width,13,NAVY)
                 p.cr.save();p.cr.rectangle(x,y,360-x,15);p.cr.clip();p.text(label,x,y,LIGHT if index==self.selection else BLACK);p.cr.restore()
-                self.hit((30,y,332,16),('device',index))
-            VerticalScrollbar(264,max(0,len(rows)-16)).draw(p,363,91,self.scroll)
-            self.hit((363,91,16,16),('scroll',-1));self.hit((363,339,16,16),('scroll',1))
-            self.hit((363,107,16,110),('scroll',-16));self.hit((363,217,16,122),('scroll',16))
+                self.hit((30,y,333,min(16,355-y)),('device',index))
+            p.cr.restore()
+            bar=self.device_bar()
+            if bar.maximum:
+                bar.draw(p,363,92,self.scroll,track="window")
+                top=92+bar.thumb_top(self.scroll)
+                self.hit((363,92,16,16),('scroll',-1));self.hit((363,339,16,16),('scroll',1))
+                self.hit((363,108,16,max(0,top-108)),('scroll',-16))
+                self.hit((363,top+bar.thumb,16,max(0,339-top-bar.thumb)),('scroll',16))
             self.hit((28,65,142,20),('group',False));self.hit((179,65,175,20),('group',True))
             if self.by_connection:
                 self.sprite(p,(179,68,13,13),28,68);self.sprite(p,(28,68,13,13),179,68)
@@ -79,6 +87,29 @@ class SystemWindow(PropertySheet):
             self.message({'filesystem':'File System Properties','graphics':'Graphics Properties','memory':'Virtual Memory'}.get(kind,'Performance Details'),text)
         else:return super().action(action)
         self.area.queue_draw()
+    def press(self,area,event):
+        if self.tab==1 and event.button==1 and self.device_bar().maximum:
+            bar=self.device_bar();top=92+bar.thumb_top(self.scroll)
+            if 363<=event.x<379 and top<=event.y<top+bar.thumb:
+                self.device_drag=event.y-top;self.focus_action=('device-tree',);return True
+        return super().press(area,event)
+    def motion(self,area,event):
+        if self.device_drag is not None:
+            self.scroll=self.device_bar().value_at(event.y-92-self.device_drag);self.area.queue_draw();return True
+        return super().motion(area,event)
+    def release(self,area,event):
+        if self.device_drag is not None:self.device_drag=None;self.area.queue_draw();return True
+        return super().release(area,event)
+    def wheel(self,area,event):
+        if self.tab!=1 or not (28<=event.x<381 and 90<=event.y<357):return False
+        if event.direction==Gdk.ScrollDirection.UP:delta=-3
+        elif event.direction==Gdk.ScrollDirection.DOWN:delta=3
+        else:
+            valid,dx,dy=event.get_scroll_deltas()
+            if not valid or not dy:return False
+            delta=3 if dy>0 else -3
+        self.action(('scroll',delta));return True
+    def tab_changed(self):self.device_drag=None;super().tab_changed()
     def message(self,title,text):
         from win95lx.apps.dialogs import message_box
         message_box(self,title,text,Gtk.MessageType.INFO)

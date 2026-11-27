@@ -8,6 +8,7 @@ from gi.repository import Gtk,Gdk,GLib,GdkPixbuf,Pango,PangoCairo
 from win95lx.control_panel.font_catalog import FontCatalog,FontFace,font_metadata,fontconfig,EXTENSIONS
 from win95lx.shell.widgets import Painter,FACE,BLACK,LIGHT,NAVY,SHADOW
 from win95lx.shell.scrollbar import VerticalScrollbar
+from win95lx.apps.popup_events import dismiss_and_replay,local_point
 from win95lx.shell.icon_labels import wrap_label
 from win95lx.shell.system_menu import options,WindowOperation,ARROWS
 from win95lx.shell.window_bounds import fit_bounds
@@ -18,8 +19,8 @@ LINK_REASON='Font shortcuts and renaming are not implemented in this folder. Ins
 class FontMenu(Gtk.Window):
     def __init__(self,parent,rows,x,width,top=42):
         super().__init__(type=Gtk.WindowType.POPUP);self.parent=parent;parent.menu_popup=self;self.shell=parent.shell;self.rows=rows;self.width=width;self.value=next((i for i,row in enumerate(rows) if row and row[2]),-1);self.hits=[];self.closed=False
-        height=5+sum(9 if row is None else 17 for row in rows);px,py=parent.get_position();self.move(px+x,py+top);self.set_transient_for(parent)
-        self.area=Gtk.DrawingArea();self.area.set_size_request(width,height);self.add(self.area);self.area.add_events(Gdk.EventMask.BUTTON_PRESS_MASK|Gdk.EventMask.POINTER_MOTION_MASK);self.area.connect('draw',self.draw);self.area.connect('button-press-event',self.press);self.area.connect('motion-notify-event',self.motion);self.connect('key-press-event',self.key);self.connect('focus-out-event',lambda *_:self.finish());self.show_all();self.grab_add();self.get_window().focus(Gdk.CURRENT_TIME)
+        height=5+sum(9 if row is None else 17 for row in rows);self.height=height;px,py=parent.get_position();self.move(px+x,py+top);self.set_transient_for(parent)
+        self.area=Gtk.DrawingArea();self.area.set_size_request(width,height);self.add(self.area);self.area.add_events(Gdk.EventMask.BUTTON_PRESS_MASK|Gdk.EventMask.POINTER_MOTION_MASK);self.area.connect('draw',self.draw);self.area.connect('button-press-event',self.press);self.area.connect('motion-notify-event',self.motion);self.connect('key-press-event',self.key);self.connect('focus-out-event',lambda *_:self.finish(restore_focus=False));self.connect('button-press-event',self.press);self.connect('grab-broken-event',lambda *_:self.finish(restore_focus=False));self.connect('destroy',self.cleanup);self.parent_destroy=parent.connect('destroy',lambda *_:self.finish(restore_focus=False));self.show_all();self.grab_add();self.get_window().focus(Gdk.CURRENT_TIME)
     def draw(self,area,cr):
         p=Painter(cr,self.shell.font);p.bevel(0,0,self.width,area.get_allocated_height());self.hits=[];y=3
         for index,row in enumerate(self.rows):
@@ -33,19 +34,38 @@ class FontMenu(Gtk.Window):
             p.text(label,24,y+2,color)
             if accelerator:p.text(accelerator[0],self.width-14-p.font.width(accelerator[0]),y+2,color)
             self.hits.append((y,index));y+=17
-    def finish(self,index=None):
+    def cleanup(self,*_):
+        self.closed=True
+        if self.has_grab():self.grab_remove()
+        handler=getattr(self,'parent_destroy',None)
+        if handler and self.parent.handler_is_connected(handler):self.parent.disconnect(handler)
+        self.parent_destroy=None
+        if self.parent.menu_popup is self:self.parent.menu_popup=None
+        if self.parent.get_visible():self.parent.area.queue_draw()
+    def finish(self,index=None,*,restore_focus=True):
         if self.closed:return True
-        self.closed=True;self.grab_remove();self.destroy();self.parent.menu_popup=None
-        if self.parent.get_window():self.parent.get_window().focus(Gdk.CURRENT_TIME)
-        if index is not None and self.rows[index] and self.rows[index][2]:GLib.idle_add(self.parent.command,self.rows[index][1])
+        self.cleanup();self.destroy()
+        if restore_focus and self.parent.get_window():self.parent.get_window().focus(Gdk.CURRENT_TIME)
+        if index is not None and self.parent.get_visible() and self.rows[index] and self.rows[index][2]:
+            parent,command=self.parent,self.rows[index][1]
+            def invoke():
+                if parent.get_visible():parent.command(command)
+                return False
+            GLib.idle_add(invoke)
         self.parent.area.queue_draw();return True
     def press(self,area,e):
-        index=next((i for y,i in self.hits if y<=e.y<y+17),None)
+        if self.closed:return True
+        x,y=local_point(self,e)
+        if not 0<=x<self.width or not 0<=y<self.height:return dismiss_and_replay(e,lambda:self.finish(restore_focus=False))
+        index=next((i for top,i in self.hits if top<=y<top+17),None)
         if index is not None and not self.rows[index][2]:self.area.set_tooltip_text(self.rows[index][3]);return True
         return self.finish(index if e.button==1 else None)
     def motion(self,area,e):
-        self.value=next((i for y,i in self.hits if y<=e.y<y+17),-1);self.area.queue_draw();return True
+        if self.closed:return True
+        x,y=local_point(self,e)
+        self.value=next((i for top,i in self.hits if 0<=x<self.width and top<=y<top+17),-1);self.area.queue_draw();return True
     def key(self,window,e):
+        if self.closed:return True
         name=Gdk.keyval_name(e.keyval);enabled=[i for i,row in enumerate(self.rows) if row and row[2]]
         if name=='Escape':return self.finish()
         if name in ('Return','KP_Enter','space'):return self.finish(self.value if self.value>=0 else None)

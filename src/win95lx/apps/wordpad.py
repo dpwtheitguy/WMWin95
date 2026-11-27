@@ -243,6 +243,7 @@ def build_window(assets=None):
     import cairo
     from win95lx.assets.bitmap import BitmapFont
     from win95lx.shell.widgets import Painter, FACE
+    from win95lx.shell.accessories import SCROLLBAR_STYLE,style_scrollbars
     from win95lx.recent_documents import record_document
     from win95lx.apps.dialogs import SAVE_CHANGES, about_dialog, choose_file, message_box, run_dialog
 
@@ -252,7 +253,7 @@ def build_window(assets=None):
             self.set_default_size(610, 420)
             self.get_style_context().add_class('win95-wordpad')
             provider = Gtk.CssProvider()
-            provider.load_from_data(CSS)
+            provider.load_from_data(CSS+SCROLLBAR_STYLE)
             Gtk.StyleContext.add_provider_for_screen(
                 self.get_screen(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
             )
@@ -385,9 +386,11 @@ def build_window(assets=None):
             box.pack_start(ruler, False, False, 0)
 
             viewport = Gtk.ScrolledWindow()
+            viewport.set_overlay_scrolling(False)
             viewport.set_shadow_type(Gtk.ShadowType.NONE)
             viewport.get_style_context().add_class('wordpad-editor')
             viewport.add(self.view)
+            style_scrollbars(viewport)
             editor_frame=Gtk.Frame(shadow_type=Gtk.ShadowType.NONE)
             editor_frame.get_style_context().add_class('wordpad-editor-frame')
             editor_frame.add(viewport)

@@ -1,0 +1,1507 @@
+{
+  "schema": 1,
+  "date": "2026-11-26",
+  "baseline": "Windows95 OSR2.5, 96dpi; classic/IE4/Plus evidence must remain separate",
+  "families": [
+    {
+      "id": "label",
+      "name": "Static/Label",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/widgets.py",
+          "sha256": "758501e402c6dab75b845b2dee35ebe83a112c14e4dde4c3b06c5e215a0645aa"
+        },
+        {
+          "path": "src/win95lx/apps/property_sheet.py",
+          "sha256": "b48a9f860ae9b4125b415a80baf13c8ea8e7c70daecc314176444c435ed2cfa9"
+        }
+      ],
+      "observation": "Original bitmap Painter text vs GTK label fonts; background/disabled embossing depends on owner.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "command",
+      "name": "CommandButton",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/command_button.py",
+          "sha256": "f3c5d084e564afcf51dab0d25850c0478cc25aff87bfa8031388551c301999cc"
+        },
+        {
+          "path": "src/win95lx/shell/widgets.py",
+          "sha256": "758501e402c6dab75b845b2dee35ebe83a112c14e4dde4c3b06c5e215a0645aa"
+        },
+        {
+          "path": "src/win95lx/apps/property_sheet.py",
+          "sha256": "b48a9f860ae9b4125b415a80baf13c8ea8e7c70daecc314176444c435ed2cfa9"
+        }
+      ],
+      "observation": "Measured shared command renderer accepted narrowly; legacy Painter.button still differs and remains used.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "confirmed_mismatch_remaining_legacy_consumers",
+      "evidence": "private/research/control-defaults-20261126/legacy-button-comparison.json"
+    },
+    {
+      "id": "check",
+      "name": "CheckBox",
+      "implementations": [
+        {
+          "path": "src/win95lx/control_panel/display_settings.py",
+          "sha256": "fe541a1c80e2ecabb3af0ea7266205c98dfb29e9ff80db469fa399291f36941c"
+        },
+        {
+          "path": "src/win95lx/apps/accessibility.py",
+          "sha256": "12b2c011748087bda70584b9ef96afcae01b2e0b2960af841205992919ef2282"
+        },
+        {
+          "path": "src/win95lx/apps/mouse.py",
+          "sha256": "e3c1d37eef3df6df83b60c0c2b406a9d2a689f25890cf5327140f6497fd3bb7f"
+        }
+      ],
+      "observation": "Native sprites/manual tick paths; no single complete state renderer.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "radio",
+      "name": "OptionButton",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/network.py",
+          "sha256": "23d0496aa7ea4bb73d1f2a9098994bcb8abff3b96184a503469c7652e2627e5a"
+        },
+        {
+          "path": "src/win95lx/apps/accessibility.py",
+          "sha256": "12b2c011748087bda70584b9ef96afcae01b2e0b2960af841205992919ef2282"
+        },
+        {
+          "path": "src/win95lx/shell/shutdown_dialog.py",
+          "sha256": "ef26894cecc2f90f00f9e0263ef581de3f14432964e6a5002dfd2b5f90d13f41"
+        }
+      ],
+      "observation": "Native sprite and manual-circle paths differ; Network same-state mismatch confirmed.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "Network scoped component corrected with16native cases; broader consumers pending",
+      "evidence": "reports/NETWORK_2026-11-26.md"
+    },
+    {
+      "id": "frame",
+      "name": "Frame/GroupBox",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/property_sheet.py",
+          "sha256": "b48a9f860ae9b4125b415a80baf13c8ea8e7c70daecc314176444c435ed2cfa9"
+        },
+        {
+          "path": "src/win95lx/apps/network.py",
+          "sha256": "23d0496aa7ea4bb73d1f2a9098994bcb8abff3b96184a503469c7652e2627e5a"
+        },
+        {
+          "path": "src/win95lx/apps/keyboard.py",
+          "sha256": "a692119cc474311dfa979cc6b8898df1b5ff8560642717d5f334067403a51d1d"
+        }
+      ],
+      "observation": "Original full-sheet art plus local clears; border/caption ownership must remain measured.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "combo-list",
+      "name": "DropDownList ComboBox",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/combo_box.py",
+          "sha256": "f3402bc935265a2ef66ef7ff5b111656f2cfdde95416b728e3232778c7631723"
+        },
+        {
+          "path": "src/win95lx/apps/choice_dialog.py",
+          "sha256": "44dd35db5868f4474eeaad38e88c98ef3922f761db3f5fdba066ac3d85e64d75"
+        },
+        {
+          "path": "src/win95lx/control_panel/background.py",
+          "sha256": "8c5e761120d7a486c928315e15a160ff8d7eb6df776eb2088e723842eb6f24a7"
+        },
+        {
+          "path": "src/win95lx/control_panel/display_settings.py",
+          "sha256": "fe541a1c80e2ecabb3af0ea7266205c98dfb29e9ff80db469fa399291f36941c"
+        }
+      ],
+      "observation": "Two popup renderers; native yellow focus perimeter is intentional in measured opened Display combo.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "containment_component_corrected_integration_pending",
+      "evidence": "private/research/control-defaults-20261126/combo-overflow.json"
+    },
+    {
+      "id": "combo-edit",
+      "name": "Editable ComboBox",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/wordpad.py",
+          "sha256": "977b38f861d506f03ce7084c40daffd1bead2804a8c04f4deeb588255a6a7692"
+        },
+        {
+          "path": "src/win95lx/apps/dialogs.py",
+          "sha256": "69d0130a49fc9d807b72712b233a904aa37f9018c8a4ddf3ab99acfc65b704dd"
+        }
+      ],
+      "observation": "GTK entry/button/arrow/popover inheritance; independent native same-state test not established here.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "edit",
+      "name": "Single-line TextBox",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/text_entry.py",
+          "sha256": "1b633a803e2db070e614228462435fd13e39e8001f08bba03e11f11ea64550c3"
+        },
+        {
+          "path": "src/win95lx/apps/dialogs.py",
+          "sha256": "69d0130a49fc9d807b72712b233a904aa37f9018c8a4ddf3ab99acfc65b704dd"
+        },
+        {
+          "path": "src/win95lx/apps/keyboard.py",
+          "sha256": "a692119cc474311dfa979cc6b8898df1b5ff8560642717d5f334067403a51d1d"
+        },
+        {
+          "path": "src/win95lx/apps/regional.py",
+          "sha256": "4e82a574d06437cb9827c193f29fade2ebb782624e711a1135b6e26bd7ed92b7"
+        }
+      ],
+      "observation": "Shared input state, multiple paint paths; enabled white vs disabled gray is native for measured IP child.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "multiline",
+      "name": "Multiline TextBox",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/notepad.py",
+          "sha256": "59b2430eefbf5056d15331c39ff8b812b39b98f7aa6af49b49243762831a9c2c"
+        }
+      ],
+      "observation": "GTK TextView plus native/Cairo menu/caption edges; white editor intentional.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "richtext",
+      "name": "RichTextBox",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/wordpad.py",
+          "sha256": "977b38f861d506f03ce7084c40daffd1bead2804a8c04f4deeb588255a6a7692"
+        }
+      ],
+      "observation": "GTK TextView formatting model with separate toolbar/ruler and document font metrics.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "listbox",
+      "name": "ListBox",
+      "implementations": [
+        {
+          "path": "src/win95lx/control_panel/background.py",
+          "sha256": "8c5e761120d7a486c928315e15a160ff8d7eb6df776eb2088e723842eb6f24a7"
+        },
+        {
+          "path": "src/win95lx/apps/mouse.py",
+          "sha256": "e3c1d37eef3df6df83b60c0c2b406a9d2a689f25890cf5327140f6497fd3bb7f"
+        },
+        {
+          "path": "src/win95lx/apps/choice_dialog.py",
+          "sha256": "44dd35db5868f4474eeaad38e88c98ef3922f761db3f5fdba066ac3d85e64d75"
+        },
+        {
+          "path": "src/win95lx/apps/network.py",
+          "sha256": "23d0496aa7ea4bb73d1f2a9098994bcb8abff3b96184a503469c7652e2627e5a"
+        }
+      ],
+      "observation": "Need focused/unfocused selected and disabled variants, item clipping and overflow.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "confirmed_mismatch_background_focus_selection",
+      "evidence": "private/research/control-defaults-20261126/background-selection-colors.json"
+    },
+    {
+      "id": "listview",
+      "name": "ListView",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/namespace_view.py",
+          "sha256": "84033a6194edd77931d8402fada27b186b1cbb659eabdca51efc2be57c6dfcc8"
+        },
+        {
+          "path": "src/win95lx/apps/dialogs.py",
+          "sha256": "69d0130a49fc9d807b72712b233a904aa37f9018c8a4ddf3ab99acfc65b704dd"
+        },
+        {
+          "path": "src/win95lx/apps/fonts.py",
+          "sha256": "ba06b1a24a50bfef61d0ba5831f149744f85280805383f8889f87e660e1c913f"
+        }
+      ],
+      "observation": "Control Panel four views; GTK file tree; Fonts listing; not one universal shared style.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "tree",
+      "name": "TreeView",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/system.py",
+          "sha256": "7d20f157303405d321e5b9dbd09c19481536dad863b5467dd22ee5dc452df4b1"
+        },
+        {
+          "path": "src/win95lx/apps/sounds.py",
+          "sha256": "c386afcfb568ad795f4a00a41abe8109f6affc74187f21a95b0063cb1cc6c7e8"
+        },
+        {
+          "path": "src/win95lx/explorer/tree_model.py",
+          "sha256": "40ddcd507aedda0455aa3658eec70f2c50991fc6c71708af10f37e5a1b72a7eb"
+        }
+      ],
+      "observation": "Specialized flat/drawn device/events trees; new Explorer pure model not integrated.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "vscroll",
+      "name": "VScrollBar",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/scrollbar.py",
+          "sha256": "c80a76dc9b52819c458be3dfe5a30df2dcb3ac2bead7024e2a0f42a48ea9b846"
+        },
+        {
+          "path": "src/win95lx/apps/system.py",
+          "sha256": "7d20f157303405d321e5b9dbd09c19481536dad863b5467dd22ee5dc452df4b1"
+        },
+        {
+          "path": "src/win95lx/apps/fonts.py",
+          "sha256": "ba06b1a24a50bfef61d0ba5831f149744f85280805383f8889f87e660e1c913f"
+        },
+        {
+          "path": "src/win95lx/apps/mouse.py",
+          "sha256": "e3c1d37eef3df6df83b60c0c2b406a9d2a689f25890cf5327140f6497fd3bb7f"
+        },
+        {
+          "path": "src/win95lx/apps/sounds.py",
+          "sha256": "c386afcfb568ad795f4a00a41abe8109f6affc74187f21a95b0063cb1cc6c7e8"
+        }
+      ],
+      "observation": "Shared explicit classic/window track; root owns current default/consumer correction.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "root_and_gtk_worker_corrections_in_progress_native_exceptions_required",
+      "evidence": "private/screenshots/gtk-scrollbars-20261126/native-track-measurements.json"
+    },
+    {
+      "id": "hscroll",
+      "name": "HScrollBar",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/namespace_view.py",
+          "sha256": "84033a6194edd77931d8402fada27b186b1cbb659eabdca51efc2be57c6dfcc8"
+        },
+        {
+          "path": "src/win95lx/apps/notepad.py",
+          "sha256": "59b2430eefbf5056d15331c39ff8b812b39b98f7aa6af49b49243762831a9c2c"
+        },
+        {
+          "path": "src/win95lx/apps/wordpad.py",
+          "sha256": "977b38f861d506f03ce7084c40daffd1bead2804a8c04f4deeb588255a6a7692"
+        },
+        {
+          "path": "src/win95lx/apps/dialogs.py",
+          "sha256": "69d0130a49fc9d807b72712b233a904aa37f9018c8a4ddf3ab99acfc65b704dd"
+        }
+      ],
+      "observation": "Rotated Cairo vertical primitive vs GTK horizontal nodes; orientation-specific tests required.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "root_and_gtk_worker_corrections_in_progress_native_exceptions_required",
+      "evidence": "private/screenshots/gtk-scrollbars-20261126/native-track-measurements.json"
+    },
+    {
+      "id": "menubar",
+      "name": "MenuBar",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/menu_layout.py",
+          "sha256": "288b148ac7ddd462ed6df6eedc1c7a7bc77d8b49e2c9e331d6e585e8330e19f5"
+        },
+        {
+          "path": "src/win95lx/shell/explorer_chrome.py",
+          "sha256": "e81747ac3967724736ba9792b5bc0654dcae79c3b071f35a80ffb9a1159ec93a"
+        },
+        {
+          "path": "src/win95lx/shell/accessories.py",
+          "sha256": "b6f8e3f20670fa0a90511bd3544d46d0e75c21f5ca589a2783c5fcdaf44a774b"
+        },
+        {
+          "path": "src/win95lx/apps/notepad.py",
+          "sha256": "59b2430eefbf5056d15331c39ff8b812b39b98f7aa6af49b49243762831a9c2c"
+        }
+      ],
+      "observation": "Original geometry plus scoped GTK and owner-drawn labels; no broad menu-state acceptance.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "menu",
+      "name": "PopupMenu",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/explorer_menu.py",
+          "sha256": "1d9a24f2510eb09c2b4655d82e48983c5d2c91a3126b2dd9343d587e6f4930e8"
+        },
+        {
+          "path": "src/win95lx/shell/accessories.py",
+          "sha256": "b6f8e3f20670fa0a90511bd3544d46d0e75c21f5ca589a2783c5fcdaf44a774b"
+        },
+        {
+          "path": "src/win95lx/apps/notepad.py",
+          "sha256": "59b2430eefbf5056d15331c39ff8b812b39b98f7aa6af49b49243762831a9c2c"
+        },
+        {
+          "path": "src/win95lx/apps/fonts.py",
+          "sha256": "ba06b1a24a50bfef61d0ba5831f149744f85280805383f8889f87e660e1c913f"
+        }
+      ],
+      "observation": "Separate Cairo/native image/GTK state paths; disabled embossing, checks and gutters must share semantics.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "tabs",
+      "name": "TabStrip",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/property_sheet.py",
+          "sha256": "b48a9f860ae9b4125b415a80baf13c8ea8e7c70daecc314176444c435ed2cfa9"
+        },
+        {
+          "path": "src/win95lx/apps/network.py",
+          "sha256": "23d0496aa7ea4bb73d1f2a9098994bcb8abff3b96184a503469c7652e2627e5a"
+        },
+        {
+          "path": "src/win95lx/apps/mouse.py",
+          "sha256": "e3c1d37eef3df6df83b60c0c2b406a9d2a689f25890cf5327140f6497fd3bb7f"
+        }
+      ],
+      "observation": "Native frame sprites and specialized rotating Network tab rows; GTK fallback Notebook separate.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "toolbar",
+      "name": "Toolbar",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/computer_view.py",
+          "sha256": "7a2932a2b471a0250ebc02a7bb1b6d11b1028374acdac5e5b478cd7957ab580d"
+        },
+        {
+          "path": "src/win95lx/apps/wordpad.py",
+          "sha256": "977b38f861d506f03ce7084c40daffd1bead2804a8c04f4deeb588255a6a7692"
+        },
+        {
+          "path": "src/win95lx/apps/dialogs.py",
+          "sha256": "69d0130a49fc9d807b72712b233a904aa37f9018c8a4ddf3ab99acfc65b704dd"
+        }
+      ],
+      "observation": "Source artwork and GTK buttons/combos; disabled/hot/pressed states are separate contracts.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "slider",
+      "name": "Slider/TrackBar",
+      "implementations": [
+        {
+          "path": "src/win95lx/control_panel/display_settings.py",
+          "sha256": "fe541a1c80e2ecabb3af0ea7266205c98dfb29e9ff80db469fa399291f36941c"
+        },
+        {
+          "path": "src/win95lx/apps/keyboard.py",
+          "sha256": "a692119cc474311dfa979cc6b8898df1b5ff8560642717d5f334067403a51d1d"
+        },
+        {
+          "path": "src/win95lx/apps/mouse.py",
+          "sha256": "e3c1d37eef3df6df83b60c0c2b406a9d2a689f25890cf5327140f6497fd3bb7f"
+        },
+        {
+          "path": "src/win95lx/apps/multimedia.py",
+          "sha256": "bf7b2bd769bbcba1753f233bf69231c84e089bc51bc64682ff40f1fef0d3aa54"
+        }
+      ],
+      "observation": "Measured artwork/position formulas; no general fully accepted TrackBar primitive.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "progress",
+      "name": "ProgressBar",
+      "implementations": [],
+      "observation": "No current dedicated shared progress renderer found; future operation UI must research original before implementing.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "status",
+      "name": "StatusBar",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/computer_view.py",
+          "sha256": "7a2932a2b471a0250ebc02a7bb1b6d11b1028374acdac5e5b478cd7957ab580d"
+        },
+        {
+          "path": "src/win95lx/apps/wordpad.py",
+          "sha256": "977b38f861d506f03ce7084c40daffd1bead2804a8c04f4deeb588255a6a7692"
+        },
+        {
+          "path": "src/win95lx/apps/fonts.py",
+          "sha256": "ba06b1a24a50bfef61d0ba5831f149744f85280805383f8889f87e660e1c913f"
+        }
+      ],
+      "observation": "Cairo inset panes vs GTK status border; white/gray depends on pane ownership.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "task",
+      "name": "TaskButton",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/taskbar.py",
+          "sha256": "ab2bf60c62d5e5c060354340fde006f4bfab18afd2fb3fc2e08c0e3ae40aa0ff"
+        }
+      ],
+      "observation": "Measured IE4 active task blank interior is solid white; do not replace universally with gray stipple.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "intentional_native_white_active_interior",
+      "evidence": "private/research/control-defaults-20261126/native-state-colors.json"
+    },
+    {
+      "id": "caption",
+      "name": "Caption/Icon/MinMaxClose",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/widgets.py",
+          "sha256": "758501e402c6dab75b845b2dee35ebe83a112c14e4dde4c3b06c5e215a0645aa"
+        },
+        {
+          "path": "src/win95lx/shell/app.py",
+          "sha256": "980fe6b0399847c4e639563724dc1d10de8e50360a23b6bba985879c8154e78f"
+        },
+        {
+          "path": "src/win95lx/shell/accessories.py",
+          "sha256": "b6f8e3f20670fa0a90511bd3544d46d0e75c21f5ca589a2783c5fcdaf44a774b"
+        },
+        {
+          "path": "src/win95lx/apps/property_sheet.py",
+          "sha256": "b48a9f860ae9b4125b415a80baf13c8ea8e7c70daecc314176444c435ed2cfa9"
+        }
+      ],
+      "observation": "Cairo symbols/native snapshots; command-button acceptance does not cover caption states.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "system-menu",
+      "name": "Window SystemMenu",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/system_menu.py",
+          "sha256": "42f1ebfcb3d2763151e6992ded19ba6f4334593f08d698870d7ea0144ea3809a"
+        },
+        {
+          "path": "src/win95lx/shell/start_context.py",
+          "sha256": "768afdee1189852ea176a04d293e8f5f0d96232351c5b87dae1e575dfae2f4c0"
+        },
+        {
+          "path": "src/win95lx/shell/accessories.py",
+          "sha256": "b6f8e3f20670fa0a90511bd3544d46d0e75c21f5ca589a2783c5fcdaf44a774b"
+        }
+      ],
+      "observation": "Shared command profiles; external WM shortcut menus can bypass native style.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "dialog",
+      "name": "CommonDialog/MessageBox",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/dialogs.py",
+          "sha256": "69d0130a49fc9d807b72712b233a904aa37f9018c8a4ddf3ab99acfc65b704dd"
+        },
+        {
+          "path": "src/win95lx/shell/run_dialog.py",
+          "sha256": "31d9e061681a62c5a0821b78143f31b5eb4079a206a45cb85b7051d72694e38c"
+        },
+        {
+          "path": "src/win95lx/shell/shutdown_dialog.py",
+          "sha256": "ef26894cecc2f90f00f9e0263ef581de3f14432964e6a5002dfd2b5f90d13f41"
+        }
+      ],
+      "observation": "Native-artwork, Cairo prompt and GTK fallback coexist; test actual runtime branch.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "updown",
+      "name": "UpDown/SpinButton",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/datetime.py",
+          "sha256": "f60df376195cee3b453a4c652946909d868568cb4fb3d6886c18e75c4ccd67ad"
+        },
+        {
+          "path": "src/win95lx/shell/app.py",
+          "sha256": "980fe6b0399847c4e639563724dc1d10de8e50360a23b6bba985879c8154e78f"
+        }
+      ],
+      "observation": "Date/time arrows vs generic GTK advanced display SpinButton; no general native accepted renderer.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "image",
+      "name": "PictureBox/Image/Shape/Line",
+      "implementations": [
+        {
+          "path": "src/win95lx/shell/widgets.py",
+          "sha256": "758501e402c6dab75b845b2dee35ebe83a112c14e4dde4c3b06c5e215a0645aa"
+        },
+        {
+          "path": "src/win95lx/control_panel/wallpaper.py",
+          "sha256": "6fe84a16ee2c75326385e7732bc0bcc84ebdd93e6998201f827ebd1dcc7d48ac"
+        },
+        {
+          "path": "src/win95lx/apps/mouse.py",
+          "sha256": "e3c1d37eef3df6df83b60c0c2b406a9d2a689f25890cf5327140f6497fd3bb7f"
+        }
+      ],
+      "observation": "Original asset decoding and integer drawing; transparent/invert pixels, border owner and clipping matter.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "masked",
+      "name": "IPAddress/MaskedEdit",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/network.py",
+          "sha256": "23d0496aa7ea4bb73d1f2a9098994bcb8abff3b96184a503469c7652e2627e5a"
+        },
+        {
+          "path": "src/win95lx/control_panel/network_preferences.py",
+          "sha256": "4672fe0addb371e9606fbe7a8bbd81f978c58cf959acf6c07b73542bc85b5f47"
+        }
+      ],
+      "observation": "Four bounded editors; stock System font typed sample accepted exactly; selection/caret remaining.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "named_typed_native_interior_exact_other_states_unaccepted",
+      "evidence": "private/screenshots/network-followup-final-800-20261126/report.json"
+    },
+    {
+      "id": "tooltip",
+      "name": "Tooltip/DisabledReason",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/property_sheet.py",
+          "sha256": "b48a9f860ae9b4125b415a80baf13c8ea8e7c70daecc314176444c435ed2cfa9"
+        }
+      ],
+      "observation": "Disabled-reason metadata and help; native tooltip geometry/state not comprehensively accepted.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "timer",
+      "name": "Timer/nonvisual",
+      "implementations": [
+        {
+          "path": "src/win95lx/apps/mouse.py",
+          "sha256": "e3c1d37eef3df6df83b60c0c2b406a9d2a689f25890cf5327140f6497fd3bb7f"
+        },
+        {
+          "path": "src/win95lx/apps/datetime.py",
+          "sha256": "f60df376195cee3b453a4c652946909d868568cb4fb3d6886c18e75c4ccd67ad"
+        },
+        {
+          "path": "src/win95lx/shell/app.py",
+          "sha256": "980fe6b0399847c4e639563724dc1d10de8e50360a23b6bba985879c8154e78f"
+        }
+      ],
+      "observation": "GLib timers; no color/default appearance. Evaluate cancellation/leaks/idle cost rather than pixel diff.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "data",
+      "name": "Data binding/nonvisual",
+      "implementations": [],
+      "observation": "No VB-style general Data control implemented; app models/service adapters are explicit.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    },
+    {
+      "id": "ole",
+      "name": "OLE/container",
+      "implementations": [],
+      "observation": "No Windows OLE container compatibility implemented; do not invent appearance acceptance.",
+      "required_states": [
+        "normal",
+        "focused",
+        "pressed",
+        "disabled",
+        "selected",
+        "inactive",
+        "open",
+        "empty",
+        "overflow",
+        "scaled"
+      ],
+      "audit_scope": "Source inventory with explicitly named independent evidence only; not blanket acceptance",
+      "audit_status": "partial_or_not_independently_state_audited",
+      "evidence": "docs/CONTROL_TOOLBOX.md"
+    }
+  ],
+  "gtk_constructor_or_typecheck_sites": [
+    {
+      "path": "src/win95lx/apps/calculator.py",
+      "line": 305,
+      "widget": "MenuBar",
+      "source": "bar = Gtk.MenuBar()"
+    },
+    {
+      "path": "src/win95lx/apps/calculator.py",
+      "line": 314,
+      "widget": "Menu",
+      "source": "menu = Gtk.Menu()"
+    },
+    {
+      "path": "src/win95lx/apps/calculator.py",
+      "line": 318,
+      "widget": "CheckMenuItem",
+      "source": "item = Gtk.CheckMenuItem.new_with_mnemonic(label)"
+    },
+    {
+      "path": "src/win95lx/apps/calculator.py",
+      "line": 335,
+      "widget": "Button",
+      "source": "button = Gtk.Button(label=key)"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 107,
+      "widget": "Button",
+      "source": "button = Gtk.Button()"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 149,
+      "widget": "Entry",
+      "source": "self.location = Gtk.Entry(hexpand=True)"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 153,
+      "widget": "Button",
+      "source": "up = Gtk.Button(label='Up')"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 158,
+      "widget": "TreeView",
+      "source": "self.view = Gtk.TreeView(model=self.files, headers_visible=False, activate_on_single_click=False)"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 162,
+      "widget": "ScrolledWindow",
+      "source": "scroller = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN, vexpand=True, overlay_scrolling=False)"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 166,
+      "widget": "Entry",
+      "source": "self.filename = Gtk.Entry(text=name)"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 170,
+      "widget": "Button",
+      "source": "confirm = Gtk.Button(label='Save' if saving else 'Open')"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 173,
+      "widget": "ComboBoxText",
+      "source": "self.filetype = Gtk.ComboBoxText()"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 180,
+      "widget": "Button",
+      "source": "cancel = Gtk.Button(label='Cancel')"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 201,
+      "widget": "TreeView",
+      "source": "self.view = Gtk.TreeView(model=self.files, headers_visible=False, fixed_height_mode=True)"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 222,
+      "widget": "ScrolledWindow",
+      "source": "scroll = Gtk.ScrolledWindow(overlay_scrolling=False)"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 227,
+      "widget": "Entry",
+      "source": "self.filename = Gtk.Entry(text=name, width_chars=1)"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 295,
+      "widget": "Menu",
+      "source": "menu = Gtk.Menu()"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 336,
+      "widget": "Menu",
+      "source": "menu = Gtk.Menu()"
+    },
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 478,
+      "widget": "Entry",
+      "source": "entry = Gtk.Entry(text=original, activates_default=True, margin=10)"
+    },
+    {
+      "path": "src/win95lx/apps/minesweeper.py",
+      "line": 236,
+      "widget": "MenuBar",
+      "source": "bar = Gtk.MenuBar()"
+    },
+    {
+      "path": "src/win95lx/apps/minesweeper.py",
+      "line": 238,
+      "widget": "Menu",
+      "source": "menu = Gtk.Menu()"
+    },
+    {
+      "path": "src/win95lx/apps/minesweeper.py",
+      "line": 247,
+      "widget": "RadioMenuItem",
+      "source": "item = Gtk.RadioMenuItem.new_with_label_from_widget(group, difficulty)"
+    },
+    {
+      "path": "src/win95lx/apps/minesweeper.py",
+      "line": 253,
+      "widget": "CheckMenuItem",
+      "source": "marks = Gtk.CheckMenuItem.new_with_mnemonic('_Marks (?)')"
+    },
+    {
+      "path": "src/win95lx/apps/minesweeper.py",
+      "line": 262,
+      "widget": "Menu",
+      "source": "help_menu = Gtk.Menu()"
+    },
+    {
+      "path": "src/win95lx/apps/notepad.py",
+      "line": 138,
+      "widget": "MenuBar",
+      "source": "menu_bar = Gtk.MenuBar()"
+    },
+    {
+      "path": "src/win95lx/apps/notepad.py",
+      "line": 142,
+      "widget": "TextView",
+      "source": "self.view = Gtk.TextView(monospace=True)"
+    },
+    {
+      "path": "src/win95lx/apps/notepad.py",
+      "line": 187,
+      "widget": "ScrolledWindow",
+      "source": "self.scroller = Gtk.ScrolledWindow()"
+    },
+    {
+      "path": "src/win95lx/apps/notepad.py",
+      "line": 213,
+      "widget": "Menu",
+      "source": "menu = Gtk.Menu()"
+    },
+    {
+      "path": "src/win95lx/apps/notepad.py",
+      "line": 272,
+      "widget": "CheckMenuItem",
+      "source": "item_class = Gtk.CheckMenuItem if callback == self.toggle_wrap else Gtk.MenuItem"
+    },
+    {
+      "path": "src/win95lx/apps/notepad.py",
+      "line": 392,
+      "widget": "Entry",
+      "source": "entry = Gtk.Entry(text=self.find_text, activates_default=True, margin=8)"
+    },
+    {
+      "path": "src/win95lx/apps/wordpad.py",
+      "line": 274,
+      "widget": "TextView",
+      "source": "self.view = Gtk.TextView(buffer=self.buffer)"
+    },
+    {
+      "path": "src/win95lx/apps/wordpad.py",
+      "line": 286,
+      "widget": "MenuBar",
+      "source": "bar = Gtk.MenuBar()"
+    },
+    {
+      "path": "src/win95lx/apps/wordpad.py",
+      "line": 345,
+      "widget": "ComboBoxText",
+      "source": "family = Gtk.ComboBoxText()"
+    },
+    {
+      "path": "src/win95lx/apps/wordpad.py",
+      "line": 351,
+      "widget": "ComboBoxText",
+      "source": "self.size = Gtk.ComboBoxText.new_with_entry()"
+    },
+    {
+      "path": "src/win95lx/apps/wordpad.py",
+      "line": 388,
+      "widget": "ScrolledWindow",
+      "source": "viewport = Gtk.ScrolledWindow()"
+    },
+    {
+      "path": "src/win95lx/apps/wordpad.py",
+      "line": 430,
+      "widget": "Menu",
+      "source": "menu = Gtk.Menu()"
+    },
+    {
+      "path": "src/win95lx/apps/wordpad.py",
+      "line": 509,
+      "widget": "ToggleButton",
+      "source": "button = Gtk.ToggleButton() if toggle else Gtk.Button()"
+    },
+    {
+      "path": "src/win95lx/apps/wordpad.py",
+      "line": 509,
+      "widget": "Button",
+      "source": "button = Gtk.ToggleButton() if toggle else Gtk.Button()"
+    },
+    {
+      "path": "src/win95lx/shell/accessories.py",
+      "line": 114,
+      "widget": "Menu",
+      "source": "if isinstance(widget,Gtk.Menu) and not getattr(widget,'win95_sound_hook',False):"
+    },
+    {
+      "path": "src/win95lx/shell/accessories.py",
+      "line": 122,
+      "widget": "MenuBar",
+      "source": "if isinstance(widget, Gtk.MenuBar):"
+    },
+    {
+      "path": "src/win95lx/shell/accessories.py",
+      "line": 124,
+      "widget": "Menu",
+      "source": "elif isinstance(widget, Gtk.Menu):"
+    },
+    {
+      "path": "src/win95lx/shell/accessories.py",
+      "line": 127,
+      "widget": "CheckMenuItem",
+      "source": "if any(isinstance(child, Gtk.CheckMenuItem) for child in widget.get_children()):"
+    },
+    {
+      "path": "src/win95lx/shell/accessories.py",
+      "line": 293,
+      "widget": "Menu",
+      "source": "system_menu = Gtk.Menu()"
+    },
+    {
+      "path": "src/win95lx/shell/app.py",
+      "line": 290,
+      "widget": "TextView",
+      "source": "if isinstance(view,Gtk.TextView) and view.get_window(Gtk.TextWindowType.TEXT):"
+    },
+    {
+      "path": "src/win95lx/shell/app.py",
+      "line": 476,
+      "widget": "TextView",
+      "source": "if isinstance(view,Gtk.TextView) and view.get_window(Gtk.TextWindowType.TEXT):"
+    },
+    {
+      "path": "src/win95lx/shell/app.py",
+      "line": 1899,
+      "widget": "SpinButton",
+      "source": "dpi = Gtk.SpinButton.new_with_range(96, 120, 1)"
+    },
+    {
+      "path": "src/win95lx/shell/app.py",
+      "line": 1915,
+      "widget": "Notebook",
+      "source": "notebook = Gtk.Notebook()"
+    }
+  ],
+  "legacy_painter_button_sites": [
+    {
+      "path": "src/win95lx/apps/dialogs.py",
+      "line": 614,
+      "source": "p.button(label.lstrip('_'),x,button_y,75,23,default=response==selected,",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/apps/fonts.py",
+      "line": 347,
+      "source": "p.button('Print',w-88,32,75,23);p.fill(w-85,35,69,17,FACE);label='Print';tx=w-88+(75-p.font.width(label))//2;p.text(label,tx+1,38,LIGHT);p.text(label,tx,37,SHADOW)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/apps/mouse.py",
+      "line": 47,
+      "source": "p.button(label,*rect,pressed=self.pressed==action)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/background.py",
+      "line": 54,
+      "source": "p.button('Background', x+9, y+29, 74, 21, pressed=True)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/background.py",
+      "line": 55,
+      "source": "p.button('Settings', x+270, y+30, 50, 20)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/background.py",
+      "line": 78,
+      "source": "p.button('\u25bc', cx+57, cy+2, 16, 17)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/background.py",
+      "line": 87,
+      "source": "p.button('Center', x+MODE_X, y+MODE_Y, MODE_WIDTH, combo.height)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/background.py",
+      "line": 97,
+      "source": "p.button(label, x+bx, y+by, width, height, default=label == 'OK')",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/display_settings.py",
+      "line": 53,
+      "source": "p.button('Background', x+9, y+29, 72, 21)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/display_settings.py",
+      "line": 54,
+      "source": "p.button('Settings', x+270, y+29, 52, 21, pressed=True)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/display_settings.py",
+      "line": 85,
+      "source": "p.button('Apply', x+320, y+415, 75, 23)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/display_settings.py",
+      "line": 93,
+      "source": "p.button(label, x+offset, y+415, 75, 23)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/display_settings.py",
+      "line": 113,
+      "source": "p.button('v', x+left+137, y+top+2, 16, 17)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/display_settings.py",
+      "line": 140,
+      "source": "p.button('Advanced Properties', x+238, y+376, 141, 23)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/display_settings.py",
+      "line": 166,
+      "source": "p.button('No', x+200, y+86, 75, 23, default=True)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/pattern_dialog.py",
+      "line": 66,
+      "source": "p.button('Edit Pattern...',230,93,75,23)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/pattern_dialog.py",
+      "line": 127,
+      "source": "p.button('OK',113,192,75,23)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/control_panel/pattern_dialog.py",
+      "line": 128,
+      "source": "p.button('Cancel',194,192,75,23)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    },
+    {
+      "path": "src/win95lx/shell/app.py",
+      "line": 307,
+      "source": "def button(self,p,label,x,y,w,h,action,pressed=False):p.button(label,x,y,w,h,pressed);self.hit(x,y,w,h,action)",
+      "classification": "Review command semantics; some are tab/arrow/fallback or native-artwork overlay, not ordinary command BUTTON"
+    }
+  ],
+  "new_product_changes": true,
+  "new_automated_regression_tests": 5,
+  "private_measurements": "private/research/control-defaults-20261126",
+  "in_progress_owners": {
+    "cairo_scrollbar": "root",
+    "gtk_scrollbar": "multimedia_applet",
+    "native_control_probe": "windows98_reference"
+  },
+  "state_list_is_applicability_checklist": "Not every state applies to every family; nonvisual Timer/Data/OLE require behavior evidence instead.",
+  "source_snapshot_note": "Source hashes are the inventory read snapshot; parallel owners may subsequently change shared files. Recompute before integration.",
+  "authorized_correction": {
+    "family": "combo-list",
+    "source": "src/win95lx/shell/combo_box.py",
+    "tests": "tests/test_combo_box_rendering.py",
+    "status": "component checks pass; combined guest integration pending",
+    "outside_pixels_before": 883,
+    "outside_pixels_after": 0,
+    "native_open_popup_differing_pixels": 0
+  },
+  "followups": {
+    "radio": "reports/NETWORK_2026-11-26.md",
+    "legacy_commands": "reports/LEGACY_BUTTON_MIGRATION_PLAN_2026-11-26.md",
+    "gtk": "reports/GTK_SCROLLBARS_2026-11-26.md",
+    "mouse_commands": "reports/MOUSE_COMMAND_BUTTONS_2026-11-26.md"
+  }
+}

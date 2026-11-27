@@ -52,3 +52,34 @@ Run `make check-mouse` for both viewport sizes. See `reports/MOUSE_PROPERTIES_20
 ## Native property-sheet measurements
 
 Build `tools/native/w95probe.c` using `dev/build_reference_probe.py` for an i386-compatible reference tool. Run it inside a reference (for example `W95PROBE.EXE keyboard 0`) to collect child HWND geometry, fonts, combo choices, enabled states, trackbar ranges and a matching BMP in C:\W95PROBE. Keep captures private. Do not infer a page origin from the painted top of a GroupBox: its text and border do not coincide with its HWND bounds. `pixel_rect` requires explicit measured origin and font base. Verify VM checkpoints with `dev/snapshot_vm.py`; raw writable floppy media can prevent a complete save.
+
+## Scrollbar track ownership and audit
+
+`VerticalScrollbar.draw` defaults to classic system gray/white one-pixel stipple.
+It owns the entire trough, independent of the containing white file/list pane.
+`track="window"` is an explicit exception for independently measured native
+Device Manager, Mouse pointer, Sounds tree and Display wallpaper-list tracks. Preserve a native
+exception's reference/version record; do not use it as a general default.
+Device Manager explicitly preserves the white exposed track measured in the
+classic native TreeView. It is not inherited from GTK or the parent background.
+
+`dev/check_scrollbar_tracks.py` samples exposed troughs in real Device Manager,
+Fonts, Font Preview and ChoicePopup consumers. It verifies independent native
+white exceptions as well. Primitive tests cover top/middle/bottom, no overflow,
+parent-color isolation and movement phase. GTK audit covers the trough node as
+well as the scrollbar background; a correct thumb alone is insufficient.
+
+For a page-aware viewport, use `VerticalScrollbar.for_page(height, maximum, page)`. Do not use a fixed thumb from a reference with a different item count. Device Manager uses native page 16 and a 263px bar; its main HWND is 410×448. Full native strip comparisons and actual drag/wheel tests are in `dev/check_scrollbar_tracks.py`.
+
+Custom GTK popups use shared coordinate translation/outside replay from `apps/popup_events.py`. Grabbed outside events can arrive on the Window, not its DrawingArea. Handle parent/direct destruction and focus changes explicitly; test the initiating outside click reaches the intended control once.
+
+### Shortcut versus shared-folder overlays
+
+In the project's original `shell32.dll` GROUP_ICON resources, **29 is the shared
+hand; 30 is the shortcut arrow**. Resource IDs are not zero-based icon indexes.
+Desktop and Explorer shortcuts use the target's base icon plus GROUP_ICON30.
+Keep share overlays separate. Inspect the extracted artwork independently and
+exercise both actual renderers; a test repeating the implementation's incorrect
+resource choice cannot establish fidelity. `check_printers_shell.py` checks both
+renderer identities, and `check_selection_details.py` compares the composed
+shortcut pixels against the original arrow resource.

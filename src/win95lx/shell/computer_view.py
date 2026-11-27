@@ -28,8 +28,9 @@ def draw(shell,p,win):
     left=x+4; width=w-8
     if 'mouse' not in shell.images and (shell.assets/'mouse-icon.png').exists():shell.images['mouse']=cairo.ImageSurface.create_from_png(str(shell.assets/'mouse-icon.png'))
     computer=win.kind=='computer'
-    entries=((9,'(C:)','drive'),(36,'Control Panel','control')) if computer else control_entries()
-    small_icon='computer' if computer else 36
+    printers=win.kind=='printers'
+    entries=shell.printer_namespace().entries() if printers else ((9,'(C:)','drive'),(36,'Control Panel','control')) if computer else control_entries()
+    small_icon='cpl-printers' if printers else 'computer' if computer else 36
     if shell.popup and isinstance(shell.popup[2],tuple) and shell.popup[2]==(win,'File'):
         p.bevel(left+11,y+26,32,19,True)
         p.menu_text('File',left+20,y+30,BLACK,'f')
@@ -96,13 +97,13 @@ def draw(shell,p,win):
         compact=bottom-top<200
         panel_visible=width-4>=400
         if compact:
-            image=surface(shell,'web-heading' if computer else 'control-web-heading')
+            image=surface(shell,'printers-web-heading' if printers else 'web-heading' if computer else 'control-web-heading')
             if image:
                 p.cr.save();p.cr.rectangle(origin[0]+14,origin[1]+4,image.get_width(),23);p.cr.clip()
                 p.image(image,origin[0]+14,origin[1]+4);p.cr.restore()
         else:
             for name,dx,dy in (('web-computer',2,2),('web-heading',108,20)):
-                image=surface(shell,name if computer else 'control-'+name)
+                image=surface(shell,'printers-'+name if printers else name if computer else 'control-'+name)
                 if image:p.image(image,origin[0]+dx,origin[1]+dy)
             p.fill(origin[0]+84,origin[1]+44,width-88,1,BLACK)
         from win95lx.shell.webview_panel import draw as draw_panel
@@ -115,18 +116,17 @@ def draw(shell,p,win):
         step=75
     else:
         icon_left=origin[0]+10;icon_top=origin[1]+10;step=102
-    if not computer:
-        from win95lx.shell.namespace_view import draw as draw_namespace
-        draw_namespace(shell,p,win,entries,icon_left,icon_top,
-                       max(0,left+width-2-icon_left),max(0,bottom-2-icon_top))
-    for index,(ident,label,target) in enumerate(entries if computer else ()):
-        # Namespace contents reflect the Linux machine; no fictitious A: or Windows CD.
-        if win.web_view:
-            dx,dy=((step,0),(0,75))[index] if computer else (index*step,0)
-        else:dx,dy=index*step,0
-        shell.icon(p,ident,label,icon_left+dx,icon_top+dy,
-                   ('item',win,target,label,(dx,dy)),shell.item_selection in ((win,label),(win,None)) and shell.state.active is win and shell.popup is None,
-                   image_offset=-1 if win.web_view else 0,label_offset=1 if win.web_view and index==0 else 0)
+    from win95lx.shell.namespace_view import draw as draw_namespace
+    defaults=(((step,0),(0,75)) if win.web_view else ((0,0),(step,0))) if computer else None
+    if computer:
+        # Native centered selection labels extend two pixels left of the image cell.
+        # Reserve that client padding while keeping the measured icon origins.
+        icon_left-=2
+        defaults=tuple((dx+2,dy) for dx,dy in defaults)
+    draw_namespace(shell,p,win,entries,icon_left,icon_top,
+                   max(0,left+width-2-icon_left),max(0,bottom-2-icon_top),defaults=defaults)
+    if printers and shell.printer_namespace().error:
+        p.text('The printing service is unavailable. Choose Refresh to try again.',origin[0]+8,max(origin[1]+4,bottom-18))
     p.cr.restore()
     sy=y+h-23
     if shell.popup and isinstance(shell.popup[2],tuple) and shell.popup[2]==(win,'File'):

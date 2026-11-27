@@ -116,3 +116,14 @@ acceptance, additional applets, detailed native-state comparisons, and the
 separate window-stacking architecture limitations. Accessibility input backends
 and a coalesced volume-update prototype are separate ongoing work, excluded
 from this acceptance checkpoint.
+
+
+## November27 lunch follow-up
+
+Visible guest refreshed to `59dbd3dd304c5c52`: supported Printers namespace and
+queue management, My Computer/Control Panel rearrangement, corrected shortcut
+overlay, and selected-label clipping correction. Full validation, native
+comparison limits,355-unit-test run with two skips, live captures and checkpoints
+are recorded in [delivery evidence](LUNCH_DELIVERY_2026-11-27.md). This does not
+accept the Add Printer wizard, all Explorer view/menu parity, Desktop Themes or
+the Easter eggs.

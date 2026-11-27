@@ -83,3 +83,10 @@ See reports/CONTROL_PANEL_2026-11-26.md for the six routed applets, narrowly acc
 Normal Win95LX settings operations must not expose sudo, terminals, password/elevation prompts or a UAC-like workflow. This is a dedicated development OS. Keep the desktop account non-admin and implement needed privileged guest operations behind narrowly scoped service/polkit helpers; never grant these policies on the host. Present unsupported features with native disabled-state explanations and operation failures with Windows 95-style errors. Do not invent an approval UI. Validate the actual non-admin desktop path, not just a root/fake backend. Developer maintenance SSH/sudo remains an internal tool, not a product interaction.
 
 Track current guest permission requirements in docs/GUEST_PRIVILEGES.md. A declarative installer capability/permission manifest is requested for a later implementation; the ledger is not yet consumed by the installer.
+
+## Hidden-feature fidelity follow-up
+
+Implement the original folder-renaming product-team credits, Volcano 3D Text
+screensaver behavior, and CLSID namespace folders. Requirements and regression
+matrix: [hidden features](docs/EASTER_EGGS.md). They are pending implementation;
+retain the Control Panel work as the primary active stream.

@@ -17,7 +17,7 @@ class ComboBox:
         self.focused = self.expanded = True
 
     def step(self, direction):
-        self.value = min(len(self.choices)-1, max(0, self.value+direction))
+        self.value = min(len(self.choices)-1, max(0, self.value+direction)) if self.choices else 0
 
     def row_at(self, x, y, width):
         offset = y-self.height-1
@@ -28,12 +28,21 @@ class ComboBox:
     def draw_list(self, p, x, y, width):
         from win95lx.shell.widgets import BLACK, LIGHT, NAVY
 
+        if width<=0:return
         y += self.height
-        p.fill(x, y, width, len(self.choices)*self.row_height+2, BLACK)
+        height=len(self.choices)*self.row_height+2
+        p.cr.save()
+        p.cr.rectangle(x,y,width,height);p.cr.clip()
+        p.fill(x,y,width,height,BLACK)
+        # The control owns its border and its text client separately. A Cairo
+        # popup shares the shell canvas, so GTK child-window clipping cannot
+        # protect adjacent controls from a long label.
+        p.cr.rectangle(x+1,y+1,max(0,width-2),max(0,height-2));p.cr.clip()
         for index, label in enumerate(self.choices):
             top = y+1+index*self.row_height
             selected = index == self.value
-            p.fill(x+1, top, width-2, self.row_height, (255,255,0) if selected else LIGHT)
+            p.fill(x+1, top, max(0,width-2), self.row_height, (255,255,0) if selected else LIGHT)
             if selected:
-                p.fill(x+2, top+1, width-4, self.row_height-2, NAVY)
+                p.fill(x+2, top+1, max(0,width-4), self.row_height-2, NAVY)
             p.text(label, x+3, top, LIGHT if selected else BLACK)
+        p.cr.restore()
