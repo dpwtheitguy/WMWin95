@@ -548,6 +548,8 @@ def file_notice(parent, state, filename):
 
 
 def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageType.WARNING, profile=None):
+    from win95lx.sound import notify
+    notify(parent,{Gtk.MessageType.ERROR:'SystemHand',Gtk.MessageType.WARNING:'SystemExclamation',Gtk.MessageType.QUESTION:'SystemQuestion',Gtk.MessageType.INFO:'SystemAsterisk'}.get(kind,'.Default'))
     assets, frame, font = art
     ident = {Gtk.MessageType.ERROR:103,Gtk.MessageType.QUESTION:102,
              Gtk.MessageType.WARNING:101,Gtk.MessageType.INFO:104}.get(kind,104)
@@ -655,6 +657,8 @@ def message_box(parent, title, text, kind, buttons=(('OK', Gtk.ResponseType.OK),
     art = dialog_art(parent, 'close')
     if art:
         return native_prompt(parent, title, text, buttons, default, art, kind, profile)
+    from win95lx.sound import notify
+    notify(parent,{Gtk.MessageType.ERROR:'SystemHand',Gtk.MessageType.WARNING:'SystemExclamation',Gtk.MessageType.QUESTION:'SystemQuestion',Gtk.MessageType.INFO:'SystemAsterisk'}.get(kind,'.Default'))
     dialog = Gtk.Dialog(title=title, transient_for=parent, modal=True)
     dialog.set_decorated(False)
     dialog.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)

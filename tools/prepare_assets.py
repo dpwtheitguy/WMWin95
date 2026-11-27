@@ -459,6 +459,18 @@ for key,definition in pointer_catalog['assets'].items():
                             'source_sha256':definition['source_sha256'],'sha256':hashlib.sha256((output/filename).read_bytes()).hexdigest()})
 from stage_control_panel_assets import stage as stage_control_panel_assets
 records.extend(stage_control_panel_assets(output))
+from stage_multimedia_assets import stage as stage_multimedia_assets
+records.extend(stage_multimedia_assets(output))
+from stage_sound_library import stage as stage_sound_library
+records.extend(stage_sound_library(output))
+from stage_command_button_assets import stage as stage_command_button_assets
+records.extend(stage_command_button_assets(output))
+from stage_fonts_assets import stage as stage_fonts_assets
+records.extend(stage_fonts_assets(output))
+from collect_font_library import collect as collect_font_library
+font_library=collect_font_library(output/'font-library')
+for row in font_library['fonts']:
+    records.append({'source':row['source'],'profile':row['product'],'type':'FONT_COLLECTION','output':'font-library/'+row['file'],'source_sha256':row['sha256'],'faces':len(row['faces']),'readable':row['readable']})
 records.append({'source':'original Windows95 and Plus95 private assets','type':'CURSOR_CATALOG','output':'pointer-schemes.json',
                 'sha256':hashlib.sha256((output/'pointer-schemes.json').read_bytes()).hexdigest()})
 (output/'manifest.json').write_text(json.dumps({'assets':records,'original_media_sha256':'c13b6bad0dcbd4f13c3d840d2b7efe939c6d4e40b1c63f086a5f92edfb1e9b77'},indent=2)+'\n');print('Prepared',len(records),'private assets')

@@ -1,5 +1,5 @@
 PYTHON ?= python3
-.PHONY: check test check-ui check-menu-seams check-sprint-controls check-computer-view check-mouse check-pointer-catalog check-selection-details check-control-panel stage reference-plan native
+.PHONY: check-control-panel-layout check-command-buttons check test check-ui check-menu-seams check-sprint-controls check-computer-view check-mouse check-pointer-catalog check-selection-details check-control-panel check-sounds check-multimedia check-volume-popup check-fonts stage reference-plan native
 native:
 	$(PYTHON) dev/build_native.py
 check:
@@ -26,7 +26,7 @@ check-pointer-catalog:
 check-control-panel:
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_control_panel.py --output private/screenshots/control-panel-$$(date +%s%N)-800
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_control_panel.py --output private/screenshots/control-panel-$$(date +%s%N)-1280
-check-ui: check-control-panel check-pointer-catalog check-mouse check-menu-seams check-sprint-controls check-computer-view check-selection-details
+check-ui: check-control-panel-layout check-command-buttons check-fonts check-multimedia check-volume-popup check-sounds check-control-panel check-pointer-catalog check-mouse check-menu-seams check-sprint-controls check-computer-view check-selection-details
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_folder_windows.py
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_folder_windows.py
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_file_dialogs.py
@@ -37,3 +37,27 @@ stage:
 	$(PYTHON) dev/stage_xfce.py
 reference-plan:
 	$(PYTHON) tools/reference_vm.py --iso "$(HOME)/Downloads/Windows 95C.iso"
+
+check-sounds:
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_sounds.py --output private/screenshots/sounds-$$(date +%s%N)-800
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_sounds.py --output private/screenshots/sounds-$$(date +%s%N)-1280
+
+check-multimedia:
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_multimedia.py --output private/screenshots/multimedia-$$(date +%s%N)-800
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_multimedia.py --output private/screenshots/multimedia-$$(date +%s%N)-1280
+
+check-volume-popup:
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_volume_popup.py --output private/screenshots/volume-$$(date +%s%N)-800
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_volume_popup.py --output private/screenshots/volume-$$(date +%s%N)-1280
+
+check-fonts:
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_fonts.py --output private/screenshots/fonts-$$(date +%s%N)-800
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_fonts.py --output private/screenshots/fonts-$$(date +%s%N)-1280
+
+check-command-buttons:
+	$(PYTHON) dev/check_command_buttons.py --output private/screenshots/command-buttons-$$(date +%s%N)-800 --size 800x600
+	$(PYTHON) dev/check_command_buttons.py --output private/screenshots/command-buttons-$$(date +%s%N)-1280 --size 1280x720
+
+check-control-panel-layout:
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/research/check_control_panel_layout.py --output private/screenshots/control-layout-$$(date +%s%N)-800
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/research/check_control_panel_layout.py --output private/screenshots/control-layout-$$(date +%s%N)-1280

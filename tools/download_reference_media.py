@@ -13,7 +13,7 @@ def download(identifier,filename,output):
     metadata_url='https://archive.org/metadata/'+identifier
     metadata=json.load(urllib.request.urlopen(metadata_url,timeout=30))
     row=next(item for item in metadata['files'] if item['name']==filename)
-    if not filename.lower().endswith(('.iso','.exe')) or not row.get('sha1'):raise ValueError('Select a hashed image or original system update')
+    if not filename.lower().endswith(('.iso','.exe','.zip','.vmdk')) or not row.get('sha1'):raise ValueError('Select a hashed image or original system update')
     size=int(row['size'])
     if not 1000000<size<2000000000:raise ValueError('Unexpected reference image size')
     url='https://archive.org/download/'+identifier+'/'+urllib.parse.quote(filename,safe='')

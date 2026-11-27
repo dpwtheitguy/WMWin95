@@ -3,6 +3,7 @@ import cairo
 from gi.repository import Gtk,Gdk
 from win95lx.shell.widgets import Painter,BLACK,LIGHT,NAVY,FACE,SHADOW
 from win95lx.shell.scrollbar import VerticalScrollbar
+from win95lx.shell.command_button import draw_command_button
 
 class ChoicePopup(Gtk.Window):
     def __init__(self,parent,rect,choices,value,callback):
@@ -16,6 +17,7 @@ class ChoicePopup(Gtk.Window):
         self.move(max(0,left),max(0,top));self.area=Gtk.DrawingArea();self.area.set_size_request(self.width,self.height);self.add(self.area)
         self.area.add_events(Gdk.EventMask.BUTTON_PRESS_MASK|Gdk.EventMask.POINTER_MOTION_MASK|Gdk.EventMask.SCROLL_MASK)
         self.area.connect('draw',self.draw);self.area.connect('button-press-event',self.press);self.area.connect('motion-notify-event',self.motion);self.area.connect('scroll-event',self.wheel)
+        self.connect('realize',lambda *_:self.get_window().set_cursor(self.shell.cursor_for('arrow')))
         self.connect('key-press-event',self.key);self.connect('focus-out-event',lambda *_:self.finish(None))
         self.show_all();self.grab_add();self.present();self.get_window().focus(Gdk.CURRENT_TIME)
     def draw(self,_area,cr):
@@ -59,11 +61,12 @@ class LanguageDialog(Gtk.Dialog):
     def __init__(self,parent,layouts,value=0,properties=False):
         super().__init__(title='Language Properties' if properties else 'Add Language',transient_for=parent,modal=True)
         self.shell=parent.shell;self.dialog_assets=parent.assets;self.assets=parent.assets
-        self.layouts=tuple(layouts);self.value=value;self.properties=properties;self.focus=0
+        self.layouts=tuple(layouts);self.value=value;self.properties=properties;self.focus=1
         self.set_decorated(False);self.set_resizable(False);self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
         self.frame=cairo.ImageSurface.create_from_png(str(self.assets/('keyboard-language-properties.png' if properties else 'keyboard-add-language.png')))
-        self.rect=(12,73 if properties else 49,318,21)
-        self.area=Gtk.DrawingArea();self.area.set_size_request(344,169);self.get_content_area().pack_start(self.area,True,True,0)
+        self.rect=(14,75 if properties else 51,318,21)
+        self.size=(347,171);self.buttons=((177,133,75,23),(257,133,75,23))
+        self.area=Gtk.DrawingArea();self.area.set_size_request(*self.size);self.get_content_area().pack_start(self.area,True,True,0)
         self.get_content_area().set_spacing(0)
         self.area.add_events(Gdk.EventMask.BUTTON_PRESS_MASK);self.area.connect('draw',self.draw);self.area.connect('button-press-event',self.press);self.connect('key-press-event',self.key)
         self.show_all()
@@ -71,21 +74,25 @@ class LanguageDialog(Gtk.Dialog):
         p=Painter(cr,self.shell.font);p.image(self.frame,0,0);x,y,w,h=self.rect
         p.fill(x+2,y+2,w-20,17,NAVY if self.focus==0 else LIGHT);p.text(self.layouts[self.value][0],x+3,y+3,LIGHT if self.focus==0 else BLACK)
         if self.properties:
-            p.fill(84,31,235,18,FACE);p.text(self.layouts[self.value][0],85,32)
+            p.fill(86,33,235,18,FACE);p.text(self.layouts[self.value][0],87,34)
+        for index,(label,rect) in enumerate(zip(('OK','Cancel'),self.buttons),1):
+            draw_command_button(p,label,rect,default=self.focus==index or self.focus==0 and index==1,focused=self.focus==index)
         return False
     def choose(self):ChoicePopup(self,self.rect,[label for label,code in self.layouts],self.value,self.selected)
     def selected(self,index):self.value=index;self.area.queue_draw()
     def press(self,_area,event):
         x,y,w,h=self.rect
-        if x<=event.x<x+w and y<=event.y<y+h:self.choose()
-        elif 175<=event.x<250 and 131<=event.y<154:self.response(Gtk.ResponseType.OK)
-        elif 255<=event.x<330 and 131<=event.y<154 or 323<=event.x<339 and 4<=event.y<19:self.response(Gtk.ResponseType.CANCEL)
+        if x<=event.x<x+w and y<=event.y<y+h:self.focus=0;self.choose()
+        elif 177<=event.x<252 and 133<=event.y<156:self.response(Gtk.ResponseType.OK)
+        elif 257<=event.x<332 and 133<=event.y<156 or 325<=event.x<341 and 6<=event.y<21:self.response(Gtk.ResponseType.CANCEL)
         return True
     def key(self,_window,event):
         name=Gdk.keyval_name(event.keyval)
+        if name=='Escape' and event.state&Gdk.ModifierType.CONTROL_MASK:
+            self.shell.key(self.shell,event);return True
         if name=='Escape':self.response(Gtk.ResponseType.CANCEL);return True
-        if name in ('Return','KP_Enter'):self.response(Gtk.ResponseType.OK);return True
-        if name=='Tab':self.focus=(self.focus+1)%3;self.area.queue_draw();return True
+        if name in ('Return','KP_Enter'):self.response(Gtk.ResponseType.CANCEL if self.focus==2 else Gtk.ResponseType.OK);return True
+        if name in ('Tab','ISO_Left_Tab'):self.focus=(self.focus+(-1 if event.state&Gdk.ModifierType.SHIFT_MASK else 1))%3;self.area.queue_draw();return True
         if name=='F4' or name=='Down' and event.state&Gdk.ModifierType.MOD1_MASK:self.choose();return True
         if self.focus==0 and name in ('Up','Down','Home','End'):
             self.value=0 if name=='Home' else len(self.layouts)-1 if name=='End' else max(0,min(len(self.layouts)-1,self.value+(1 if name=='Down' else -1)));self.area.queue_draw();return True

@@ -1,6 +1,5 @@
 """Shut Down Windows dialog geometry and input from the native reference."""
 
-import os
 from pathlib import Path
 
 import cairo
@@ -13,14 +12,7 @@ BUTTONS = ('OK', 'Cancel', 'Help')
 ASSETS = ('poweroff', 'reboot', 'dos')
 
 
-def is_development_guest():
-    if os.uname().nodename != 'win95lx-dev':
-        return False
-    try:
-        return Path('/sys/class/dmi/id/sys_vendor').read_text().strip() == 'QEMU'
-    except OSError:
-        return False
-
+from win95lx.guest_identity import is_development_guest
 
 class ShutdownDialog:
     def __init__(self, assets):

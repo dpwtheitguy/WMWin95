@@ -17,6 +17,12 @@ class Window:
     address_bar: bool = True
     web_view: bool = True
     focus_item: str | None = None
+    namespace_view: str = "large"
+    namespace_scroll: tuple = (0,0)
+    namespace_auto: bool = True
+    namespace_positions: tuple = ()
+    namespace_layout: object | None = None
+    namespace_viewport: tuple = (0,0,0,0)
     info_scroll: int = 0
     info_scroll_max: int = 0
     back_history: list = field(default_factory=list)

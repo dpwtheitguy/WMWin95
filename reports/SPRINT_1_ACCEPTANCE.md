@@ -67,3 +67,52 @@ The corrected repeatable X11 runner passed all 24 scenario executions (12 at eac
 ## Explorer follow-up
 
 The subsequent whole-File-menu comparison exposed the limits of the original Close-only acceptance. My Computer now has a complete selection-dependent namespace File profile and additional IE4 bands. See [the Explorer iteration report](EXPLORER_PARITY_2026-11-25.md) for complete-menu measurements, fifty-observation disposition, broader regression results, and remaining work. The earlier eight accepted increments remain scoped to their original recorded regions and behaviors.
+
+## November 26 follow-up: Control Panel controls and layout
+
+The Sounds closed scheme field now has an independently measured zero-difference
+310×25 border/padding/text comparison at 800×600 and 1280×720, with long-name
+clipping regression. See [Sounds alignment evidence](SOUNDS_ALIGNMENT_2026-11-26.md).
+The unit suite passed 243 tests before the subsequent shared-button integration;
+that count is a checkpoint, not acceptance of later changes.
+
+User testing then exposed Control Panel namespace icons overflowing a single row
+and drawing outside the restored window. The source correction now provides responsive
+view layout, overflow scrolling, content clipping and clipped hit targets.
+Isolated forced-X11 tests passed 76 captured states across two resolutions,
+including description wrapping, resize, movement and each implemented view mode.
+See [namespace layout evidence](CONTROL_PANEL_NAMESPACE_LAYOUT_2026-11-26.md).
+The regression is included in `make check-ui`; combined guest validation passed (`make test check-ui`, exit 0). No corrected release has been activated
+in the user's manual-test VM during this work.
+
+### Combined guest acceptance checkpoint
+
+On November 26, the isolated developer Xvfb run in
+`/home/developer/win95lx-combined-qa-20261126` completed `make test check-ui`
+with exit status 0: **254 unit tests passed**, followed by all configured rendered
+and interaction checks at 800×600 and 1280×720. Fonts additionally has its own
+1280×800 evidence. Log: `private/combined-ui-20261126.log`. This includes the new
+namespace layout regression, 88 native button cases per resolution, Fonts,
+Multimedia, volume popup, Sounds, property sheets, pointer schemes, Mouse, menu
+seams, sprint regressions, Explorer selection details, independent folder
+transfers, file dialogs and reference UI regions. Named pixel regions retain
+their individual reports; passing the suite does not establish whole-desktop
+pixel identity or completion of all Control Panel capabilities.
+
+The first combined attempt found the layout harness's moving Git HEAD dependency.
+A later attempt waited on an error dialog because the isolated test checkout
+lacked its original custom CUR fixture. The historical comparison dependency
+was removed, the required fixture was staged, and Mouse's check now validates
+its presence before any interactive window opens. The complete corrected suite
+then passed. These were test-harness defects, not concealed passing product
+results. The user's visible session was neither driven nor restarted.
+
+Fresh independent sound-library staging also verified all 286 WAV files and
+semantically identical catalog content. The full asset preparation pipeline now
+includes that library explicitly, rather than depending on a prior manual stage.
+
+Remaining Control Panel work includes unregistered Network service/permission
+acceptance, additional applets, detailed native-state comparisons, and the
+separate window-stacking architecture limitations. Accessibility input backends
+and a coalesced volume-update prototype are separate ongoing work, excluded
+from this acceptance checkpoint.

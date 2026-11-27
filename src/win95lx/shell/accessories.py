@@ -2,7 +2,7 @@
 
 from importlib import import_module
 
-from gi.repository import Gdk, GdkPixbuf, GLib, Gtk
+from gi.repository import Gdk, GdkPixbuf, GLib, Gtk, GObject
 
 from win95lx.shell.menu_layout import NOTEPAD_FILE_WIDTH, NOTEPAD_HELP_WIDTH, POPUP_GUTTER
 from win95lx.shell.system_menu import ARROWS, COMMANDS, MENU_WIDTH, WindowOperation, options
@@ -71,7 +71,25 @@ cursor-handle { opacity: 0; }
 """.replace(b"@GUTTER@", str(POPUP_GUTTER-1).encode())
 
 
+_menu_sound_hook=None
+
+def menu_sound_emission(_hint,_count,values):
+    item=values[0]
+    if getattr(item,'win95_sound_hook',False) and item.get_sensitive():
+        from win95lx.sound import notify
+        notify(item,'MenuCommand')
+    return True
+
 def style_menus(widget):
+    global _menu_sound_hook
+    if isinstance(widget,Gtk.Menu) and not getattr(widget,'win95_sound_hook',False):
+        from win95lx.sound import notify
+        widget.connect('map',lambda menu:notify(menu,'MenuPopup'))
+        widget.win95_sound_hook=True
+    if isinstance(widget,Gtk.MenuItem) and not isinstance(widget,Gtk.SeparatorMenuItem) and widget.get_submenu() is None:
+        widget.win95_sound_hook=True
+        if _menu_sound_hook is None:
+            _menu_sound_hook=GObject.signal_add_emission_hook(GObject.signal_lookup('activate',Gtk.MenuItem),0,menu_sound_emission)
     if isinstance(widget, Gtk.MenuBar):
         widget.get_style_context().add_class('win95-app-menubar')
     elif isinstance(widget, Gtk.Menu):
@@ -108,6 +126,15 @@ def install_menu_style(screen):
 
 
 def build(kind, shell):
+    if kind=='fonts':
+        from win95lx.apps.fonts import FontsWindow
+        return FontsWindow(shell)
+    if kind=='multimedia':
+        from win95lx.apps.multimedia import MultimediaWindow
+        return MultimediaWindow(shell)
+    if kind=='sounds':
+        from win95lx.apps.sounds import SoundsWindow
+        return SoundsWindow(shell)
     if kind=='regional':
         from win95lx.apps.regional import RegionalWindow
         return RegionalWindow(shell)

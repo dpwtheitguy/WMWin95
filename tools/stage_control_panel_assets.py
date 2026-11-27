@@ -53,6 +53,15 @@ def stage(output):
             records.append({'source':str(source.relative_to(ROOT)),'type':'SCREEN_CAPTURE_CONTROL','profile':'classic',
                             'rectangle':rect,'output':filename,'reference_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),
                             'dynamic_content_removed':applet=='system' and tab=='general'})
+    source=captures/'plus-sounds-index1.png'
+    if source.exists():
+        sw,sh,pixels=read(source);x,y,w,h=66,66,366,448
+        dest='sounds-sounds-frame.png'
+        write(output/dest,w,h,[pixels[(y+yy)*sw+x+xx] for yy in range(h) for xx in range(w)])
+        records.append({'source':str(source.relative_to(ROOT)),'type':'SCREEN_CAPTURE_CONTROL','profile':'plus',
+                        'rectangle':[x,y,w,h],'output':dest,'reference_sha256':hashlib.sha256(source.read_bytes()).hexdigest()})
+    from stage_sound_library import stage as stage_sounds
+    records.extend(stage_sounds(output))
     groups={'keyboard':('main.cpl',200),'fonts':('main.cpl',400),'printers':('main.cpl',300),
             'datetime':('timedate.cpl',200),'regional':('intl.cpl',101),'system':('sysdm.cpl',600),
             'multimedia':('mmsys.cpl',99),'sounds':('mmsys.cpl',100),
@@ -74,7 +83,7 @@ def stage(output):
     for name,source_name in (('keyboard-add-language','keyboard-add-language-dialog.png'),('keyboard-language-properties','keyboard-add-language-actual.png')):
         source=captures/source_name
         if source.exists():
-            sw,sh,pixels=read(source);x,y,w,h=35,57,344,169
+            sw,sh,pixels=read(source);x,y,w,h=33,55,347,171
             write(output/(name+'.png'),w,h,[pixels[(y+yy)*sw+x+xx] for yy in range(h) for xx in range(w)])
             records.append({'source':str(source.relative_to(ROOT)),'type':'SCREEN_CAPTURE_CONTROL','output':name+'.png',
                             'rectangle':[x,y,w,h],'reference_sha256':hashlib.sha256(source.read_bytes()).hexdigest()})

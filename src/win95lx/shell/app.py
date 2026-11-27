@@ -36,7 +36,7 @@ from win95lx.control_panel import background, display_settings
 from win95lx.control_panel.display_preferences import DisplayPreferences, FONT_SIZES, PALETTES, color_surface
 from win95lx.control_panel.wallpaper import BITMAPS, Wallpaper, paint_wallpaper, paint_pattern
 from win95lx.recent_documents import RecentDocuments
-from win95lx.sound import play_startup
+from win95lx.sound import play_startup,play_event
 from win95lx.shell.widgets import Painter,FACE,LIGHT,SHADOW,BLACK,NAVY,TEAL
 RECYCLE_TARGET = '::recycle-bin::'
 
@@ -57,6 +57,16 @@ class Shell(Gtk.Window):
     def __init__(self,assets):
         super().__init__(title='Win95LX Development Shell');self.set_decorated(False);self.set_default_size(800,600);self.move(0,0);self.fullscreen();self.state=DesktopState();self.assets=assets;self.font=BitmapFont((assets/'ms-sans-serif-8.fnt').read_bytes());self.images={};self.small_images={};self.hits=[];self.drag=None;self.clock=None;self.popup=None;self.item_selection=None;self.pending_resolution=None
         self.accessory_windows = {}
+        from win95lx.control_panel.audio_preferences import AudioPreferences
+        self.audio_preferences=AudioPreferences();self.audio_muted=False;self.volume_popup=None
+        try:
+            saved=json.loads((Path.home()/'.config/win95lx/multimedia.json').read_text())
+            if isinstance(saved,dict) and type(saved.get('tray')) is bool:self.audio_preferences=replace(self.audio_preferences,tray=saved['tray'])
+        except (OSError,ValueError,TypeError):pass
+        for name in ('volume','volume-muted'):
+            icon=assets/(name+'-icon.png')
+            if icon.exists():self.small_images[name]=cairo.ImageSurface.create_from_png(str(icon))
+        self.namespace_drag = None
         self.task_order = []
         self.active_task = None
         self.desktop_icons = DesktopIcons()
@@ -418,6 +428,7 @@ class Shell(Gtk.Window):
                 return
         existing = next((win for win in self.state.windows if win.kind == kind and win.folder == folder), None)
         self.state.open(kind, folder)
+        if existing is None:play_event(self.assets,'Open')
         self.menu_path.clear()
         self.popup=None
         if kind == 'drive':
@@ -480,12 +491,14 @@ class Shell(Gtk.Window):
                 return
             self.accessory_windows[kind] = window
             window.connect('destroy', self.accessory_closed, kind)
+            play_event(self.assets,'Open')
             window.connect('notify::title', lambda *_: self.area.queue_draw())
             window.connect('notify::is-active', lambda *_: self.area.queue_draw())
         window.show_all()
         window.present()
 
     def accessory_closed(self, window, kind):
+        play_event(self.assets,'Close')
         del self.accessory_windows[kind]
         if self.get_window():
             self.get_window().focus(Gdk.CURRENT_TIME)
@@ -582,14 +595,15 @@ class Shell(Gtk.Window):
         self.hit(2,bar+4,54,22,('start',))
         tray = self.display_preferences.tray
         language=bool(self.keyboard_preferences and self.keyboard_preferences.indicator and len(self.keyboard_preferences.layouts)>1)
-        self.draw_tasks(p, bar, width-(95 if tray else 75)-(24 if language else 0))
+        volume=bool(self.audio_preferences.tray)
+        self.draw_tasks(p, bar, width-(95 if tray else 75)-(24 if language else 0)-(24 if volume else 0))
         if language:
             from win95lx.control_panel.keyboard_preferences import KeyboardGroups
             try:
                 if self.keyboard_groups is None:self.keyboard_groups=KeyboardGroups()
                 index=self.keyboard_groups.current();code=self.keyboard_preferences.layouts[min(index,len(self.keyboard_preferences.layouts)-1)]
             except RuntimeError:code=self.keyboard_preferences.layouts[0]
-            left=width-(112 if tray else 88)
+            left=width-(112 if tray else 88)-(24 if volume else 0)
             p.fill(left,bar+6,19,17,NAVY);p.text({'us':'En','gb':'En','de':'De','fr':'Fr','es':'Es'}.get(code,code[:2].title()),left+2,bar+8,LIGHT)
             self.hit(left,bar+4,22,22,('keyboard-language-menu',))
         if tray:
@@ -602,6 +616,11 @@ class Shell(Gtk.Window):
                 p.image(icon,0,0)
                 p.cr.restore()
             self.hit(width-88,bar+4,22,22,('display-tray-open',))
+        if volume:
+            left=width-(112 if tray else 88)
+            icon=self.small_images.get('volume-muted' if self.audio_muted else 'volume')
+            if icon:p.image(icon,left+3,bar+7)
+            self.hit(left,bar+4,22,22,('volume-tray-open',left))
         p.fill(width-69,bar+4,1,22,SHADOW)
         p.fill(width-68,bar+4,1,22,LIGHT)
         p.bevel(width-65,bar+4,63,22,True)
@@ -693,7 +712,7 @@ class Shell(Gtk.Window):
             p.caption_button(symbol,x+offset,y+6)
             self.hit(x+offset,y+6,16,14,(action,win))
         if explorer:
-            if win.kind in ('computer','control') and (win.toolbar or win.address_bar or win.web_view):
+            if win.kind=='control' or win.kind=='computer' and (win.toolbar or win.address_bar or win.web_view):
                 from copy import copy
                 frame=copy(win);frame.x,frame.y,frame.width,frame.height=x,y,w,h
                 explorer_chrome.draw(p,frame,self.explorer_menu_art,
@@ -807,6 +826,7 @@ class Shell(Gtk.Window):
         browser = self.browser_for(win)
         directory = browser.directory
         sources = tuple(directory/name for name in sorted(browser.selection))
+        if self.popup is not None:play_event(self.assets,'MenuCommand')
         self.popup = None
         if command in ('open','explore'):
             for source in sources:
@@ -1026,6 +1046,7 @@ class Shell(Gtk.Window):
             if len(self.menu_path) == depth + 1:
                 self.menu_path.append((action[1], 0))
         elif not hover:
+            play_event(self.assets,'MenuCommand')
             self.action(action)
 
     def show_start(self):
@@ -1034,12 +1055,14 @@ class Shell(Gtk.Window):
         self.state.menu_index = -1
         self.popup = None
         self.menu_path.clear()
+        if self.state.start_open:play_event(self.assets,'MenuPopup')
 
     def choose_menu_row(self, index):
         self.state.menu_index = index
         if index in menu.SUBMENUS:
             self.menu_path[:] = [(index, 0)]
         else:
+            play_event(self.assets,'MenuCommand')
             self.action(menu.ROWS[index][3])
 
     def namespace_file_rows(self,win):
@@ -1064,12 +1087,16 @@ class Shell(Gtk.Window):
                 'View': ([('Standard Buttons',('computer-view-toggle',win,'toolbar')),
                           ('Address Bar',('computer-view-toggle',win,'address_bar')),
                           ('as Web Page',('computer-view-toggle',win,'web_view')),
-                          ('Refresh',('dismiss',))] if win.kind=='computer' else [('Refresh',('dismiss',))]),
+                          ('Refresh',('dismiss',))] if win.kind in ('computer','control') else [('Refresh',('dismiss',))]),
                 'Go': [('My Computer',('open','computer')),('(C:)',('open','drive'))],
                 'Favorites': [('Control Panel',('open','control'))],
                 'Help': [('About Win95LX',('about',))],
                 'Item': [],
             }[menu]
+            if win.kind=='control' and menu=='View':
+                options=options[:-1]+[(label,('namespace-view',win,mode)) for mode,label in
+                    (('large','Large Icons'),('small','Small Icons'),('list','List'),('details','Details'))]+[
+                    ('Auto Arrange',('namespace-auto',win)),('Refresh',('dismiss',))]
             if win.kind == 'recycle' and menu == 'File':
                 options = [('Restore',('trash-command','restore')),
                            ('Empty Recycle Bin',('trash-command','empty')),
@@ -1093,6 +1120,10 @@ class Shell(Gtk.Window):
             p.window_frame(x, y, width, len(options)*POPUP_ROW_HEIGHT+6)
             for index, (label, action) in enumerate(options):
                 row = y+3+index*POPUP_ROW_HEIGHT
+                checked=(action[0]=='namespace-view' and action[1].namespace_view==action[2]
+                         or action[0]=='namespace-auto' and action[1].namespace_auto
+                         or action[0]=='computer-view-toggle' and getattr(action[1],action[2]))
+                if checked and 'menu-check' in self.images:p.image(self.images['menu-check'],x+5,row+4)
                 p.text(label, x+POPUP_GUTTER, row+1)
                 self.hit(x+3, row, width-6, POPUP_ROW_HEIGHT, action)
         else:
@@ -1447,6 +1478,16 @@ class Shell(Gtk.Window):
                 from win95lx.apps.dialogs import message_box
                 message_box(self,'Keyboard Properties',str(error),Gtk.MessageType.ERROR)
             self.start_context=None
+        elif kind == 'volume-tray-open':
+            if self.volume_popup:self.volume_popup.finish()
+            else:
+                from win95lx.apps.volume_popup import VolumePopup
+                try:
+                    self.volume_popup=VolumePopup(self,action[1])
+                    self.volume_popup.connect('destroy',lambda *_:setattr(self,'volume_popup',None))
+                except (OSError,ValueError,RuntimeError,subprocess.SubprocessError) as error:
+                    from win95lx.apps.dialogs import message_box
+                    message_box(self,'Volume Control',str(error),Gtk.MessageType.ERROR)
         elif kind == 'display-tray-open':
             self.open('display')
             self.display_tab = 'settings'
@@ -1473,8 +1514,10 @@ class Shell(Gtk.Window):
             message_box(self, 'Display Properties',
                         'Use Desktop area or Screen area to change the guest resolution. '
                         'Both sliders control the same display.', Gtk.MessageType.INFO)
-        elif kind=='close':self.state.windows.remove(action[1]);self.popup=None
-        elif kind=='minimize':action[1].minimized=True
+        elif kind=='close':self.state.windows.remove(action[1]);self.popup=None;play_event(self.assets,'Close')
+        elif kind=='minimize':
+            if not action[1].minimized:play_event(self.assets,'Minimize')
+            action[1].minimized=True
         elif kind=='task':
             win=action[1]
             if win is self.active_task:win.minimized=True
@@ -1487,9 +1530,11 @@ class Shell(Gtk.Window):
             if resizable and (kind=='maximize' or event.type==Gdk.EventType._2BUTTON_PRESS):
                 self.drag=None
                 if win.restored_bounds is None:
+                    play_event(self.assets,'Maximize')
                     win.restored_bounds=(win.x,win.y,win.width,win.height)
                     win.x,win.y,win.width,win.height=0,0,self.width,self.height-28
                 else:
+                    play_event(self.assets,'RestoreDown')
                     win.x,win.y,win.width,win.height=win.restored_bounds
                     win.restored_bounds=None
                     self.resize_to_display(self.get_screen())
@@ -1516,6 +1561,17 @@ class Shell(Gtk.Window):
             left = offset-8 if win.kind == 'drive' and menu == 'Edit' else offset-9 if menu == 'File' else offset-5
             dx,dy=(-4,-5) if win.kind in ('computer','control') and win.restored_bounds is not None else (0,0)
             self.popup=(win.x+left+dx,win.y+explorer_chrome.POPUP_TOP+dy,(win,menu))
+            play_event(self.assets,'MenuPopup')
+        elif kind=='namespace-view':
+            win,mode=action[1:];win.namespace_view=mode;win.namespace_scroll=(0,0);win.namespace_positions=();self.popup=None
+        elif kind=='namespace-auto':
+            win=action[1];win.namespace_auto=not win.namespace_auto;self.popup=None
+        elif kind=='namespace-thumb':
+            win,axis,x,y,length,maximum,thumb=action[1:]
+            coordinate=(event.x-x if axis==0 else event.y-y) if event else thumb
+            self.namespace_drag=(win,axis,x,y,length,maximum,coordinate-thumb)
+        elif kind=='namespace-scroll':
+            win,axis,delta=action[1:];position=list(win.namespace_scroll);position[axis]=max(0,position[axis]+delta);win.namespace_scroll=tuple(position)
         elif kind=='computer-view-toggle':
             setattr(action[1],action[2],not getattr(action[1],action[2]))
             self.popup=None
@@ -1547,6 +1603,7 @@ class Shell(Gtk.Window):
             xx,yy,_,_=computer_view.geometry(action[1])
             self.popup=(xx+58,yy+112,(action[1],'Go'))
         elif kind=='computer-menu':
+            if self.popup is not None:play_event(self.assets,'MenuCommand')
             self.popup=None
             if action[2]=='offline':
                 self.work_offline=not self.work_offline
@@ -1951,6 +2008,11 @@ class Shell(Gtk.Window):
         if self.pointer_scale != 1:
             event = ScaledPointer(event, self.pointer_scale)
         win = self.state.active
+        if win and win.kind=='control' and not self.state.start_open and not self.state.dialog and not self.popup:
+            x,y,w,h=win.namespace_viewport
+            if x<=event.x<x+w and y<=event.y<y+h and event.direction in (Gdk.ScrollDirection.UP,Gdk.ScrollDirection.DOWN):
+                axis=0 if win.namespace_view=='list' or win.namespace_layout and not win.namespace_layout.vertical else 1
+                self.action(('namespace-scroll',win,axis,-51 if event.direction==Gdk.ScrollDirection.UP else 51));return True
         if win and win.kind in ('computer','control') and win.web_view and not self.state.start_open and not self.state.dialog and not self.popup:
             left,top,width,height=computer_view.geometry(win)
             if left<=event.x<left+width*.3 and top+118<=event.y<top+height-24 and event.direction in (Gdk.ScrollDirection.UP,Gdk.ScrollDirection.DOWN):
@@ -2178,14 +2240,16 @@ class Shell(Gtk.Window):
                                  Gtk.MessageType.WARNING,YES_NO,Gtk.ResponseType.NO)
             if answer != Gtk.ResponseType.YES:
                 return
+        deleted=0
         for name in names:
             try:
                 if command == 'restore':
                     self.trash.restore(name)
                 else:
-                    self.trash.delete(name)
+                    self.trash.delete(name);deleted+=1
             except (OSError,StopIteration) as error:
                 message_box(self,'Recycle Bin',str(error),Gtk.MessageType.ERROR)
+        if command=='empty' and deleted:play_event(self.assets,'EmptyRecycleBin')
         self.trash_selection.clear()
         self.refresh_file_views()
         self.area.queue_draw()
@@ -2242,6 +2306,7 @@ class Shell(Gtk.Window):
         if self.pointer_scale != 1 and (self.file_drag or self.shortcut_drag or self.icon_drag):
             event = ScaledPointer(event, self.pointer_scale)
         if event.button == 1:
+            self.namespace_drag = None
             self.wallpaper_drag = self.drive_scroll_drag = self.resolution_drag = None
         if event.button == 1 and self.file_drag:
             win, label, start_x, start_y = self.file_drag
@@ -2291,6 +2356,10 @@ class Shell(Gtk.Window):
     def motion(self,area,event):
         if self.pointer_scale != 1:
             event = ScaledPointer(event, self.pointer_scale)
+        if self.namespace_drag:
+            win,axis,x,y,length,maximum,offset=self.namespace_drag
+            value=VerticalScrollbar(length,maximum).value_at((event.x-x if axis==0 else event.y-y)-offset)
+            position=list(win.namespace_scroll);position[axis]=value;win.namespace_scroll=tuple(position);self.area.queue_draw();return True
         if self.window_operation:
             win, operation = self.window_operation
             self.apply_window_operation(win, operation.motion(event.x,event.y,(self.width,self.height)))
@@ -2523,6 +2592,18 @@ class Shell(Gtk.Window):
                 match=next((i for i,row in enumerate(menu.ROWS) if row[2]==name.lower()),None)
                 if match is not None:
                     self.choose_menu_row(match)
+        elif self.state.active and self.state.active.kind=='control' and name in ('Left','Right','Up','Down','Home','End'):
+            from win95lx.explorer.namespace_layout import reveal
+            win=self.state.active;labels=list(cpl_catalog.labels());layout=win.namespace_layout
+            if labels and layout:
+                current=labels.index(win.focus_item) if win.focus_item in labels else 0
+                if name=='Home':index=0
+                elif name=='End':index=len(labels)-1
+                else:
+                    x,y=layout.positions[current];axis=0 if name in ('Left','Right') else 1;direction=-1 if name in ('Left','Up') else 1
+                    candidates=[i for i,pos in enumerate(layout.positions) if (pos[axis]-(x,y)[axis])*direction>0]
+                    index=min(candidates,key=lambda i:(abs(layout.positions[i][1-axis]-(x,y)[1-axis]),abs(layout.positions[i][axis]-(x,y)[axis]))) if candidates else current
+                win.focus_item=labels[index];self.item_selection=(win,labels[index]);win.info_scroll=0;win.namespace_scroll=reveal(layout,index)
         elif (self.state.active and self.state.active.kind == 'drive'
               and ((ctrl and name.lower() in ('x','c','v','a','w'))
                    or name in ('Delete','F2','F5') or alt and name == 'Return')):

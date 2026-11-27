@@ -12,6 +12,8 @@ from check_reference_ui import compare_region
 
 def main():
  p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);a=p.parse_args();a.output.mkdir(parents=True,exist_ok=False)
+ custom=ROOT/'private/cabsets/windows95/arrow_m.cur'
+ assert custom.is_file(), 'Stage the original custom-pointer fixture before starting this interactive check.'
  import gi;gi.require_foreign('cairo');import cairo
  from win95lx.shell.app import Shell,Gtk,Gdk
  from win95lx.apps.mouse import MouseWindow
@@ -28,6 +30,12 @@ def main():
    actual=capture('buttons-default')
    ref=ROOT/'private/screenshots/start-development-20261110/native-mouse-buttons-clean.png'
    difference=compare_region(actual,read(ref),(44,44,404,448),(0,0));comparisons.append({'name':'complete default Buttons sheet','differing_pixels':difference});assert not difference,difference
+   pending=window.controller.pending
+   with patch.object(shell,'key') as start,patch.object(window,'destroy') as destroy:
+    key=SimpleNamespace(keyval=Gdk.KEY_Escape,state=Gdk.ModifierType.CONTROL_MASK)
+    assert window.key(window,key);start.assert_called_once_with(shell,key);destroy.assert_not_called()
+   assert window.controller.pending==pending
+   checks.append('Ctrl+Esc forwards Start without cancelling Mouse Properties pending edits')
    # A real pointer release, not press, commits the button action.
    event=lambda x,y:SimpleNamespace(x=x,y=y,button=1,type=Gdk.EventType.BUTTON_PRESS)
    window.press(window.area,event(150,94));window.release(window.area,event(150,94));assert window.controller.pending.left_handed
@@ -61,7 +69,6 @@ def main():
    checks.append('pointer list thumb dragging clamps at both ends and redraws actual rows')
    window.action(('apply',));assert shell.cursor_for('arrow') is not None
    checks.append('scheme dropdown pointer and keyboard selection all fourteen cursor roles and actual cursor application')
-   custom=ROOT/'private/cabsets/windows95/arrow_m.cur'
    window.role=0
    with patch('win95lx.apps.dialogs.choose_file',return_value=custom):window.action(('browse',))
    assert window.controller.pending.overrides['arrow']==str(custom)

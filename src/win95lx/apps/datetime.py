@@ -109,11 +109,11 @@ class DateTimeWindow(PropertySheet):
             if kind=='time' and name in ('Left','Right'):self.segment=max(0,min(3,self.segment+(1 if name=='Right' else -1)));return True
             if name in ('Up','Down','Left','Right'):
                 delta=1 if name in ('Up','Right') else -1
-                if kind=='month':self.edit(month=(value.month-1+delta)%12+1)
+                if kind=='month':self.edit(month=(value.month-1+(-1 if name in ('Up','Left') else 1))%12+1)
                 elif kind=='year':self.edit(year=value.year+delta)
                 elif kind=='time':self.step_time(delta)
                 elif kind=='zone':
-                    index=next(index for index,(_,zone,_) in enumerate(self.zones) if zone==self.controller.pending.zone);self.select_zone(max(0,min(len(self.zones)-1,index+delta)))
+                    index=next(index for index,(_,zone,_) in enumerate(self.zones) if zone==self.controller.pending.zone);self.select_zone(max(0,min(len(self.zones)-1,index+(-1 if name in ('Up','Left') else 1))))
                 else:self.controller.edited=value+timedelta(days=delta if name in ('Left','Right') else -7 if name=='Up' else 7)
                 self.area.queue_draw();return True
             if name and name.isdigit() and kind in ('year','time'):

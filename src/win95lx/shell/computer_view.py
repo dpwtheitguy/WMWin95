@@ -91,6 +91,7 @@ def draw(shell,p,win):
     p.fill(left+1,top+1,1,bottom-top-2,BLACK)
     p.fill(left+2,top+2,width-4,bottom-top-4,LIGHT)
     origin=left+2,top+2
+    p.cr.save();p.cr.rectangle(origin[0],origin[1],max(0,width-4),max(0,bottom-top-4));p.cr.clip()
     if win.web_view:
         compact=bottom-top<200
         panel_visible=width-4>=400
@@ -114,7 +115,11 @@ def draw(shell,p,win):
         step=75
     else:
         icon_left=origin[0]+10;icon_top=origin[1]+10;step=102
-    for index,(ident,label,target) in enumerate(entries):
+    if not computer:
+        from win95lx.shell.namespace_view import draw as draw_namespace
+        draw_namespace(shell,p,win,entries,icon_left,icon_top,
+                       max(0,left+width-2-icon_left),max(0,bottom-2-icon_top))
+    for index,(ident,label,target) in enumerate(entries if computer else ()):
         # Namespace contents reflect the Linux machine; no fictitious A: or Windows CD.
         if win.web_view:
             dx,dy=((step,0),(0,75))[index] if computer else (index*step,0)
@@ -122,6 +127,7 @@ def draw(shell,p,win):
         shell.icon(p,ident,label,icon_left+dx,icon_top+dy,
                    ('item',win,target,label,(dx,dy)),shell.item_selection in ((win,label),(win,None)) and shell.state.active is win and shell.popup is None,
                    image_offset=-1 if win.web_view else 0,label_offset=1 if win.web_view and index==0 else 0)
+    p.cr.restore()
     sy=y+h-23
     if shell.popup and isinstance(shell.popup[2],tuple) and shell.popup[2]==(win,'File'):
         hints={'shortcut':'Creates shortcuts to the selected items.',

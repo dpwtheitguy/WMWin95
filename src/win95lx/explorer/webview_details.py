@@ -25,13 +25,18 @@ def describe(selection,strings,root='/'):
 
 
 def wrapped(text,font,width):
-    lines=[]
+    # Long filenames/tokens must fit the same measured column as normal words.
+    width=max(1,width);lines=[]
     for paragraph in text.split('\n'):
         line=''
         for word in paragraph.split():
             candidate=(line+' '+word).strip()
-            if line and font.width(candidate)>width:lines.append(line);line=word
-            else:line=candidate
+            if line and font.width(candidate)>width:lines.append(line);line=''
+            while font.width(word)>width and len(word)>1:
+                cut=1
+                while cut<len(word) and font.width(word[:cut+1])<=width:cut+=1
+                lines.append(word[:cut]);word=word[cut:]
+            line=(line+' '+word).strip()
         lines.append(line)
     return lines
 

@@ -249,6 +249,8 @@ class MouseWindow(Gtk.Window):
     def caption_focus(self,active):
         self.caption_active=active;self.area.queue_draw();return False
     def key(self,_window,e):
+        if e.state&Gdk.ModifierType.CONTROL_MASK and e.keyval==Gdk.KEY_Escape:
+            self.shell.key(self.shell,e);return True
         if e.state&Gdk.ModifierType.MOD1_MASK and e.keyval==Gdk.KEY_F4:self.action(('cancel',));return True
         if e.keyval==Gdk.KEY_Escape:
             if self.combo.expanded:self.combo.expanded=False;self.combo.value=self.scheme_choices.index(self.controller.pending.scheme);self.area.queue_draw()

@@ -34,7 +34,8 @@ def draw(shell,p,win,left,top,width,height,*,panel_top=88):
     available=max(1,round((width-4)*.3)-44)
     if details.title:
         for line in wrapped(details.title,bold,available):bp.text(line,x,y);y+=13
-    if details.type_name:rp.text(details.type_name,x,y);y+=13
+    if details.type_name:
+        for line in wrapped(details.type_name,regular,available):rp.text(line,x,y);y+=13
     if details.description:
         if details.title:y+=13
         for line in wrapped(details.description,regular,available):rp.text(line,x,y);y+=13

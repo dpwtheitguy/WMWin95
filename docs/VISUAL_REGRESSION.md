@@ -93,3 +93,17 @@ For icon rearrangement, redraw the drag preview before delivering the button rel
 ## Complete My Computer profile
 
 `make check-computer-view` checks the full File popup, not a single Close glyph. Exercise empty selection, a drive, Control Panel, and ordinary file/folder selections through their respective profiles. Verify disabled rows have no active hit target, Alt+F chooses the first enabled row, mnemonics only invoke enabled commands, a blank click clears selection, and shortcut creation preserves existing files. Compare pressed headings, full bands, status hints and adjacent edges. Keep device inventory and clock settings separate from drawing defects. See `reports/EXPLORER_PARITY_2026-11-25.md` for the original fifty-observation disposition and remaining functionality.
+
+## Combo field clearing and text bounds
+
+Do not compare only the glyph rectangle after fixing a field alignment defect.
+Capture the complete HWND plus adjacent GroupBox padding independently from the
+implementation. Check the left/top bevel, client fill, arrow and lower edge
+together. A dropdown list has no Edit child: use measured selection text pixels
+rather than applying an Edit control's EM_GETRECT offsets. Clip long labels to
+the client field and verify that they leave the arrow and borders unchanged.
+
+Sounds native scheme geometry is `(33,332,300,21)` with text origin `(37,336)`;
+its editable Name combo uses different geometry. The regression is in
+`dev/check_sounds.py`, including a long custom label. Native evidence and
+implementation captures remain separate under private screenshots.

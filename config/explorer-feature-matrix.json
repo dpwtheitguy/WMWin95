@@ -1,0 +1,706 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-11-26",
+  "scope": "Research and unintegrated tree foundation, not Explorer acceptance",
+  "feature_status_definitions": {
+    "implemented_partial": "Existing implementation; not full historical acceptance",
+    "missing": "Audited gap",
+    "foundation_only": "Unit-tested model; no GUI integration"
+  },
+  "features": [
+    {
+      "id": "launch.start_programs",
+      "status": "missing",
+      "source": "src/win95lx/shell/start_menu.py",
+      "observation": "Programs-root Windows Explorer shortcut; original SETUPC.INF /n,/e,%30%.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "launch.run_arguments",
+      "status": "missing",
+      "source": "src/win95lx/shell/run_dialog.py",
+      "observation": "Explorer currently opens My Computer only; /n /e /root /select need a safe parser.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "window.independence",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/model.py",
+      "observation": "Independent browser/path/selection/history exists; exercise simultaneous windows and persistence.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "window.same_window",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/browsing.py",
+      "observation": "Persisted single-window preference and namespace history; Folder Options UI absent.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "window.history",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Back/forward namespace snapshots exist; capture every namespace transition.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "tree.model",
+      "status": "foundation_only",
+      "source": "src/win95lx/explorer/tree_model.py",
+      "observation": "Lazy model, stale callbacks, keyboard, cycles and errors tested; no GUI integration.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "tree.native_view",
+      "status": "missing",
+      "source": "src/win95lx/shell/computer_view.py",
+      "observation": "No All Folders pane, splitter, connectors, close button or tree drag targets.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "tree.namespace",
+      "status": "missing",
+      "source": "src/win95lx/explorer/namespace.py",
+      "observation": "Desktop/My Computer/drives/control panel tree adapters required.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "tree.worker",
+      "status": "missing",
+      "source": "src/win95lx/explorer/tree_model.py",
+      "observation": "DirectorySource must run outside UI thread; scheduling/cancellation not integrated.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.large_icons",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/drive_browser.py",
+      "observation": "Existing icon grid; placement fidelity remains state-specific.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.small_icons",
+      "status": "missing",
+      "source": "src/win95lx/explorer/drive_browser.py",
+      "observation": "Native metrics and layout needed.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.list",
+      "status": "missing",
+      "source": "src/win95lx/explorer/drive_browser.py",
+      "observation": "Column-wise small-icon flow and horizontal scroll needed.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.details",
+      "status": "missing",
+      "source": "src/win95lx/explorer/drive_browser.py",
+      "observation": "Columns, headers, sorting, resize and file metadata needed.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.sort",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/drive_browser.py",
+      "observation": "Fixed folders-first casefold sort only; menu sort modes absent.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.persistence",
+      "status": "missing",
+      "source": "src/win95lx/shell/model.py",
+      "observation": "Persist view/sort/columns/folder geometry with schema migration.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.hidden",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/drive_browser.py",
+      "observation": "Dotfiles hidden; complete Folder Options and extension preferences missing.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.toolbar",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/computer_view.py",
+      "observation": "IE4 toolbar drawn; several operation buttons lack matching dispatch.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.address",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/computer_view.py",
+      "observation": "Address control exists; history/completion/rooted parsing require acceptance.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.status",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/computer_view.py",
+      "observation": "Object count/status exists; selected bytes/free space and all views need testing.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.web",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/webview_details.py",
+      "observation": "My Computer and selection description implementation; not complete template engine.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "view.customize",
+      "status": "missing",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Customize this Folder wizard and template policies absent.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "menu.file",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/commands.py",
+      "observation": "Selection capability profiles exist; native all contexts not accepted.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "menu.edit",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/edit_commands.py",
+      "observation": "Cut/copy/paste/paste shortcut/select/invert; Undo disabled.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "menu.view",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Some toolbar/address/Web View toggles; view modes and options incomplete.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "menu.go",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Navigation needs cross-profile and history-state matrix.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "menu.favorites",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Existing menu is not evidence of full favorites organization.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "menu.tools",
+      "status": "missing",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Native Explorer Find menu differs by profile; verify before adding.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "menu.help",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "About/help appearance and behavior need native comparison.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "operation.copy",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/file_operations.py",
+      "observation": "Copies files/folders with same-folder Copy of naming; metadata/error coverage incomplete.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "operation.move",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/file_operations.py",
+      "observation": "No-replace move; cross-filesystem fallback missing.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "operation.rename",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/file_operations.py",
+      "observation": "Validation exists; Win95 reserved names/case collisions not complete.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "operation.delete",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/trash.py",
+      "observation": "Trash/restore exists; native policy/properties incomplete.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "operation.undo",
+      "status": "missing",
+      "source": "src/win95lx/explorer/edit_commands.py",
+      "observation": "No operation journal, inverse plans or native Undo labels.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "operation.progress_cancel",
+      "status": "missing",
+      "source": "src/win95lx/explorer/file_operations.py",
+      "observation": "Async progress/cancellation/retry and rollback protocol needed.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "operation.clipboard",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/edit_commands.py",
+      "observation": "File clipboard exists; interoperability and namespace coverage incomplete.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "operation.shortcuts",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/namespace.py",
+      "observation": "Safe .desktop Type=Link namespace shortcuts, not binary .lnk or symlinks.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "operation.associations",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Text/RTF handlers; editable File Types/Open With not implemented.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "operation.properties",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Simple native messages/capacity data; full property pages missing.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "input.selection",
+      "status": "implemented_partial",
+      "source": "src/win95lx/explorer/drive_browser.py",
+      "observation": "Per-window selection exists; complete keyboard/drag UAT required.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "input.drop",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Transfers and repositioning exist; every target/tolerance/profile must be measured.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "input.keyboard",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Compare F2/F3/F4/F5/F6/AltEnter/Backspace/Ctrl shortcuts individually.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "namespace.devices",
+      "status": "missing",
+      "source": "src/win95lx/explorer/namespace.py",
+      "observation": "Real removable/network/printer inventory incomplete.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "namespace.search",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Not full asynchronous native Find files/folders interface.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "namespace.network",
+      "status": "missing",
+      "source": "src/win95lx/explorer/namespace.py",
+      "observation": "Network Neighborhood, mapping and disconnect workflows not complete.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "profiles.classic",
+      "status": "missing",
+      "source": "src/win95lx/shell/model.py",
+      "observation": "No independent shell-generation contract for Explorer yet.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "profiles.plus",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/model.py",
+      "observation": "Plus assets/themes elsewhere do not establish Explorer feature profile.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "profiles.active_desktop",
+      "status": "missing",
+      "source": "src/win95lx/shell/model.py",
+      "observation": "Do not couple desktop HTML enablement to IE4 Folder Web View.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "accessibility.scale",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/computer_view.py",
+      "observation": "Existing scaling requires native metrics at each font/DPI and resolution.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "monitor.external_changes",
+      "status": "missing",
+      "source": "src/win95lx/explorer/drive_browser.py",
+      "observation": "Filesystem monitor/coalesced refresh with selection/scroll preservation required.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "performance.async",
+      "status": "missing",
+      "source": "src/win95lx/explorer/file_operations.py",
+      "observation": "No accepted end-to-end slow-storage UI responsiveness evidence.",
+      "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
+    },
+    {
+      "id": "desktop.native_stacking",
+      "status": "implemented_partial",
+      "priority": "P0",
+      "source": "src/win95lx/shell/app.py",
+      "observation": "Root integration found fullscreen painted Explorer shell covers separate GTK applets when focused/raised; lowering focus alone hides shell overlays. Not accepted.",
+      "acceptance": "Mixed two Explorer/two CPL/unsaved Notepad visibility, transient ordering, Start/menu overlap, task minimize/restore and crash tests in real guest."
+    },
+    {
+      "id": "desktop.global_shortcuts",
+      "status": "implemented_partial",
+      "priority": "P0",
+      "source": "src/win95lx/apps/property_sheet.py",
+      "observation": "Escape cancellation does not exclude Control; Ctrl+Esc can cancel applet instead of Start. Single global shortcut routing authority needed.",
+      "acceptance": "Ctrl+Esc from every applet control/modal context preserves pending edits; native Escape/AltTab/system menu behavior."
+    }
+  ],
+  "reuse_candidates": [
+    {
+      "repository": "JackTulli/Linux-explorer",
+      "url": "https://github.com/JackTulli/Linux-explorer",
+      "pin": "0e50375e22231811b16398fd12d85ccf780a0f69",
+      "license": "MIT code; original Microsoft artwork separate",
+      "architecture": "native C/Xlib Windows 2000 desktop + Explorer",
+      "recommendation": "evaluate/adapt",
+      "assessment": "Tree, four views and operations have actual source; synchronous tree scan caps one directory at 512 names. New WM/toolkit would be architectural migration.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified",
+      "wm_source_verified": [
+        "MapRequest/ConfigureRequest/UnmapNotify",
+        "Motif decoration hints",
+        "transient raising",
+        "focus",
+        "minimize/restore",
+        "global keys"
+      ],
+      "wm_risk": "Integrated taskbar/desktop needs WM-only separation; GTK interoperability untested."
+    },
+    {
+      "repository": "grassmunk/Chicago95",
+      "url": "https://github.com/grassmunk/Chicago95",
+      "pin": "5da19b8b1e2a886ebf6628403023d5fac3acc3ee",
+      "license": "GPL3+/MIT by component; artwork separate",
+      "architecture": "GTK/XFWM theme suite",
+      "recommendation": "reuse selectively",
+      "assessment": "Useful fallback theme/Plus importer; does not supply Explorer file-operation semantics.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "ice-wm/icewm",
+      "url": "https://github.com/ice-wm/icewm",
+      "pin": "17907bdef5de6d18f9002a11d5c11abb8c1f6a42",
+      "license": "LGPL2 COPYING; check per-file headers",
+      "architecture": "native X11 WM/taskbar",
+      "recommendation": "nested WM-only evaluation preserving current applets",
+      "assessment": "Maintained WM, not file manager; replacing current WM is out of scope.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified",
+      "wm_source_verified": [
+        "WM_TAKE_FOCUS",
+        "WM_DELETE_WINDOW",
+        "transient hints",
+        "_NET_ACTIVE_WINDOW"
+      ]
+    },
+    {
+      "repository": "reactos/reactos",
+      "url": "https://github.com/reactos/reactos",
+      "pin": "3e6033a613fbf7c5bd58aaeaa05af42514af59d5",
+      "license": "GPL2 project; per-file exceptions",
+      "architecture": "Win32 compatible OS shell",
+      "recommendation": "reference",
+      "assessment": "Explorer depends on shell32/browseui/Win32 services; not native Linux drop-in.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "wine-mirror/wine",
+      "url": "https://github.com/wine-mirror/wine",
+      "pin": "ecca8e75524b446d07b9a25a79e32cd9df7dd2aa",
+      "license": "LGPL2.1+",
+      "architecture": "Win32 compatibility shell",
+      "recommendation": "reference/adapt after review",
+      "assessment": "Explorer namespace and launch parser useful; Wine runtime and styling differ.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "madkmedia/Bevel95",
+      "url": "https://github.com/madkmedia/Bevel95",
+      "pin": "6a742ff38071af5de02f9e7ab2b3ae792de411d2",
+      "license": "GPL3-or-later own code; art separate",
+      "architecture": "Rust Windows 11 classic shell",
+      "recommendation": "reference",
+      "assessment": "Close classic intent; upstream Windows/MSVC target, no verified Linux backend here.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "jdan/98.css",
+      "url": "https://github.com/jdan/98.css",
+      "pin": "b1d7a907371bbe523d6f64e3af97f714fdbd6d6a",
+      "license": "MIT",
+      "architecture": "browser CSS controls",
+      "recommendation": "reference",
+      "assessment": "Control visuals only; no native Linux shell/filesystem backend.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "React95/React95",
+      "url": "https://github.com/React95/React95",
+      "pin": "e1a82838e83f24e07582e2e866c76514a7d3d0d0",
+      "license": "MIT",
+      "architecture": "React web controls",
+      "recommendation": "reference",
+      "assessment": "UI components, not a complete native Explorer.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "DustinBrett/daedalOS",
+      "url": "https://github.com/DustinBrett/daedalOS",
+      "pin": "ed9c7a54cc50a6e9125333743164830ad56779a5",
+      "license": "MIT",
+      "architecture": "browser desktop/VFS",
+      "recommendation": "reference",
+      "assessment": "Broad browser desktop behaviors; browser rewrite would replace current architecture.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "microsoft/winfile",
+      "url": "https://github.com/microsoft/winfile",
+      "pin": "63ec2cc425c666fe37193085b0528f8f63986e4d",
+      "license": "MIT",
+      "architecture": "official Windows File Manager source",
+      "recommendation": "reference",
+      "assessment": "Legitimate historical source, not Explorer; archived March 2025 and Win32 target.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "lxqt/pcmanfm-qt",
+      "url": "https://github.com/lxqt/pcmanfm-qt",
+      "pin": "3987c0bb9818496407c6a78855fc6f90d85c3dd5",
+      "license": "GPL2 project",
+      "architecture": "native Qt file manager",
+      "recommendation": "evaluate backend ideas",
+      "assessment": "Real tree/views/operations; Qt toolkit and UI differ.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "lxqt/libfm-qt",
+      "url": "https://github.com/lxqt/libfm-qt",
+      "pin": "06b63b6af95b6acabbcec2de26e67e39b40ec792",
+      "license": "LGPL2.1+ library; BSD CMake",
+      "architecture": "Qt file manager library",
+      "recommendation": "evaluate",
+      "assessment": "Reusable backend/model layer but Qt dependency and binding work.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "lxde/libfm",
+      "url": "https://github.com/lxde/libfm",
+      "pin": "f3861c0d6a1a0c720ede5d7ae4941e515240ce5e",
+      "license": "GPL2 COPYING",
+      "architecture": "GTK/GLib file manager library",
+      "recommendation": "evaluate",
+      "assessment": "Closer ecosystem; GVFS/monitor/volume infrastructure, GPL integration review.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "xfce-mirror/thunar",
+      "url": "https://github.com/xfce-mirror/thunar",
+      "pin": "b1d2264ccae761e6bd1384fb992c4ea3d4564c44",
+      "license": "GPL2 project",
+      "architecture": "native XFCE file manager",
+      "recommendation": "reference/interop",
+      "assessment": "Useful behavior baseline; no Thunar fork authorized and no assumed clean embeddable backend.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "nestoris/se98-wm-theme",
+      "url": "https://github.com/nestoris/se98-wm-theme",
+      "pin": "c54a19604012a2aa4464575cb3fbe49681473dc8",
+      "license": "GPL3",
+      "architecture": "GTK/XFWM/Metacity themes",
+      "recommendation": "reference",
+      "assessment": "Later Windows appearance; no file-manager semantics.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "nestoris/Win98SE",
+      "url": "https://github.com/nestoris/Win98SE",
+      "pin": "a837b57a47242d6eefe63cadc9e6906a5be7e7a6",
+      "license": "GPL2 project; asset provenance separately",
+      "architecture": "icon theme",
+      "recommendation": "reference",
+      "assessment": "Mixed asset sources; not automatically original Windows95 icons.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "wieslawsoltes/Win95",
+      "url": "https://github.com/wieslawsoltes/Win95",
+      "pin": "eee7ff3a7db1765bc567b49cc9ec8bafb53f3765",
+      "license": "code grant not verified; font license separate",
+      "architecture": "browser desktop/VFS",
+      "recommendation": "reference only",
+      "assessment": "No root LICENSE found in inspected files; do not copy code until grant confirmed.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "repository": "felixrieseberg/windows95",
+      "url": "https://github.com/felixrieseberg/windows95",
+      "pin": "051065e5ae815203a0a9038e01eefdf3c10519f1",
+      "license": "app/guest licensing require separate review",
+      "architecture": "Electron/v86 actual guest appliance",
+      "recommendation": "reference only",
+      "assessment": "Emulates actual Windows; does not implement a native Linux Explorer.",
+      "built_and_tested": false,
+      "confidence": "source inspected; runtime unverified"
+    },
+    {
+      "url": "https://xclass.sourceforge.net/applications.html",
+      "name": "xclass + Explorer",
+      "license": "toolkit LGPL stated; Explorer application grant unverified",
+      "architecture": "historical native C++ Xlib Windows95 widgets and Explorer",
+      "recommendation": "evaluate historical source",
+      "assessment": "Upstream warns applications unfinished; no downloaded Explorer archive inspected.",
+      "built_and_tested": false
+    },
+    {
+      "url": "https://fvwm95.sourceforge.net/",
+      "name": "FVWM95",
+      "license": "review exact source headers before reuse",
+      "architecture": "historical FVWM-derived WM/taskbar",
+      "recommendation": "reference",
+      "assessment": "Companion Explorer is separate; WM replacement out of scope.",
+      "built_and_tested": false
+    },
+    {
+      "url": "https://sourceforge.net/projects/xfe/",
+      "name": "XFE",
+      "license": "GPL2 upstream project listing; file-level review required",
+      "architecture": "native X Explorer/Commander file manager",
+      "recommendation": "evaluate",
+      "assessment": "Tree plus one/two file panes, search and remote-server features; not accepted as Windows95 pixel faithful.",
+      "built_and_tested": false
+    },
+    {
+      "url": "https://github.com/rodlie/qtfm",
+      "name": "QtFM",
+      "license": "not audited",
+      "architecture": "Qt file manager",
+      "recommendation": "secondary evaluation",
+      "assessment": "Repository verified; no detailed source/license acceptance performed.",
+      "built_and_tested": false
+    },
+    {
+      "url": "https://gnome.pages.gitlab.gnome.org/gtk/gio/overview.html",
+      "name": "GIO",
+      "license": "review linked GLib version licensing before new redistribution",
+      "architecture": "GLib/GObject filesystem/volume/async infrastructure",
+      "recommendation": "first backend spike",
+      "assessment": "Fits existing GTK stack; wrap errors, cancellation and naming behind our native controls.",
+      "built_and_tested": false
+    },
+    {
+      "url": "https://doc.qt.io/qt-6/qfilesystemmodel.html",
+      "name": "QFileSystemModel",
+      "license": "Qt module/version license review required",
+      "architecture": "worker-populated Qt filesystem model",
+      "recommendation": "reference/alternative spike",
+      "assessment": "Useful model semantics; adding Qt for current GTK shell requires justification.",
+      "built_and_tested": false
+    },
+    {
+      "name": "XFWM4",
+      "url": "https://gitlab.xfce.org/xfce/xfwm4",
+      "license": "Verify exact source/file grants before adaptation; no code copied",
+      "architecture": "native X11 window manager already aligned with XFCE base",
+      "recommendation": "first existing-environment WM-only feasibility baseline",
+      "assessment": "Focus/stacking/event source inspected; real guest integration not run. Current painted Explorer surfaces still require native-window separation.",
+      "built_and_tested": false
+    }
+  ],
+  "profile_contract": {
+    "os_release": [
+      "rtm",
+      "osr1",
+      "osr2",
+      "osr2.5"
+    ],
+    "shell_generation": [
+      "classic",
+      "ie4_desktop_update"
+    ],
+    "folder_web_view": false,
+    "active_desktop": false,
+    "plus_components": [],
+    "browse_in_same_window": true,
+    "dependencies": [
+      "folder_web_view requires ie4_desktop_update",
+      "active_desktop requires ie4_desktop_update",
+      "Plus components never imply IE4 or Active Desktop"
+    ],
+    "runtime_implemented": false
+  },
+  "evidence": {
+    "native_manifest": "private/screenshots/explorer-plan-20261126/capture.json",
+    "source_provenance": [
+      "private/research/explorer-plan/repo-pins.json",
+      "private/research/explorer-plan/upstream-fetch.json",
+      "private/research/explorer-plan/source-fetch.json"
+    ],
+    "new_tests": "tests/test_explorer_tree_model.py",
+    "new_test_count": 13,
+    "ui_integrated": false
+  },
+  "architecture_gate": {
+    "priority": "P0",
+    "root_observed": true,
+    "child_independently_replayed": false,
+    "implemented": false,
+    "recommendation": "Nested WM-only evaluation preserving native GTK applets/backends/controls; progressively separate desktop/taskbar/popups and native Explorer windows. No wholesale shell replacement.",
+    "candidate_order": [
+      "existing XFWM4",
+      "minimal IceWM",
+      "Linux-explorer WM-only feasibility"
+    ],
+    "evidence": [
+      "private/research/explorer-plan/wm-source-fetch.json",
+      "private/research/explorer-plan/wm-alternatives-fetch.json"
+    ],
+    "pure_tree_code_unchanged": true
+  }
+}

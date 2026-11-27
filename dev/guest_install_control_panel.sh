@@ -2,7 +2,11 @@
 # Install narrowly scoped OS-settings support only in the development guest.
 set -eu
 test "$(cat /sys/class/dmi/id/sys_vendor)" = QEMU
-test "$(hostname)" = win95lx-dev
+if test -x /usr/lib/win95lx/require-guest; then
+    /usr/lib/win95lx/require-guest
+else
+    test "$(hostname)" = win95lx-dev
+fi
 test "$(id -u)" = 0
 test -d /home/developer/win95lx-preview/src/win95lx/control_panel
 install -d /etc/polkit-1/rules.d

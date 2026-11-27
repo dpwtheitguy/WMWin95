@@ -1,0 +1,3037 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-11-26",
+  "status": "researched_inventory_with_explicit_media_gaps",
+  "scope_notes": [
+    "Research only: no game implementation, installation, or Start menu change. Control Panel work remains the primary task.",
+    "No leaked Microsoft NT/XP source was used. A port\u2019s open-source license does not grant redistribution rights to original proprietary assets.",
+    "Candidate ports were not built, run, or accepted for visual fidelity in this task.",
+    "This English product-family inventory does not establish every OEM, localized, prerelease, service-pack, XP Starter/Embedded, x64, or IA-64 SKU.",
+    "Screensavers, creative applications, and trailer-only sampler entries are excluded from game counts. Retail Entertainment Packs are separate from stock Windows.",
+    "No dedicated Plus! for Windows 3.x or Plus! for Windows Me product was confirmed. Plus! for Kids is a Windows 95-era product, not a separate Plus! 98 for Kids release.",
+    "Known name traps are recorded: Golf solitaire/Fuji Golf/Golf 1998 Lite; Space Cadet/Pinball Arcade; SegaSoft Lose Your Marbles/the unrelated Macintosh game; Best of Windows/Game Boy Color rosters."
+  ],
+  "sources": {
+    "win30manual": {
+      "title": "Microsoft Windows 3.0 User\u2019s Guide",
+      "url": "https://bitsavers.trailing-edge.com/pdf/microsoft/windows_3.0/Windows_3.0_Users_Guide_198909.pdf",
+      "kind": "archived_primary",
+      "note": "Microsoft-authored manual; identifies Solitaire and Reversi."
+    },
+    "win31manual": {
+      "title": "Microsoft Press: Concise Guide to Windows 3.1",
+      "url": "https://vtda.org/books/Computing/OperatingSystems/ConciseGuideWindows3.1_KrisJamsa.pdf",
+      "kind": "archived_primary",
+      "note": "Games chapter identifies Solitaire and Minesweeper."
+    },
+    "wfw31": {
+      "title": "Microsoft KB Q90561: New Files Included with Windows for Workgroups 3.1",
+      "url": "https://jeffpar.github.io/kbarchive/kb/090/Q90561/",
+      "kind": "archived_primary",
+      "note": "MSHEARTS.EXE identified as NetDDE Hearts."
+    },
+    "wfw311": {
+      "title": "Original Windows for Workgroups 3.11 disk directory listings",
+      "url": "https://www.pcjs.org/software/pcx86/sys/windows/3.11/",
+      "kind": "original_media_listing",
+      "note": ""
+    },
+    "me": {
+      "title": "Microsoft KB306862: List of Games That Are Included with Windows",
+      "url": "https://ftp.zx.net.nz/pub/mirror/ftp.microsoft.com/MISC/KB/en-us/306/862.HTM",
+      "kind": "archived_primary",
+      "note": "Lists all eleven Me games."
+    },
+    "xp": {
+      "title": "Microsoft KB307768: Add or Remove Games in Windows XP",
+      "url": "https://ftp.zx.net.nz/pub/mirror/ftp.microsoft.com/MISC/KB/en-us/307/768.HTM",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "xp_local": {
+      "title": "Microsoft Support answer: default XP local games",
+      "url": "https://learn.microsoft.com/en-us/answers/questions/2491864/where-can-i-get-find-the-old-hearts-game-not-inter",
+      "kind": "support_answer",
+      "note": "Community-era support answer; corroborates six local games, not an original XP manifest."
+    },
+    "internet_retirement": {
+      "title": "Microsoft: The New Internet Games in Windows 7",
+      "url": "https://blogs.windows.com/windowsexperience/2009/02/19/the-new-internet-games-in-windows-7/",
+      "kind": "primary",
+      "note": "Confirms predecessor Internet games; exact five supported by Me KB and project original-client inventory."
+    },
+    "plus98press": {
+      "title": "Microsoft announces Plus!98 availability",
+      "url": "https://news.microsoft.com/source/1998/06/25/microsoft-announces-immediate-availability-of-microsoft-plus-98/",
+      "kind": "primary",
+      "note": ""
+    },
+    "plusxppress": {
+      "title": "Microsoft announces Plus! for Windows XP",
+      "url": "https://news.microsoft.com/source/2001/09/26/microsoft-announces-microsoft-plus-for-windows-xp/",
+      "kind": "primary",
+      "note": ""
+    },
+    "kids": {
+      "title": "Microsoft Plus! for Kids announcement",
+      "url": "https://news.microsoft.com/source/1997/02/18/microsoft-plus-for-kids-is-a-quick-and-easy-way-to-make-using-windows-95-even-more-secure-and-fun-for-kids/",
+      "kind": "primary",
+      "note": ""
+    },
+    "dme": {
+      "title": "Microsoft Plus! Digital Media Edition announcement",
+      "url": "https://news.microsoft.com/source/2002/12/16/microsoft-announces-plus-digital-media-edition-the-ultimate-photo-music-and-movie-enhancement-pack-for-windows-xp/",
+      "kind": "primary",
+      "note": ""
+    },
+    "superpack": {
+      "title": "Microsoft Plus! SuperPack announcement",
+      "url": "https://news.microsoft.com/source/2004/10/19/microsoft-announces-immediate-availability-of-plus-superpack-for-windows-xp/",
+      "kind": "primary",
+      "note": ""
+    },
+    "gamepack": {
+      "title": "Microsoft KB Q282167: Plus! Game Pack requirements",
+      "url": "https://jeffpar.github.io/kbarchive/kb/282/Q282167/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "gamepack_puzzle": {
+      "title": "Microsoft KB Q272333: Game Pack includes Puzzle Collection",
+      "url": "https://jeffpar.github.io/kbarchive/kb/272/Q272333/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "gamepack_contents": {
+      "title": "Plus! Game Pack product-box description transcription",
+      "url": "https://www.ebay.com/p/170314078",
+      "kind": "secondary_product_listing",
+      "note": "12-card-game names and Pandora trial are provisional pending original local manifest/box scan; listing is not treated as primary proof."
+    },
+    "puzzle": {
+      "title": "Microsoft KB Q168868: Puzzle Collection contents",
+      "url": "https://jeffpar.github.io/kbarchive/kb/168/Q168868/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "best": {
+      "title": "Microsoft KB Q130026: Best of Entertainment Pack contents",
+      "url": "https://jeffpar.github.io/kbarchive/kb/130/Q130026/",
+      "kind": "archived_primary",
+      "note": "Authoritative thirteen-game list; no Tic Tac Drop in the Windows compilation."
+    },
+    "mep_listing": {
+      "title": "Entertainment Pack volume catalog",
+      "url": "https://appserv.winworldpc.com/product/microsoft-entertainm/4",
+      "kind": "secondary_catalog",
+      "note": "Volume rosters cross-checked against Microsoft KB descriptions; remaining original manifests not acquired."
+    },
+    "inkball_manual": {
+      "title": "Motion Computing M1400 Tablet PC User Guide",
+      "url": "https://ptacts.uspto.gov/ptacts/public-informations/petitions/1547245/download-documents?artifactId=GIrU8vmRkWeLXZeLHzmP2QZXBFuA0xMGAA1cSdQr3xGjR9iysFs_UQU",
+      "kind": "archived_primary",
+      "note": "OEM manual explicitly documents bundled InkBall; exact first Tablet edition requires original media comparison."
+    },
+    "pinball64": {
+      "title": "Raymond Chen: gaps in Space Cadet on 64-bit Windows",
+      "url": "https://devblogs.microsoft.com/oldnewthing/20220106-00/?p=106122",
+      "kind": "primary",
+      "note": "Do not infer a blanket XP x64 absence from the older Alpha port anecdote."
+    },
+    "win95_rtm": {
+      "title": "applets.inf",
+      "local_path": "private/cabsets/windows95-osr1-all/applets.inf",
+      "sha256": "5821c34d000e3cf9e4d1df03da500d3d271529b1b4820b0c485ed9592e969a3d",
+      "kind": "original_media",
+      "note": "Directory is misleadingly named: source inspected as RTM 950. Games optional component: [wingames.files]."
+    },
+    "win95_osr2": {
+      "title": "applets.inf",
+      "local_path": "private/cabsets/windows95-rtm-all/applets.inf",
+      "sha256": "9f0bc0f41746163823d2a688210e656a62c8111bc95ec2b4a848c9798127bd2d",
+      "kind": "original_media",
+      "note": "Directory misleadingly named: source inspected as OSR2 build 1111."
+    },
+    "win95_osr25": {
+      "title": "applets.inf",
+      "local_path": "private/cabsets/windows95/applets.inf",
+      "sha256": "9f0bc0f41746163823d2a688210e656a62c8111bc95ec2b4a848c9798127bd2d",
+      "kind": "original_media",
+      "note": ""
+    },
+    "plus95": {
+      "title": "PLUS.INF",
+      "local_path": "private/reference/media/plus/PLUS.INF",
+      "sha256": "450f30cefbd3eb7465be00afa196dd4f9e8d876449b499ecf630bbee20de8f7b",
+      "kind": "original_media",
+      "note": "Pinball files, destination and shortcuts."
+    },
+    "win98se": {
+      "title": "appletpp.inf",
+      "local_path": "private/cabsets/windows98-se/base/appletpp.inf",
+      "sha256": "71dbb15ffbd8c85c0b731fc71db094dd68ef81c4c478bcdb948d1e8ec99b12ef",
+      "kind": "original_media",
+      "note": "[wingames.files] and game links."
+    },
+    "plus98": {
+      "title": "PLS98GAM.INF",
+      "local_path": "private/cabsets/plus98/PLS98GAM.INF",
+      "sha256": "5ad7a87bb27d7d513a2786d92bfb660f58bcc77201d9e20ae678ab1c5f21c54c",
+      "kind": "original_media",
+      "note": "Golf, Spider, LYM sections and native labels; LYM registry calls version Lite."
+    },
+    "hover": {
+      "title": "hovrread.txt",
+      "local_path": "private/reference/media/funstuff/hover/hovrread.txt",
+      "sha256": "8091d2e5dbffe5a56386b463d653d1616c47302248f064a259c3e0d44a9e6948",
+      "kind": "original_media",
+      "note": ""
+    },
+    "pinball98migration": {
+      "title": "pinball.inf",
+      "local_path": "private/reference-media/windows98-se-extracted/media/tools/mtsutil/pinball.inf",
+      "sha256": "15452d1a407b29f6963b05666e7059ed172ea8d1503a409ed5083f6435b81f4e",
+      "kind": "original_media",
+      "note": "Explicitly installs from Plus! 95 CD, not stock Windows 98 payload."
+    },
+    "sampler95": {
+      "title": "sampler.ini",
+      "local_path": "private/reference/media/sampler/sampler.ini",
+      "sha256": "d36e80e9995c801b6ce7bf8dd6ecdda6fd083aa8a3fce16198a3cdaf369fc4a1",
+      "kind": "original_media",
+      "note": "Original selected media sample; separate trailers from playable trials."
+    },
+    "pacmantrial": {
+      "title": "READ-ME.TXT",
+      "local_path": "private/reference/media/demos/PACMAN/READ-ME.TXT",
+      "sha256": "e98e48de6c723c12549b4ae29a93ff08f04359fe627f833a4f9035eeaa23f70e",
+      "kind": "original_media",
+      "note": "First two Pac-Man levels, not four full Return of Arcade games."
+    },
+    "sampler98": {
+      "title": "default.htm",
+      "local_path": "private/reference-media/windows98-se-extracted/media/cdsample/catalog/products/pinball/default.htm",
+      "sha256": "202552c6263b3a2e23a74858ec4f2ad3805068180c67d8f41ff9bfa3467fa420",
+      "kind": "original_media",
+      "note": "Pinball Arcade is a separate seven-table retail product; media includes trial executable."
+    },
+    "kb-cruel": {
+      "title": "Microsoft KB Q66859",
+      "url": "https://jeffpar.github.io/kbarchive/kb/066/Q66859/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-golf-solitaire": {
+      "title": "Microsoft KB Q66874",
+      "url": "https://jeffpar.github.io/kbarchive/kb/066/Q66874/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-minesweeper": {
+      "title": "Microsoft KB Q66352",
+      "url": "https://jeffpar.github.io/kbarchive/kb/066/Q66352/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-pegged": {
+      "title": "Microsoft KB Q66351",
+      "url": "https://jeffpar.github.io/kbarchive/kb/066/Q66351/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-taipei": {
+      "title": "Microsoft KB Q66354",
+      "url": "https://jeffpar.github.io/kbarchive/kb/066/Q66354/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-tetris": {
+      "title": "Microsoft KB Q66356",
+      "url": "https://jeffpar.github.io/kbarchive/kb/066/Q66356/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-tictactics": {
+      "title": "Microsoft KB Q66353",
+      "url": "https://jeffpar.github.io/kbarchive/kb/066/Q66353/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-fuji-golf": {
+      "title": "Microsoft KB Q96137",
+      "url": "https://jeffpar.github.io/kbarchive/kb/096/Q96137/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-pipe-dream": {
+      "title": "Microsoft KB Q96714",
+      "url": "https://jeffpar.github.io/kbarchive/kb/096/Q96714/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-chips-challenge": {
+      "title": "Microsoft KB Q98909",
+      "url": "https://jeffpar.github.io/kbarchive/kb/098/Q98909/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-klotski": {
+      "title": "Microsoft KB Q98930",
+      "url": "https://jeffpar.github.io/kbarchive/kb/098/Q98930/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-go-figure": {
+      "title": "Microsoft KB Q98931",
+      "url": "https://jeffpar.github.io/kbarchive/kb/098/Q98931/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-life-genesis": {
+      "title": "Microsoft KB Q98932",
+      "url": "https://jeffpar.github.io/kbarchive/kb/098/Q98932/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-tetravex": {
+      "title": "Microsoft KB Q98933",
+      "url": "https://jeffpar.github.io/kbarchive/kb/098/Q98933/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-tic-tac-drop": {
+      "title": "Microsoft KB Q98934",
+      "url": "https://jeffpar.github.io/kbarchive/kb/098/Q98934/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-wordzap": {
+      "title": "Microsoft KB Q98935",
+      "url": "https://jeffpar.github.io/kbarchive/kb/098/Q98935/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-dr-black-jack": {
+      "title": "Microsoft KB Q98936",
+      "url": "https://jeffpar.github.io/kbarchive/kb/098/Q98936/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-tripeaks": {
+      "title": "Microsoft KB Q98937",
+      "url": "https://jeffpar.github.io/kbarchive/kb/098/Q98937/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-jezzball": {
+      "title": "Microsoft KB Q98938",
+      "url": "https://jeffpar.github.io/kbarchive/kb/098/Q98938/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-maxwells-maniac": {
+      "title": "Microsoft KB Q99158",
+      "url": "https://jeffpar.github.io/kbarchive/kb/099/Q99158/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "kb-chess": {
+      "title": "Microsoft KB Q99159",
+      "url": "https://jeffpar.github.io/kbarchive/kb/099/Q99159/",
+      "kind": "archived_primary",
+      "note": ""
+    },
+    "wep_roster": {
+      "title": "Microsoft Entertainment Pack volume rosters",
+      "url": "https://en.wikipedia.org/wiki/Microsoft_Entertainment_Pack",
+      "kind": "secondary_roster",
+      "note": "Only used where original Microsoft manifests/KB descriptions remain missing; not a substitute for media acceptance."
+    },
+    "payload-pinball-arcade-trial": {
+      "title": "mspinbal.exe",
+      "local_path": "private/reference-media/windows98-se-extracted/media/cdsample/demos/pinball/mspinbal.exe",
+      "sha256": "c445040d3f45af6cb61bc3cf10e9f1dd3ee2c0f545badae79b8a2e4bfcd7024e",
+      "kind": "original_media",
+      "note": "Static inventory only; not executed. Payload extraction and exact trial-version verification remain open."
+    },
+    "payload-age-of-empires-rise-of-rome-trial": {
+      "title": "msaoex.exe",
+      "local_path": "private/reference-media/windows98-se-extracted/media/cdsample/demos/agex/msaoex.exe",
+      "sha256": "e2a5f94bfbd14515f4b32cac783809d47dc6ed967799c7e414ed81e56c5f1a16",
+      "kind": "original_media",
+      "note": "Static inventory only; not executed. Payload extraction and exact trial-version verification remain open."
+    },
+    "payload-monster-truck-madness2-trial": {
+      "title": "msmtm2.exe",
+      "local_path": "private/reference-media/windows98-se-extracted/media/cdsample/demos/mtm2/msmtm2.exe",
+      "sha256": "aeaceb155b6a8c3fde61b571b9f095acaa7e98e54250c6e89e49a3c0595ceb4f",
+      "kind": "original_media",
+      "note": "Static inventory only; not executed. Payload extraction and exact trial-version verification remain open."
+    },
+    "payload-motocross-madness-trial": {
+      "title": "msmcm.exe",
+      "local_path": "private/reference-media/windows98-se-extracted/media/cdsample/demos/mcm/msmcm.exe",
+      "sha256": "28bdaf2ca25312dc8ebd52947c37ceebacc77dfbe681d25c460141f596f12ed2",
+      "kind": "original_media",
+      "note": "Static inventory only; not executed. Payload extraction and exact trial-version verification remain open."
+    },
+    "payload-golf99-trial": {
+      "title": "msgolf99.exe",
+      "local_path": "private/reference-media/windows98-se-extracted/media/cdsample/demos/golf/msgolf99.exe",
+      "sha256": "d3e8312051f27af3e50e8f1188d2db38cc2c72ccbf42d82790aab132a821e1e0",
+      "kind": "original_media",
+      "note": "Static inventory only; not executed. Payload extraction and exact trial-version verification remain open."
+    },
+    "payload-hellbender-trial": {
+      "title": "HELTRIAL.EXE",
+      "local_path": "private/reference/media/demos/hbender/COMPRESS/HELTRIAL.EXE",
+      "sha256": "39faf61e873e30a1edb65586d461d682dc942b274549ba8748b4dd29195ed529",
+      "kind": "original_media",
+      "note": "Static original-media inventory; not executed."
+    },
+    "payload-pacman-trial": {
+      "title": "ARCTRIAL.INF",
+      "local_path": "private/reference/media/demos/PACMAN/ARCTRIAL.INF",
+      "sha256": "c158ca332457eabcdd980e32aa94ce676aa6324b7e4dd7cfbb66a2321939aef8",
+      "kind": "original_media",
+      "note": "Static original-media inventory; not executed."
+    }
+  },
+  "products": [
+    {
+      "id": "win30",
+      "display_name": "Windows 3.0",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "reversi"
+      ],
+      "evidence": [
+        "win30manual"
+      ],
+      "confidence": "confirmed",
+      "notes": "",
+      "default_install": false
+    },
+    {
+      "id": "win31",
+      "display_name": "Windows 3.1 / non-Workgroups 3.11",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper"
+      ],
+      "evidence": [
+        "win31manual"
+      ],
+      "confidence": "confirmed",
+      "notes": "Hearts belongs to Windows for Workgroups, not every product called 3.11.",
+      "default_install": false
+    },
+    {
+      "id": "wfw31",
+      "display_name": "Windows for Workgroups 3.1",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "hearts"
+      ],
+      "evidence": [
+        "wfw31",
+        "win31manual"
+      ],
+      "confidence": "confirmed",
+      "notes": "",
+      "default_install": false
+    },
+    {
+      "id": "wfw311",
+      "display_name": "Windows for Workgroups 3.11",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "hearts"
+      ],
+      "evidence": [
+        "wfw311",
+        "win31manual"
+      ],
+      "confidence": "confirmed",
+      "notes": "",
+      "default_install": false
+    },
+    {
+      "id": "win95rtm",
+      "display_name": "Windows 95 RTM",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "freecell",
+        "hearts"
+      ],
+      "evidence": [
+        "win95_rtm"
+      ],
+      "confidence": "confirmed",
+      "notes": "Optional Games component; installed defaults vary by setup profile.",
+      "default_install": false
+    },
+    {
+      "id": "win95osr2",
+      "display_name": "Windows 95 OSR2",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "freecell",
+        "hearts"
+      ],
+      "evidence": [
+        "win95_osr2"
+      ],
+      "confidence": "confirmed",
+      "notes": "Optional Games component; installed defaults vary by setup profile.",
+      "default_install": false
+    },
+    {
+      "id": "win95osr25",
+      "display_name": "Windows 95 OSR2.5",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "freecell",
+        "hearts"
+      ],
+      "evidence": [
+        "win95_osr25"
+      ],
+      "confidence": "confirmed",
+      "notes": "Optional Games component; installed defaults vary by setup profile.",
+      "default_install": false
+    },
+    {
+      "id": "win95osr1",
+      "display_name": "Windows 95 OSR1 / 950a",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "freecell",
+        "hearts"
+      ],
+      "evidence": [
+        "win95_rtm"
+      ],
+      "confidence": "expected_family_set_not_independently_verified",
+      "notes": "Expected family roster; original OSR1 media is not yet independently verified.",
+      "default_install": false
+    },
+    {
+      "id": "win95osr21",
+      "display_name": "Windows 95 OSR2.1",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "freecell",
+        "hearts"
+      ],
+      "evidence": [
+        "win95_osr2"
+      ],
+      "confidence": "expected_family_set_not_independently_verified",
+      "notes": "Expected family roster; original OSR2.1 media is not yet independently verified.",
+      "default_install": false
+    },
+    {
+      "id": "win95_cd_extra",
+      "display_name": "Windows 95 CD-ROM extras",
+      "category": "media_extra",
+      "games": [
+        "hover"
+      ],
+      "evidence": [
+        "hover"
+      ],
+      "confidence": "confirmed",
+      "notes": "Hover! is a CD extra, not a standard Add/Remove Games entry. Present on the local RTM and OSR2/2.5 media.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-win95-cd-extra"
+    },
+    {
+      "id": "win98fe",
+      "display_name": "Windows 98 First Edition",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "freecell",
+        "hearts"
+      ],
+      "evidence": [
+        "win98se"
+      ],
+      "confidence": "expected_family_set_not_independently_verified",
+      "notes": "Expected family roster; FE media is still needed for an independent component and extras audit.",
+      "default_install": false
+    },
+    {
+      "id": "win98se",
+      "display_name": "Windows 98 Second Edition",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "freecell",
+        "hearts"
+      ],
+      "evidence": [
+        "win98se"
+      ],
+      "confidence": "confirmed",
+      "notes": "Four games verified in the original INF. The separate Pinball migration utility requires Plus! 95 media.",
+      "default_install": false
+    },
+    {
+      "id": "winme",
+      "display_name": "Windows Millennium Edition",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "freecell",
+        "hearts",
+        "pinball",
+        "spider",
+        "internet-backgammon",
+        "internet-checkers",
+        "internet-hearts",
+        "internet-reversi",
+        "internet-spades"
+      ],
+      "evidence": [
+        "me"
+      ],
+      "confidence": "confirmed",
+      "notes": "",
+      "default_install": false
+    },
+    {
+      "id": "winxp32",
+      "display_name": "Windows XP Home/Professional 32-bit family",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "freecell",
+        "hearts",
+        "pinball",
+        "spider",
+        "internet-backgammon",
+        "internet-checkers",
+        "internet-hearts",
+        "internet-reversi",
+        "internet-spades"
+      ],
+      "evidence": [
+        "xp",
+        "xp_local",
+        "me",
+        "internet_retirement"
+      ],
+      "confidence": "documented_family_set_media_pending",
+      "notes": "Documented family roster; original XP manifests, service packs, regional SKUs, Starter and 64-bit exceptions still require media checks.",
+      "default_install": false
+    },
+    {
+      "id": "winxp_tablet",
+      "display_name": "Windows XP Tablet PC family",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "freecell",
+        "hearts",
+        "pinball",
+        "spider",
+        "internet-backgammon",
+        "internet-checkers",
+        "internet-hearts",
+        "internet-reversi",
+        "internet-spades",
+        "inkball"
+      ],
+      "evidence": [
+        "inkball_manual",
+        "xp"
+      ],
+      "confidence": "documented_family_set_media_pending",
+      "notes": "Tablet-specific InkBall. Exact first edition and the inherited game defaults still require original media checks.",
+      "default_install": false
+    },
+    {
+      "id": "winxp_mce",
+      "display_name": "Windows XP Media Center editions",
+      "category": "os",
+      "games": [
+        "solitaire",
+        "minesweeper",
+        "freecell",
+        "hearts",
+        "pinball",
+        "spider",
+        "internet-backgammon",
+        "internet-checkers",
+        "internet-hearts",
+        "internet-reversi",
+        "internet-spades"
+      ],
+      "evidence": [
+        "xp"
+      ],
+      "confidence": "expected_family_set_not_independently_verified",
+      "notes": "No extra built-in game asserted. OEM partner software and the online gallery are not counted as Windows components. Media Center 2002/2004/2005 media checks remain open.",
+      "default_install": false
+    },
+    {
+      "id": "plus95",
+      "display_name": "Microsoft Plus! for Windows 95",
+      "category": "plus",
+      "games": [
+        "pinball"
+      ],
+      "evidence": [
+        "plus95"
+      ],
+      "confidence": "confirmed",
+      "notes": "",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-plus95"
+    },
+    {
+      "id": "plus98",
+      "display_name": "Microsoft Plus! 98",
+      "category": "plus",
+      "games": [
+        "golf98-lite",
+        "lose-your-marbles",
+        "spider"
+      ],
+      "evidence": [
+        "plus98",
+        "plus98press"
+      ],
+      "confidence": "confirmed",
+      "notes": "",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-plus98"
+    },
+    {
+      "id": "plusxp",
+      "display_name": "Microsoft Plus! for Windows XP",
+      "category": "plus",
+      "games": [
+        "hyperbowl",
+        "labyrinth",
+        "russian-square"
+      ],
+      "evidence": [
+        "plusxppress"
+      ],
+      "confidence": "confirmed",
+      "notes": "",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-plusxp"
+    },
+    {
+      "id": "plusxp_dme",
+      "display_name": "Microsoft Plus! Digital Media Edition",
+      "category": "plus",
+      "games": [],
+      "evidence": [
+        "dme"
+      ],
+      "confidence": "confirmed",
+      "notes": "Digital-media tools; no new game appears in Microsoft\u2019s feature list.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-plusxp-dme"
+    },
+    {
+      "id": "plusxp_superpack",
+      "display_name": "Microsoft Plus! SuperPack",
+      "category": "plus",
+      "games": [
+        "hyperbowl",
+        "labyrinth",
+        "russian-square"
+      ],
+      "evidence": [
+        "superpack",
+        "plusxppress"
+      ],
+      "confidence": "confirmed",
+      "notes": "Compilation of Plus! for XP and Digital Media Edition; the three games are not additional new titles.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-plusxp-superpack"
+    },
+    {
+      "id": "pluskids",
+      "display_name": "Microsoft Plus! for Kids (1997)",
+      "category": "creative_tools",
+      "games": [],
+      "evidence": [
+        "kids"
+      ],
+      "confidence": "confirmed",
+      "notes": "Talk It!, Play It!, Paint It!, Picture Picker, Protect It! and themes. Play It! is a musical keyboard/recorder, not a conventional game. No separate Plus! 98 for Kids product was confirmed.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-pluskids"
+    },
+    {
+      "id": "mep1",
+      "display_name": "Microsoft Entertainment Pack 1",
+      "category": "optional_entertainment_pack",
+      "games": [
+        "cruel",
+        "golf-solitaire",
+        "minesweeper",
+        "pegged",
+        "taipei",
+        "tetris",
+        "tictactics"
+      ],
+      "evidence": [
+        "wep_roster",
+        "kb-cruel",
+        "kb-golf-solitaire",
+        "kb-minesweeper",
+        "kb-pegged",
+        "kb-taipei",
+        "kb-tetris",
+        "kb-tictactics"
+      ],
+      "confidence": "confirmed",
+      "notes": "Seven-game optional retail pack. IdleWild and its modules are screensavers, excluded from game counts. Not stock Windows 3.x.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-entertainment-pack-1"
+    },
+    {
+      "id": "mep2",
+      "display_name": "Microsoft Entertainment Pack 2",
+      "category": "optional_entertainment_pack",
+      "games": [
+        "freecell",
+        "jigsawed",
+        "pipe-dream",
+        "rattler-race",
+        "rodents-revenge",
+        "stones",
+        "tuts-tomb"
+      ],
+      "evidence": [
+        "wep_roster",
+        "kb-pipe-dream"
+      ],
+      "confidence": "confirmed",
+      "notes": "Seven-game optional retail pack. IdleWild and its modules are screensavers, excluded from game counts. Not stock Windows 3.x.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-entertainment-pack-2"
+    },
+    {
+      "id": "mep3",
+      "display_name": "Microsoft Entertainment Pack 3",
+      "category": "optional_entertainment_pack",
+      "games": [
+        "fuji-golf",
+        "klotski",
+        "life-genesis",
+        "skifree",
+        "tetravex",
+        "tripeaks",
+        "wordzap"
+      ],
+      "evidence": [
+        "wep_roster",
+        "kb-fuji-golf",
+        "kb-klotski",
+        "kb-life-genesis",
+        "kb-tetravex",
+        "kb-tripeaks",
+        "kb-wordzap"
+      ],
+      "confidence": "confirmed",
+      "notes": "Seven-game optional retail pack. IdleWild and its modules are screensavers, excluded from game counts. Not stock Windows 3.x.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-entertainment-pack-3"
+    },
+    {
+      "id": "mep4",
+      "display_name": "Microsoft Entertainment Pack 4",
+      "category": "optional_entertainment_pack",
+      "games": [
+        "chess",
+        "chips-challenge",
+        "dr-black-jack",
+        "go-figure",
+        "jezzball",
+        "maxwells-maniac",
+        "tic-tac-drop"
+      ],
+      "evidence": [
+        "wep_roster",
+        "kb-chess",
+        "kb-chips-challenge",
+        "kb-dr-black-jack",
+        "kb-go-figure",
+        "kb-jezzball",
+        "kb-maxwells-maniac",
+        "kb-tic-tac-drop"
+      ],
+      "confidence": "confirmed",
+      "notes": "Seven-game optional retail pack. IdleWild and its modules are screensavers, excluded from game counts. Not stock Windows 3.x.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-entertainment-pack-4"
+    },
+    {
+      "id": "mep_best",
+      "display_name": "The Best of Microsoft Entertainment Pack (Windows)",
+      "category": "optional_entertainment_pack",
+      "games": [
+        "golf-solitaire",
+        "taipei",
+        "tetris",
+        "freecell",
+        "pipe-dream",
+        "rodents-revenge",
+        "tuts-tomb",
+        "skifree",
+        "tetravex",
+        "tripeaks",
+        "chips-challenge",
+        "dr-black-jack",
+        "jezzball"
+      ],
+      "evidence": [
+        "best"
+      ],
+      "confidence": "confirmed",
+      "notes": "Authoritative 13-game Windows compilation. The Game Boy Color compilation has a different seven-game roster and is outside this target.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-best-of-entertainment-pack"
+    },
+    {
+      "id": "puzzle_collection",
+      "display_name": "Microsoft Entertainment Pack: The Puzzle Collection",
+      "category": "optional_entertainment_pack",
+      "games": [
+        "fringer",
+        "mixed-genetics",
+        "rat-poker",
+        "finty-flush",
+        "color-collision",
+        "jewel-chase",
+        "lineup",
+        "spring-weekend",
+        "charmer",
+        "muddled-casino"
+      ],
+      "evidence": [
+        "puzzle"
+      ],
+      "confidence": "confirmed",
+      "notes": "Separate Windows 95/NT 4 retail pack; also included in Plus! Game Pack.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-puzzle-collection"
+    },
+    {
+      "id": "plus_gamepack_2000",
+      "display_name": "Microsoft Plus! Game Pack: Cards & Puzzles (2000)",
+      "category": "plus_game_pack",
+      "games": [
+        "bicycle-crazy-eights",
+        "bicycle-old-maid",
+        "bicycle-go-fish",
+        "bicycle-hearts",
+        "bicycle-spades",
+        "bicycle-pinochle",
+        "bicycle-oh-hell",
+        "bicycle-gin-rummy",
+        "bicycle-skat",
+        "bicycle-euchre",
+        "bicycle-schafkopf",
+        "bicycle-cribbage",
+        "fringer",
+        "mixed-genetics",
+        "rat-poker",
+        "finty-flush",
+        "color-collision",
+        "jewel-chase",
+        "lineup",
+        "spring-weekend",
+        "charmer",
+        "muddled-casino",
+        "pandoras-box-trial"
+      ],
+      "evidence": [
+        "gamepack",
+        "gamepack_puzzle",
+        "gamepack_contents"
+      ],
+      "confidence": "partially_primary_confirmed",
+      "notes": "Separate Plus-branded game product from the Me era, not a product titled Plus! for Me. Twelve card games, ten puzzle games and a Pandora\u2019s Box trial. Exact card/trial payload awaits original media.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-plus-gamepack-2000"
+    },
+    {
+      "id": "sampler95",
+      "display_name": "Locally inspected Windows 95 CD sampler",
+      "category": "media_trial",
+      "games": [
+        "hellbender-trial",
+        "pacman-trial"
+      ],
+      "evidence": [
+        "sampler95",
+        "pacmantrial"
+      ],
+      "confidence": "confirmed",
+      "notes": "Hellbender and Pac-Man trials present. Deadly Tide and Monster Truck Madness entries point to AVI trailers and are not counted as playable games. This is one inspected media SKU.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-sampler95"
+    },
+    {
+      "id": "sampler98",
+      "display_name": "Locally inspected Windows 98 SE CD sampler",
+      "category": "media_trial",
+      "games": [
+        "pinball-arcade-trial",
+        "age-of-empires-rise-of-rome-trial",
+        "monster-truck-madness2-trial",
+        "motocross-madness-trial",
+        "golf99-trial"
+      ],
+      "evidence": [
+        "sampler98"
+      ],
+      "confidence": "local_payloads_partially_identified",
+      "notes": "Original executable filenames: mspinbal, msaoex, msmtm2, msmcm, msgolf99. Verify each internal version/help file. MoneyWeb is not a game.",
+      "default_install": false,
+      "proposed_metapackage": "win95lx-games-sampler98"
+    }
+  ],
+  "games": [
+    {
+      "id": "reversi",
+      "display_name": "Reversi",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "win30manual"
+      ],
+      "products": [
+        "win30"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "iagno"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-reversi",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "solitaire",
+      "display_name": "Solitaire (Klondike)",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "win30manual",
+        "win95_osr25"
+      ],
+      "products": [
+        "win30",
+        "win31",
+        "wfw31",
+        "wfw311",
+        "win95rtm",
+        "win95osr2",
+        "win95osr25",
+        "win95osr1",
+        "win95osr21",
+        "win98fe",
+        "win98se",
+        "winme",
+        "winxp32",
+        "winxp_tablet",
+        "winxp_mce"
+      ],
+      "variants": [
+        "Windows 3.x 16-bit",
+        "Windows 95/98/Me classic",
+        "Windows XP frame and card artwork"
+      ],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "pysolfc",
+        "aisleriot",
+        "reactos"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-solitaire",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "minesweeper",
+      "display_name": "Minesweeper",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "win31manual",
+        "win95_osr25"
+      ],
+      "products": [
+        "win31",
+        "wfw31",
+        "wfw311",
+        "win95rtm",
+        "win95osr2",
+        "win95osr25",
+        "win95osr1",
+        "win95osr21",
+        "win98fe",
+        "win98se",
+        "winme",
+        "winxp32",
+        "winxp_tablet",
+        "winxp_mce",
+        "mep1"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "existing_win95lx_not_audited_in_this_inventory",
+      "port_candidates": [
+        "existing_win95lx",
+        "reactos"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-minesweeper",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "hearts",
+      "display_name": "Hearts / The Microsoft Hearts Network",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "wfw31",
+        "win95_osr25"
+      ],
+      "products": [
+        "wfw31",
+        "wfw311",
+        "win95rtm",
+        "win95osr2",
+        "win95osr25",
+        "win95osr1",
+        "win95osr21",
+        "win98fe",
+        "win98se",
+        "winme",
+        "winxp32",
+        "winxp_tablet",
+        "winxp_mce"
+      ],
+      "variants": [
+        "Windows for Workgroups NetDDE edition",
+        "Windows 95/98 classic edition",
+        "Windows Me Classic Hearts",
+        "Windows XP Hearts; Internet Hearts is a separate client"
+      ],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-hearts",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "freecell",
+      "display_name": "FreeCell",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "win95_rtm",
+        "win95_osr25"
+      ],
+      "products": [
+        "win95rtm",
+        "win95osr2",
+        "win95osr25",
+        "win95osr1",
+        "win95osr21",
+        "win98fe",
+        "win98se",
+        "winme",
+        "winxp32",
+        "winxp_tablet",
+        "winxp_mce",
+        "mep2",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "pysolfc",
+        "aisleriot",
+        "reactos"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-freecell",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "pinball",
+      "display_name": "3D Pinball for Windows \u2014 Space Cadet",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "plus95",
+        "me"
+      ],
+      "products": [
+        "winme",
+        "winxp32",
+        "winxp_tablet",
+        "winxp_mce",
+        "plus95"
+      ],
+      "variants": [
+        "Plus! 95 Space Cadet",
+        "Me/XP native port: compare resource format and scoring independently"
+      ],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "spacecadet"
+      ],
+      "notes": "Full Tilt! retail tables Dragon\u2019s Keep and Skulduggery are not Plus! 95 contents. The Windows 98 SE migration INF requires a Plus! 95 CD; Pinball Arcade is a different game.",
+      "default_install": false,
+      "package_id": "win95lx-game-pinball",
+      "package_status": "private_proof_built",
+      "package_blockers": [
+        "Native classic window/menu integration and fidelity review pending",
+        "Original data package locally generated from owned Plus95 media only"
+      ]
+    },
+    {
+      "id": "spider",
+      "display_name": "Spider Solitaire",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "plus98",
+        "me"
+      ],
+      "products": [
+        "winme",
+        "winxp32",
+        "winxp_tablet",
+        "winxp_mce",
+        "plus98"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "pysolfc",
+        "aisleriot",
+        "reactos"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-spider",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "hover",
+      "display_name": "Hover!",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "hover"
+      ],
+      "products": [
+        "win95_cd_extra"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "hover_recomp"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-hover",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "golf98-lite",
+      "display_name": "Microsoft Golf 1998 Lite",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "plus98",
+        "plus98press"
+      ],
+      "products": [
+        "plus98"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-golf98-lite",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "lose-your-marbles",
+      "display_name": "Lose Your Marbles (Plus!98 Lite variant)",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "plus98",
+        "plus98press"
+      ],
+      "products": [
+        "plus98"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "SegaSoft action-puzzle Lite variant. Do not substitute the unrelated 1994 Macintosh logic puzzle by Mark Pilgrim.",
+      "default_install": false,
+      "package_id": "win95lx-game-lose-your-marbles",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "hyperbowl",
+      "display_name": "HyperBowl Plus! Edition",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "plusxppress"
+      ],
+      "products": [
+        "plusxp",
+        "plusxp_superpack"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-hyperbowl",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "labyrinth",
+      "display_name": "The Labyrinth Plus! Edition",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "plusxppress"
+      ],
+      "products": [
+        "plusxp",
+        "plusxp_superpack"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "neverball_analog"
+      ],
+      "notes": "Microsoft\u2019s launch announcement specifies 40 levels. Neverball is a physics/gameplay analogue, not the same game or level set.",
+      "default_install": false,
+      "package_id": "win95lx-game-labyrinth",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "russian-square",
+      "display_name": "Russian Square Plus! Edition",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "plusxppress"
+      ],
+      "products": [
+        "plusxp",
+        "plusxp_superpack"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-russian-square",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "inkball",
+      "display_name": "InkBall",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "inkball_manual"
+      ],
+      "products": [
+        "winxp_tablet"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Confirmed in the XP Tablet PC family. Earlier OEM documentation lists it, so the often repeated Tablet 2005 introduction date is not accepted without original media checks. It is not a standard Home/Professional default.",
+      "default_install": false,
+      "package_id": "win95lx-game-inkball",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "internet-backgammon",
+      "display_name": "Internet Backgammon",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "me",
+        "internet_retirement"
+      ],
+      "products": [
+        "winme",
+        "winxp32",
+        "winxp_tablet",
+        "winxp_mce"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "zone_server"
+      ],
+      "notes": "Original Microsoft service retired. A preserved UI plus replacement server/client work is separate from local game rules.",
+      "default_install": false,
+      "package_id": "win95lx-game-internet-backgammon",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "internet-checkers",
+      "display_name": "Internet Checkers",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "me",
+        "internet_retirement"
+      ],
+      "products": [
+        "winme",
+        "winxp32",
+        "winxp_tablet",
+        "winxp_mce"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "zone_server"
+      ],
+      "notes": "Original Microsoft service retired. A preserved UI plus replacement server/client work is separate from local game rules.",
+      "default_install": false,
+      "package_id": "win95lx-game-internet-checkers",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "internet-hearts",
+      "display_name": "Internet Hearts",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "me",
+        "internet_retirement"
+      ],
+      "products": [
+        "winme",
+        "winxp32",
+        "winxp_tablet",
+        "winxp_mce"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "zone_server"
+      ],
+      "notes": "Original Microsoft service retired. A preserved UI plus replacement server/client work is separate from local game rules.",
+      "default_install": false,
+      "package_id": "win95lx-game-internet-hearts",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "internet-reversi",
+      "display_name": "Internet Reversi",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "me",
+        "internet_retirement"
+      ],
+      "products": [
+        "winme",
+        "winxp32",
+        "winxp_tablet",
+        "winxp_mce"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "zone_server"
+      ],
+      "notes": "Original Microsoft service retired. A preserved UI plus replacement server/client work is separate from local game rules.",
+      "default_install": false,
+      "package_id": "win95lx-game-internet-reversi",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "internet-spades",
+      "display_name": "Internet Spades",
+      "category": "os_plus",
+      "bundling_evidence": [
+        "me",
+        "internet_retirement"
+      ],
+      "products": [
+        "winme",
+        "winxp32",
+        "winxp_tablet",
+        "winxp_mce"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "zone_server"
+      ],
+      "notes": "Original Microsoft service retired. A preserved UI plus replacement server/client work is separate from local game rules.",
+      "default_install": false,
+      "package_id": "win95lx-game-internet-spades",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "cruel",
+      "display_name": "Cruel Solitaire",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-cruel"
+      ],
+      "products": [
+        "mep1"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "pysolfc"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-cruel",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "golf-solitaire",
+      "display_name": "Golf (solitaire)",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-golf-solitaire"
+      ],
+      "products": [
+        "mep1",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "pysolfc"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-golf-solitaire",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "pegged",
+      "display_name": "Pegged",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-pegged"
+      ],
+      "products": [
+        "mep1"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-pegged",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "taipei",
+      "display_name": "Taipei",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-taipei"
+      ],
+      "products": [
+        "mep1",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-taipei",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "tetris",
+      "display_name": "Tetris",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-tetris"
+      ],
+      "products": [
+        "mep1",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-tetris",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "tictactics",
+      "display_name": "TicTactics",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-tictactics"
+      ],
+      "products": [
+        "mep1"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-tictactics",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "jigsawed",
+      "display_name": "JigSawed",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "wep_roster"
+      ],
+      "products": [
+        "mep2"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-jigsawed",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "pipe-dream",
+      "display_name": "Pipe Dream",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-pipe-dream"
+      ],
+      "products": [
+        "mep2",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-pipe-dream",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "rattler-race",
+      "display_name": "RattlerRace",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "wep_roster"
+      ],
+      "products": [
+        "mep2"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-rattler-race",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "rodents-revenge",
+      "display_name": "Rodent\u2019s Revenge",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "wep_roster"
+      ],
+      "products": [
+        "mep2",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-rodents-revenge",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "stones",
+      "display_name": "Stones",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "wep_roster"
+      ],
+      "products": [
+        "mep2"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-stones",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "tuts-tomb",
+      "display_name": "Tut\u2019s Tomb",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "wep_roster"
+      ],
+      "products": [
+        "mep2",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "pysolfc"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-tuts-tomb",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "fuji-golf",
+      "display_name": "Fuji Golf",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-fuji-golf"
+      ],
+      "products": [
+        "mep3"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-fuji-golf",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "klotski",
+      "display_name": "Klotski",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-klotski"
+      ],
+      "products": [
+        "mep3"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-klotski",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "life-genesis",
+      "display_name": "Life Genesis",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-life-genesis"
+      ],
+      "products": [
+        "mep3"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-life-genesis",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "skifree",
+      "display_name": "SkiFree",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "wep_roster"
+      ],
+      "products": [
+        "mep3",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "skifree_author",
+        "jskifree_unlicensed"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-skifree",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "tetravex",
+      "display_name": "TetraVex",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-tetravex"
+      ],
+      "products": [
+        "mep3",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-tetravex",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "tripeaks",
+      "display_name": "TriPeaks",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-tripeaks"
+      ],
+      "products": [
+        "mep3",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "pysolfc"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-tripeaks",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "wordzap",
+      "display_name": "WordZap",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-wordzap"
+      ],
+      "products": [
+        "mep3"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-wordzap",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "chess",
+      "display_name": "Chess (WinChess)",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-chess"
+      ],
+      "products": [
+        "mep4"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-chess",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "chips-challenge",
+      "display_name": "Chip\u2019s Challenge",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-chips-challenge"
+      ],
+      "products": [
+        "mep4",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [
+        "tileworld"
+      ],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-chips-challenge",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "dr-black-jack",
+      "display_name": "Dr. Black Jack",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-dr-black-jack"
+      ],
+      "products": [
+        "mep4",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-dr-black-jack",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "go-figure",
+      "display_name": "Go Figure!",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-go-figure"
+      ],
+      "products": [
+        "mep4"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-go-figure",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "jezzball",
+      "display_name": "JezzBall",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-jezzball"
+      ],
+      "products": [
+        "mep4",
+        "mep_best"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-jezzball",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "maxwells-maniac",
+      "display_name": "Maxwell\u2019s Maniac",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-maxwells-maniac"
+      ],
+      "products": [
+        "mep4"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-maxwells-maniac",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "tic-tac-drop",
+      "display_name": "Tic Tac Drop",
+      "category": "optional_entertainment_pack",
+      "bundling_evidence": [
+        "kb-tic-tac-drop"
+      ],
+      "products": [
+        "mep4"
+      ],
+      "variants": [],
+      "confidence": "kb_confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-tic-tac-drop",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-crazy-eights",
+      "display_name": "Bicycle Crazy Eights",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-crazy-eights",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-old-maid",
+      "display_name": "Bicycle Old Maid",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-old-maid",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-go-fish",
+      "display_name": "Bicycle Go Fish",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-go-fish",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-hearts",
+      "display_name": "Bicycle Hearts",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-hearts",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-spades",
+      "display_name": "Bicycle Spades",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-spades",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-pinochle",
+      "display_name": "Bicycle Pinochle",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-pinochle",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-oh-hell",
+      "display_name": "Bicycle Oh Hell!",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-oh-hell",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-gin-rummy",
+      "display_name": "Bicycle Gin Rummy",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-gin-rummy",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-skat",
+      "display_name": "Bicycle Skat",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-skat",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-euchre",
+      "display_name": "Bicycle Euchre",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-euchre",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-schafkopf",
+      "display_name": "Bicycle Schafkopf",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-schafkopf",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "bicycle-cribbage",
+      "display_name": "Bicycle Cribbage",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Bicycle Card Collection implementation. Its graphics, AI and multiplayer behavior are distinct from the similarly named Windows built-in or Internet game.",
+      "default_install": false,
+      "package_id": "win95lx-game-bicycle-cribbage",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "fringer",
+      "display_name": "Fringer",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "puzzle",
+        "gamepack_puzzle"
+      ],
+      "products": [
+        "puzzle_collection",
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-fringer",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "mixed-genetics",
+      "display_name": "Mixed Genetics",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "puzzle",
+        "gamepack_puzzle"
+      ],
+      "products": [
+        "puzzle_collection",
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-mixed-genetics",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "rat-poker",
+      "display_name": "Rat Poker",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "puzzle",
+        "gamepack_puzzle"
+      ],
+      "products": [
+        "puzzle_collection",
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-rat-poker",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "finty-flush",
+      "display_name": "Finty Flush",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "puzzle",
+        "gamepack_puzzle"
+      ],
+      "products": [
+        "puzzle_collection",
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-finty-flush",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "color-collision",
+      "display_name": "Color Collision",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "puzzle",
+        "gamepack_puzzle"
+      ],
+      "products": [
+        "puzzle_collection",
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-color-collision",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "jewel-chase",
+      "display_name": "Jewel Chase",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "puzzle",
+        "gamepack_puzzle"
+      ],
+      "products": [
+        "puzzle_collection",
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-jewel-chase",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "lineup",
+      "display_name": "Lineup",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "puzzle",
+        "gamepack_puzzle"
+      ],
+      "products": [
+        "puzzle_collection",
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-lineup",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "spring-weekend",
+      "display_name": "Spring Weekend",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "puzzle",
+        "gamepack_puzzle"
+      ],
+      "products": [
+        "puzzle_collection",
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-spring-weekend",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "charmer",
+      "display_name": "Charmer",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "puzzle",
+        "gamepack_puzzle"
+      ],
+      "products": [
+        "puzzle_collection",
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-charmer",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "muddled-casino",
+      "display_name": "Muddled Casino",
+      "category": "plus_game_pack",
+      "bundling_evidence": [
+        "puzzle",
+        "gamepack_puzzle"
+      ],
+      "products": [
+        "puzzle_collection",
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "confirmed",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "",
+      "default_install": false,
+      "package_id": "win95lx-game-muddled-casino",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "pandoras-box-trial",
+      "display_name": "Pandora\u2019s Box (GamePack trial)",
+      "category": "trial",
+      "bundling_evidence": [
+        "gamepack_contents"
+      ],
+      "products": [
+        "plus_gamepack_2000"
+      ],
+      "variants": [],
+      "confidence": "roster_original_manifest_pending",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Limited Game Pack trial, not the full retail Pandora\u2019s Box. Verify the exact eight-puzzle payload against original media.",
+      "default_install": false,
+      "package_id": "win95lx-game-pandoras-box-trial",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "hellbender-trial",
+      "display_name": "Hellbender trial",
+      "category": "media_trial",
+      "bundling_evidence": [
+        "sampler95",
+        "payload-hellbender-trial"
+      ],
+      "products": [
+        "sampler95"
+      ],
+      "variants": [],
+      "confidence": "confirmed_local_media",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Payload on a locally inspected CD sampler; not an installed default or full retail release.",
+      "default_install": false,
+      "package_id": "win95lx-game-hellbender-trial",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "pacman-trial",
+      "display_name": "Pac-Man \u2014 Return of Arcade trial",
+      "category": "media_trial",
+      "bundling_evidence": [
+        "pacmantrial",
+        "payload-pacman-trial"
+      ],
+      "products": [
+        "sampler95"
+      ],
+      "variants": [],
+      "confidence": "confirmed_local_media",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Payload on a locally inspected CD sampler; not an installed default or full retail release.",
+      "default_install": false,
+      "package_id": "win95lx-game-pacman-trial",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "pinball-arcade-trial",
+      "display_name": "Microsoft Pinball Arcade trial",
+      "category": "media_trial",
+      "bundling_evidence": [
+        "sampler98",
+        "payload-pinball-arcade-trial"
+      ],
+      "products": [
+        "sampler98"
+      ],
+      "variants": [],
+      "confidence": "confirmed_local_media",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Payload on a locally inspected CD sampler; not an installed default or full retail release.",
+      "default_install": false,
+      "package_id": "win95lx-game-pinball-arcade-trial",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "age-of-empires-rise-of-rome-trial",
+      "display_name": "Age of Empires: The Rise of Rome trial",
+      "category": "media_trial",
+      "bundling_evidence": [
+        "payload-age-of-empires-rise-of-rome-trial"
+      ],
+      "products": [
+        "sampler98"
+      ],
+      "variants": [],
+      "confidence": "local_payload_identity_needs_version_check",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Payload on a locally inspected CD sampler; not an installed default or full retail release.",
+      "default_install": false,
+      "package_id": "win95lx-game-age-of-empires-rise-of-rome-trial",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "monster-truck-madness2-trial",
+      "display_name": "Monster Truck Madness 2 trial",
+      "category": "media_trial",
+      "bundling_evidence": [
+        "payload-monster-truck-madness2-trial"
+      ],
+      "products": [
+        "sampler98"
+      ],
+      "variants": [],
+      "confidence": "local_payload_identity_needs_version_check",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Payload on a locally inspected CD sampler; not an installed default or full retail release.",
+      "default_install": false,
+      "package_id": "win95lx-game-monster-truck-madness2-trial",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "motocross-madness-trial",
+      "display_name": "Motocross Madness trial",
+      "category": "media_trial",
+      "bundling_evidence": [
+        "payload-motocross-madness-trial"
+      ],
+      "products": [
+        "sampler98"
+      ],
+      "variants": [],
+      "confidence": "local_payload_identity_needs_version_check",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Payload on a locally inspected CD sampler; not an installed default or full retail release.",
+      "default_install": false,
+      "package_id": "win95lx-game-motocross-madness-trial",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    },
+    {
+      "id": "golf99-trial",
+      "display_name": "Microsoft Golf 1999 trial",
+      "category": "media_trial",
+      "bundling_evidence": [
+        "payload-golf99-trial"
+      ],
+      "products": [
+        "sampler98"
+      ],
+      "variants": [],
+      "confidence": "local_payload_identity_needs_version_check",
+      "implementation_status": "not_implemented",
+      "port_candidates": [],
+      "notes": "Payload on a locally inspected CD sampler; not an installed default or full retail release.",
+      "default_install": false,
+      "package_id": "win95lx-game-golf99-trial",
+      "package_status": "planned",
+      "package_blockers": [
+        "Implementation and license review required before packaging"
+      ]
+    }
+  ],
+  "port_candidates": [
+    {
+      "id": "spacecadet",
+      "url": "https://github.com/k4zmu2a/SpaceCadetPinball",
+      "license_observed": "MIT",
+      "assessment": "Native Linux SDL2 decompilation/port; original data files are required and are not included. Highest-priority port candidate. Validate Plus! 95 versus XP data, physics and frame behavior before adoption.",
+      "repository_metadata": {
+        "repository": "k4zmu2a/SpaceCadetPinball",
+        "url": "https://github.com/k4zmu2a/SpaceCadetPinball",
+        "default_branch": "master",
+        "license": "MIT",
+        "pushed_at": "2024-08-21T06:56:55Z",
+        "archived": false
+      }
+    },
+    {
+      "id": "pysolfc",
+      "url": "https://github.com/shlomif/PySolFC",
+      "license_observed": "GPL-3.0",
+      "assessment": "Portable Python solitaire rules and many variants. Its modern Tk/Kivy UI does not match Windows 95. Check deal numbering and scoring before reuse.",
+      "repository_metadata": {
+        "repository": "shlomif/PySolFC",
+        "url": "https://github.com/shlomif/PySolFC",
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "pushed_at": "2026-11-26T17:54:14Z",
+        "archived": false
+      }
+    },
+    {
+      "id": "aisleriot",
+      "url": "https://gitlab.gnome.org/GNOME/aisleriot",
+      "license_observed": "not_verified_in_this_pass",
+      "assessment": "Potential solitaire rules reference. GitLab returned HTTP 406; no dependency or license acceptance is claimed."
+    },
+    {
+      "id": "reactos",
+      "url": "https://github.com/reactos/reactos/tree/master/base/applications/games",
+      "license_observed": "GPL-2.0 project; per-file audit required",
+      "assessment": "Clean-room Windows-compatible project. Its Win32 games may supply rules/reference implementations but are not Linux GTK drop-ins. Do not use leaked NT/XP source forks.",
+      "repository_metadata": {
+        "repository": "reactos/reactos",
+        "url": "https://github.com/reactos/reactos",
+        "default_branch": "master",
+        "license": "GPL-2.0",
+        "pushed_at": "2026-11-26T06:44:12Z",
+        "archived": false
+      }
+    },
+    {
+      "id": "existing_win95lx",
+      "url": "src/win95lx/apps/minesweeper.py",
+      "license_observed": "repository license",
+      "assessment": "Existing Win95LX Minesweeper; not independently audited for rules or pixel fidelity in this inventory."
+    },
+    {
+      "id": "zone_server",
+      "url": "https://github.com/provigz/ZoneInternetGamesServer",
+      "license_observed": "AGPL-3.0",
+      "assessment": "Replacement server and client-routing project, not a Linux native client. Requires original game clients plus Wine/compatibility or a rewritten client. Multiplayer/bot coverage varies by game. No deployment performed.",
+      "repository_metadata": {
+        "repository": "provigz/ZoneInternetGamesServer",
+        "url": "https://github.com/provigz/ZoneInternetGamesServer",
+        "default_branch": "master",
+        "license": "AGPL-3.0",
+        "pushed_at": "2026-10-09T16:20:14Z",
+        "archived": false
+      }
+    },
+    {
+      "id": "iagno",
+      "url": "https://gitlab.gnome.org/GNOME/iagno",
+      "license_observed": "GPL-3.0 COPYING observed",
+      "assessment": "Native Linux Reversi analogue. Original Windows artwork, menus, AI difficulty and rules still need comparison; this is not a drop-in fidelity port."
+    },
+    {
+      "id": "tileworld",
+      "url": "https://github.com/retrofw/tileworld",
+      "license_observed": "GPL-2.0 observed on reviewed fork",
+      "assessment": "Tile World rules implementation. The reviewed repository is a handheld port; trace the desktop upstream before adopting. Microsoft level data/art and community levels have separate terms."
+    },
+    {
+      "id": "skifree_author",
+      "url": "https://ski.ihoc.net/",
+      "license_observed": "author-provided free binary; no source license verified",
+      "assessment": "Original author offers SkiFree 1.04 for Win32 and states Wine compatibility. This differs from the 1991 version and is not an open-source native Linux port."
+    },
+    {
+      "id": "jskifree_unlicensed",
+      "url": "https://github.com/dimme/jskifree",
+      "license_observed": "no explicit license detected",
+      "assessment": "Java 17+ from-scratch implementation claim. Missing explicit licensing and asset provenance mean it is not approved for reuse.",
+      "repository_metadata": {
+        "repository": "dimme/jskifree",
+        "url": "https://github.com/dimme/jskifree",
+        "default_branch": "master",
+        "license": null,
+        "pushed_at": "2026-08-30T11:55:44Z",
+        "archived": false
+      }
+    },
+    {
+      "id": "neverball_analog",
+      "url": "https://github.com/Neverball/neverball",
+      "license_observed": "GPL-2.0-or-later per project; asset exceptions require review",
+      "assessment": "Native Linux tilt-ball engine analogue only. It is not The Labyrinth Plus! Edition or Microsoft Golf 1998 Lite; game mechanics, levels and UI differ.",
+      "repository_metadata": {
+        "repository": "Neverball/neverball",
+        "url": "https://github.com/Neverball/neverball",
+        "default_branch": "master",
+        "license": "NOASSERTION",
+        "pushed_at": "2026-11-26T13:56:37Z",
+        "archived": false
+      }
+    },
+    {
+      "id": "hover_recomp",
+      "url": "https://github.com/sp00nznet/hover",
+      "license_observed": "MIT observed",
+      "assessment": "Native C static-recompilation tooling; bring original Hover! files. Small, recent project with unvalidated stability/fidelity. Do not confuse it with the unrelated shurcooL/Hover game from 2000."
+    }
+  ],
+  "non_game_companions": [
+    {
+      "product": "pluskids",
+      "items": [
+        "Talk It!",
+        "Play It!",
+        "Paint It!",
+        "Picture Picker",
+        "Protect It!"
+      ],
+      "evidence": [
+        "kids"
+      ]
+    },
+    {
+      "product": "mep1/mep2/mep3",
+      "items": [
+        "IdleWild",
+        "IdleWild screen-saver modules"
+      ],
+      "evidence": [
+        "mep_listing"
+      ]
+    },
+    {
+      "product": "plusxp_dme",
+      "items": [
+        "Photo Story",
+        "Party Mode",
+        "Analog Recorder",
+        "CD Label Maker",
+        "Dancer",
+        "Audio Converter",
+        "Movie Maker effects/transitions"
+      ],
+      "evidence": [
+        "dme"
+      ]
+    }
+  ],
+  "installation_policy": {
+    "default_install": false,
+    "ui": "Future explicit Install Games selector; APT per game",
+    "policy": "Research only. Future additional games and Entertainment Packs are optional proposals, not implemented installers. Entertainment Packs are off by default. Existing base games are unchanged; target-profile base defaults will be researched separately. The private Pinball runtime prototype predates this scope clarification and is not integrated. Original assets remain private."
+  },
+  "project_scope": {
+    "status": "research_only",
+    "default_install": false,
+    "intent": "Familiar mid-to-late-1990s Windows PC classics; the historical catalog is not a promise to install every title.",
+    "entertainment_packs": "Optional, off by default; future installer design only.",
+    "implementation": "Paused by user direction; no further game builds or packaging."
+  }
+}

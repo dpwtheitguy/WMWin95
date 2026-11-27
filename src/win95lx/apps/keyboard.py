@@ -85,14 +85,10 @@ class KeyboardWindow(PropertySheet):
                     p.text(description,367-p.font.width(description),y+2,LIGHT if selected else BLACK)
                 p.fill(124,239,135,17,FACE);p.text(self.layout_names.get(layouts[0],layouts[0]),125,241)
             for index in range(len(layouts)):self.hit((34,100+index*17,334,17),('language',index))
-            if len(layouts)<4:self.hit((33,203,108,23),('add',))
-            else:self.button(p,'Add...',(33,203,108,23),('add',),False,'This keyboard backend supports four layouts. Remove a language before adding another.')
-            self.hit((147,203,108,23),('properties',))
-            reason='At least one keyboard language must remain installed.'
-            if len(layouts)>1:self.button(p,'Remove',(261,203,108,23),('remove',))
-            else:self.disabled.append(((261,203,108,23),reason))
-            if self.language_selection>0:self.button(p,'Set as Default',(261,237,108,23),('default',))
-            else:self.disabled.append(((261,237,108,23),'The selected language is already the default.'))
+            self.button(p,'A&dd...',(33,202,108,23),('add',),len(layouts)<4,'This keyboard backend supports four layouts. Remove a language before adding another.')
+            self.button(p,'P&roperties',(147,202,108,23),('properties',))
+            self.button(p,'Re&move',(261,202,108,23),('remove',),len(layouts)>1,'At least one keyboard language must remain installed.')
+            self.button(p,'&Set as Default',(261,236,108,23),('default',),self.language_selection>0,'The selected language is already the default.')
             # A shortcut is relevant only when more than one layout is installed.
             for value,x,label in (('alt_shift',34,'Left Alt+Shift'),('ctrl_shift',130,'Ctrl+Shift'),('none',209,'None')):
                 if len(layouts)>1:
@@ -170,7 +166,7 @@ class KeyboardWindow(PropertySheet):
             field=self.focus_action[1];index,maximum=self.controller.pending.position(field)
             index=0 if name=='Home' else maximum if name=='End' else index+(1 if name in ('Right','Up') else -1)
             self.controller.pending=self.controller.pending.slider(field,index);self.area.queue_draw();return True
-        if self.focus_action==('entry','test') and name not in ('Escape','Tab','ISO_Left_Tab','Return','KP_Enter','F1'):
+        if self.focus_action==('entry','test') and not event.state&Gdk.ModifierType.MOD1_MASK and not (ctrl and name=='Escape') and name not in ('Escape','Tab','ISO_Left_Tab','Return','KP_Enter','F1'):
             char=chr(Gdk.keyval_to_unicode(event.keyval)) if Gdk.keyval_to_unicode(event.keyval) else ''
             if self.test_entry.key(name,char,ctrl,bool(event.state&Gdk.ModifierType.SHIFT_MASK)):self.caret=True;self.area.queue_draw();return True
         return super().key(window,event)

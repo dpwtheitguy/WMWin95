@@ -3,7 +3,11 @@
 # Preserves developer authentication and does not modify global shortcuts.
 set -eu
 test "$(cat /sys/class/dmi/id/sys_vendor)" = QEMU
-test "$(hostname)" = win95lx-dev
+if test -x /usr/lib/win95lx/require-guest; then
+    /usr/lib/win95lx/require-guest
+else
+    test "$(hostname)" = win95lx-dev
+fi
 test "$(id -u)" = 0
 test -f /home/developer/win95lx-preview/src/win95lx/shell/app.py
 install -d /opt/win95lx /opt/win95lx/bin /opt/win95lx/releases
