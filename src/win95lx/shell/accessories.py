@@ -191,6 +191,12 @@ def install_menu_style(screen):
 
 
 def build(kind, shell):
+    if kind=='printer-wizard':
+        from win95lx.apps.printer_wizard import PrinterWizardWindow
+        return PrinterWizardWindow(shell,on_installed=shell.refresh_printers)
+    if kind=='themes':
+        from win95lx.apps.desktop_themes import DesktopThemesWindow
+        return DesktopThemesWindow(shell)
     if kind=='accessibility':
         from win95lx.apps.accessibility import AccessibilityWindow
         return AccessibilityWindow(shell)

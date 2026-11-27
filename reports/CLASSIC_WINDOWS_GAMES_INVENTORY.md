@@ -1,4 +1,6 @@
-If you hak. Repository information was checked on November 26; the JSON retains observed upstream push dates where available. License labels below describe observed source terms, not a completed per-file/asset audit.
+# Classic Windows games: inventory and port research
+
+Repository information was checked on November 26; the JSON retains observed upstream push dates where available. License labels below describe observed source terms, not a completed per-file/asset audit.
 
 | Game family | Candidate | Actual fit / remaining work |
 | --- | --- | --- |
@@ -36,3 +38,65 @@ For each game, capture default, open-menu, disabled, focused, active-play, pause
 - Find and audit exact native ports for the remaining games; validate per-file licenses and separate asset rights. Candidate status must not be converted into “implemented” without gameplay and visual evidence.
 
 Inventory validation checked unique IDs, product-to-game links, evidence references and port-candidate links. These are data-consistency checks, **not game unit/regression tests**. There are no new before/after game screenshots because no game was implemented in this task.
+
+## Shared-control lessons for future games — 27 November 2026
+
+These are engineering requirements transferred from the accepted namespace-drop
+iteration, not evidence that any additional game was built or accepted.
+
+- A card/tile drag needs real pointer press, sub-threshold motion, threshold
+  crossing, redraw while held, near-edge drops, release, cancellation and lost
+  capture tests. Preserve the grab offset instead of snapping the object center
+  to the pointer. Derive each game's legal target/tolerance from its original;
+  do not reuse Explorer's measured margins as an assumed card-game rule.
+- Inspect the actual framebuffer while the drag is held and while a resulting
+  modal is open. Explorer left a stale ghost because repaint was queued after a
+  blocking dialog. Include successful/illegal drops, dialog dismissal and
+  focus/pause transitions; calling a renderer with cleared model state misses
+  that timing defect.
+- Verify logical mouse-button mapping before comparing references. A saved
+  SM_SWAPBUTTON setting made physical-left act as right. Test multiple held
+  buttons for Minesweeper/chording separately from ordinary drag behavior.
+- Compare complete states: image plus label/selection/focus and adjacent bevels,
+  menus with accelerators, and full scrollbar track/buttons/thumb. Independently
+  measure window/control bounds before accepting a screenshot crop. A resource
+  test that repeats an implementation's chosen ID can repeat its mistake.
+- Keep Classic, IE4 and configured Plus references separate. A Plus asset override
+  is not proof of every default installation. Name the game's exact binary/data
+  edition when comparing cards, tables, sounds, rules and settings.
+- Use bounded caches keyed by immutable artwork/state, keep decoding/discovery
+  off the paint path and measure input-to-paint as well as component timings.
+  Never infer whole-game speed from a fast isolated drawing helper.
+- Installation tests must keep original game data private, preserve existing
+  saves/high scores, and validate cancellation/failed writes in disposable HOME
+  and install roots. A launchable shortcut is not gameplay acceptance.
+
+Evidence and reusable checks: `reports/NAMESPACE_SHORTCUT_FIDELITY_2026-11-27.md`,
+`dev/check_namespace_modal_ghost.py`, `dev/check_shortcut_visuals.py`, and
+`docs/CONTROL_TOOLBOX.md`. Games remain secondary research until their separate
+implementation assignment; these notes add no launcher/package by themselves.
+
+Applet follow-up also reinforces two game acceptance requirements: use long,
+realistic option lists so the initial selected row and Back/reopen focus are
+visible; and verify actual playfield/sprite/audio effects after changing options,
+not just the persisted settings. Preserve pending edits across conflicting
+settings windows. Palette/decode/adapter behavior must be recorded separately:
+a lossless source export is not automatically identical to the original visible
+framebuffer. Keep source assets, native conversion derivatives and independent
+reference screenshots separate, with hashes and named color-depth profiles.
+
+For paletted games, also test foreground/background palette changes with other
+windows open. The current compositor's ≤256-unique-color fast path preserves a
+small scene, but extra colored windows can trigger a different quantizer. A
+single card/table screenshot cannot establish global palette realization.
+Capture the final framebuffer after all GTK/SDL filters, not only an offscreen
+render function. Preserve logical image palettes separately from named adapter
+output conversions; future Pinball/card artwork must not inherit a reference
+VM's DAC profile without the matching display-depth evidence.
+
+Automated QMP key acknowledgement is not a game-input consumption barrier. Wait
+for the expected game/menu state before issuing the next action; screenshots
+caught during painting or queued typing must not become reference evidence.
+For timing-sensitive gameplay use a recorded simulation/input timeline and
+state readback as well as settled screenshots, rather than stretching sleeps
+until an intermittent run happens to pass.

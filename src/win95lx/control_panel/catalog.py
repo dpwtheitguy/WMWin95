@@ -14,7 +14,7 @@ CATALOG=(
     Applet('hardware','Add New Hardware','control sysdm.cpl add new hardware','udev device discovery and driver inventory'),
     Applet('addremove','Add/Remove Programs','control appwiz.cpl','dpkg/APT package management'),
     Applet('datetime','Date/Time','control timedate.cpl','system clock and zoneinfo',True),
-    Applet('themes','Desktop Themes','control themes.cpl','original Plus themes and session preferences'),
+    Applet('themes','Desktop Themes','control themes.cpl','original Plus themes and session preferences',True),
     Applet('display','Display','control desk.cpl','RandR and session appearance',True),
     Applet('fonts','Fonts','control fonts','Fontconfig and per-user font files',True),
     Applet('internet','Internet','control inetcpl.cpl','browser preferences, proxy and certificate store'),

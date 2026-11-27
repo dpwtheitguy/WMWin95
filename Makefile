@@ -1,5 +1,5 @@
 PYTHON ?= python3
-.PHONY: check-namespace-modal-ghost check-shortcut-visuals check-namespace-drop-prompt check-printers-shell check-namespace-rearrange check-dnd-feel check-popup-dismissal check-gtk-scrollbars check-accessibility check-scrollbar-tracks check-control-panel-layout check-command-buttons check test check-ui check-menu-seams check-sprint-controls check-computer-view check-mouse check-pointer-catalog check-selection-details check-control-panel check-sounds check-multimedia check-volume-popup check-fonts stage reference-plan native
+.PHONY: check-themes check-printer-wizard check-printer-installation-backend check-namespace-modal-ghost check-shortcut-visuals check-namespace-drop-prompt check-printers-shell check-namespace-rearrange check-dnd-feel check-popup-dismissal check-gtk-scrollbars check-accessibility check-scrollbar-tracks check-control-panel-layout check-command-buttons check test check-ui check-menu-seams check-sprint-controls check-computer-view check-mouse check-pointer-catalog check-selection-details check-control-panel check-sounds check-multimedia check-volume-popup check-fonts stage reference-plan native
 native:
 	$(PYTHON) dev/build_native.py
 check:
@@ -26,7 +26,7 @@ check-pointer-catalog:
 check-control-panel:
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_control_panel.py --output private/screenshots/control-panel-$$(date +%s%N)-800
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_control_panel.py --output private/screenshots/control-panel-$$(date +%s%N)-1280
-check-ui: check-namespace-modal-ghost check-shortcut-visuals check-namespace-drop-prompt check-namespace-rearrange check-printers-shell check-dnd-feel check-popup-dismissal check-gtk-scrollbars check-accessibility check-scrollbar-tracks check-control-panel-layout check-command-buttons check-fonts check-multimedia check-volume-popup check-sounds check-control-panel check-pointer-catalog check-mouse check-menu-seams check-sprint-controls check-computer-view check-selection-details
+check-ui: check-themes check-printer-wizard check-namespace-modal-ghost check-shortcut-visuals check-namespace-drop-prompt check-namespace-rearrange check-printers-shell check-dnd-feel check-popup-dismissal check-gtk-scrollbars check-accessibility check-scrollbar-tracks check-control-panel-layout check-command-buttons check-fonts check-multimedia check-volume-popup check-sounds check-control-panel check-pointer-catalog check-mouse check-menu-seams check-sprint-controls check-computer-view check-selection-details
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_folder_windows.py
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_folder_windows.py
 	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_file_dialogs.py
@@ -104,3 +104,16 @@ check-namespace-drop-prompt:
 check-namespace-modal-ghost:
 	env -u WAYLAND_DISPLAY GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_namespace_modal_ghost.py --output private/screenshots/modal-ghost-$$(date +%s%N)-800
 	env -u WAYLAND_DISPLAY GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_namespace_modal_ghost.py --output private/screenshots/modal-ghost-$$(date +%s%N)-1280
+
+check-themes:
+	$(PYTHON) dev/check_themes.py --palette truecolor --size 800x600 --output private/screenshots/themes-truecolor-$$(date +%s%N)-800
+	$(PYTHON) dev/check_themes.py --palette truecolor --size 1280x720 --output private/screenshots/themes-truecolor-$$(date +%s%N)-1280
+	$(PYTHON) dev/check_themes.py --palette 256 --size 800x600 --output private/screenshots/themes-256-$$(date +%s%N)-800
+	$(PYTHON) dev/check_themes.py --palette 256 --size 1280x720 --output private/screenshots/themes-256-$$(date +%s%N)-1280
+
+check-printer-wizard:
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 800x600x24' $(PYTHON) dev/check_printer_wizard.py --output private/screenshots/printer-wizard-$$(date +%s%N)-800
+	GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1280x720x24' $(PYTHON) dev/check_printer_wizard.py --output private/screenshots/printer-wizard-$$(date +%s%N)-1280
+
+check-printer-installation-backend:
+	$(PYTHON) dev/check_printer_installation_backend.py --owned-guest-service --output private/screenshots/printer-installation-$$(date +%s%N)

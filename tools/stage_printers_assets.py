@@ -68,6 +68,27 @@ def stage(output):
         records.append({'source':str((folder/'PRINTERS.BMP').relative_to(ROOT)),'output':dest,'type':'SCREEN_CAPTURE_CONTROL','region':rect,'reference_sha256':hashlib.sha256((folder/'PRINTERS.BMP').read_bytes()).hexdigest()})
     for size in (16,32):
         data=(output/f'printer-{size}.png').read_bytes();(output/f'cpl-printers-{size}.png').write_bytes(data)
+    records.extend(stage_wizard(output))
+    return records
+
+def stage_wizard(output):
+    """Whole HWND captures only after independent size/button metadata checks.
+
+    Dynamic client regions are cleared by the consumer; the captured frame is
+    private original artwork, not itself evidence of rendered dynamic parity.
+    """
+    from stage_command_button_assets import read_bmp
+    from pixels import write
+    records=[]
+    for page,source_name in (('welcome','welcome'),('driver','page1'),('port','port'),('name','name'),('testpage','testpage')):
+        source=ROOT/'private/reference-tools/printers-native-20261127'/source_name
+        metadata=json.loads((source/'PRINTERS.JSN').read_text())
+        w,h,pixels=read_bmp(source/'PRINTERS.BMP')
+        if metadata['size']!=[441,323]or(w,h)!=(441,323):raise ValueError('Add Printer HWND geometry changed.')
+        for label,rect in (('< &Back',[193,287,75,23]),('Next >',[268,287,75,23]),('Cancel',[353,287,75,23])):
+            if not any(c['class']=='Button'and c['text']==label and c['rect']==rect for c in metadata['controls']):raise ValueError('Add Printer button geometry is unverified: '+label)
+        dest='printer-wizard-'+page+'-frame.png';write(output/dest,w,h,pixels)
+        records.append({'source':str((source/'PRINTERS.BMP').relative_to(ROOT)),'type':'SCREEN_CAPTURE_CONTROL','profile':'plus-ie4','output':dest,'dimensions':[w,h],'reference_sha256':hashlib.sha256((source/'PRINTERS.BMP').read_bytes()).hexdigest(),'metadata_sha256':hashlib.sha256((source/'PRINTERS.JSN').read_bytes()).hexdigest(),'scope':'Measured441x323 Add Printer frame/buttons. Linux driver, endpoint and name regions drawn dynamically; not full dynamic pixel acceptance.'})
     return records
 
 if __name__=='__main__':

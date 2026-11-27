@@ -91,3 +91,11 @@ Namespace/shortcut follow-up supersedes that build: `70026f549a5d4525`, still11
 Control Panel entries, with native virtual-object shortcut drops and corrected
 desktop cells. Checkpoint `namespace-shortcuts-ready-20261127`; evidence in
 `reports/NAMESPACE_SHORTCUT_FIDELITY_2026-11-27.md`.
+
+Applet handoff supersedes the eleven-entry build: `ecf12b033a5104fe`,12 Control
+Panel entries including the functional Desktop Themes subset and create-only
+Add Printer workflow inside Printers. The reviewed printer service installer
+must accompany a fresh guest setup; it grants no general desktop administration.
+Checkpoint `applets-printer-themes-ready-20261127` was verified after live tests,
+owned-printer cleanup and exact restoration of the user's appearance preferences.
+See `reports/APPLET_DELIVERY_2026-11-27.md` for test scope and unaccepted features.

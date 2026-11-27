@@ -120,3 +120,93 @@ Instrument X window IDs, active-window/stacking properties, focus events, screen
 
 
 Follow-up isolated experiment completed: see `reports/WINDOW_MANAGER_FEASIBILITY.md`. Actual copied shell on private Xvfb reproduced no-WM covering, verified XFWM4/IceWM stacking improvements, confirmed covered Start/Run and Ctrl+Esc cancellation, and demonstrated native-popup layering. No production deployment.
+
+## Implemented lessons — namespace drops and shortcut cells, 27 November 2026
+
+The earlier gap list is historical. The current shell has Small Icons, List and
+Details namespace layouts, free icon rearrangement where supported, and typed
+virtual-object drops. This does not accept the planned Explorer tree or every
+view/operation. See `NAMESPACE_SHORTCUT_FIDELITY_2026-11-27.md` and
+`SHORTCUT_VISUAL_AUDIT_2026-11-27.md` for measured scope and evidence.
+
+- Dispatch by object capability: a drive/Control Panel object is not an ordinary
+  file. Native left-drop offers a shortcut; right-drop offers Create Shortcut(s)
+  Here/Cancel. Do not pass C: through a file operation on Linux `/`. A shortcut
+  is a typed `.desktop` Link, not a symlink and not binary `.lnk` compatibility.
+- Preserve the original image-to-pointer offset through ghost rendering and final
+  placement. Distinguish within-pane rearrangement, cross-pane transfer and
+  namespace shortcut creation. Exclude covered windows and nonclient bands.
+- Queue repaint **before** entering a blocking modal after release. A real-input
+  regression reproduced 202 stale ghost pixels in the previous candidate; the
+  fix produces zero at both tested sizes. Calling draw after clearing model
+  state cannot establish that the displayed framebuffer was cleared in time.
+- Measure HWND bounds before staging frames or hit targets. The native question
+  is 326×119, not the initially guessed 326×118. A wrong crop can compare exactly
+  to itself while accepting incorrect geometry. Preserve rejected evidence.
+- Resource IDs differ from icon indexes: GROUP_ICON29 is a sharing hand; 30 is
+  the shortcut arrow. Native selection tints the base but keeps the arrow
+  untinted. Inspect the actual startup renderer, not merely its resource loader.
+- Full icon/label cells reveal omitted behavior: opaque system-desktop-color
+  label unions, palette-index focus inversion, long-label expansion on active
+  selection, and IE4 folder Y−1/selection phase1. Classic/Plus artwork and label
+  rules differ; keep each profile's evidence and overrides independent.
+- Keep writes exclusive, validate destinations at release, preserve original
+  objects on cancellation/failure and initialize only the application's known
+  profile Desktop. Disposable tests must explicitly map their test drive;
+  assuming C: still maps to a temporary Documents directory is unsafe and stale.
+- UI caches must have bounded lifetime and immutable source identity. The new
+  selection-mask cache retains at most128 source/phase pairs; its component
+  microbenchmark is not a whole-desktop latency claim.
+
+Verified references are three prepared OSR2.5 configurations, not every Windows
+95 release. Remaining work includes16px shortcut acceptance, additional modifier
+combinations, complete folder post-drop focus and general native-window stacking.
+
+The older Ctrl+Esc cancellation observation above is also historical:
+`PropertySheet.key` now intercepts Ctrl+Escape before ordinary Escape and forwards
+to the shell; the existing control-panel checker asserts pending edits survive.
+That bounded routing correction does not resolve the larger fullscreen-shell
+stacking/surface separation gate, which remains independent acceptance work.
+
+## Applet integration lessons — 27 November 2026
+
+Add Printer's actual installed inventory exposed an initial selection hidden
+outside both list viewports. Request reveal on page entry and Back, give focus
+to the selected list, and keep manual scrolling separate from selection. Fixtures
+with only two rows cannot test this. The previous immutable candidate fails the
+new deep-inventory regression; the corrected wizard passes. A working Add Printer
+command also retained old disabled-gray label styling in the shell; capability,
+action routing and normal/selected rendering must change together.
+
+Read-only discovery success does not prove write authorization. Validate through
+the real non-admin UI and narrowly scoped guest service, using an owned endpoint,
+then read back actual device state and preserve original queues/defaults. Keep
+blocking discovery, driver negotiation and job polling off the GTK thread. Seed
+native window captions from known cached display names while refreshing stable
+backend identities asynchronously; do not expose random internal queue IDs.
+
+Theme testing exposed saved-but-unrendered wallpaper and stale settings
+controllers. Verify actual desktop pixels and preference consumers after Apply,
+reopen and injected failure. Preserve pending edits rather than silently closing
+another Properties window. The current bounded implementation rejects conflicting
+selected components and reloads authoritative closed-app preferences at the
+transaction boundary. This is not general shared-controller synchronization.
+
+Palette follow-up: a low-color source bitmap is not automatically the physical
+VGA output. The prepared QEMU reference expands six-bit DAC components using its
+recorded adapter rule. Keep logical native BMPs and named physical-palette
+product derivatives separate; never transform the independent screenshot to fit
+ours. The current ≤256-unique-color optimization is scene-dependent: adding
+other windows/icons can cross that threshold and invoke fixed-cube conversion.
+Passing one preview does not accept global palette ownership/realization across
+multiple Explorer windows. Compare the actual composed framebuffer, not only a
+DrawingArea method that bypasses the final GTK palette filter.
+
+Live-input evidence must synchronize with the guest consuming input, not just
+QMP acknowledging an event. Root's fast type→Next sequence advanced before the
+last characters were consumed; the backend preserved the shorter received name.
+A later screenshot also caught Run midway through typing; a settled capture
+showed the complete command and correctly reopened applet. Pace automated input,
+observe the expected field/page before the next action, and retain/reject
+transitional captures separately. Stable pixels alone cannot establish that an
+expected operation completed; check its semantic result too.

@@ -211,6 +211,8 @@ class Shell(Gtk.Window):
             for size,mapping in ((32,self.images),(16,self.small_images)):
                 path=assets/f'{name}-{size}.png'
                 if path.exists():mapping[name]=cairo.ImageSurface.create_from_png(str(path))
+        for mapping in (self.images,self.small_images):
+            if 'printer-add' in mapping:mapping['printer-wizard']=mapping['printer-add']
         for ident, filename in (
             ('banner', 'start-banner.png'), ('computer', 'my-computer-32.png'),
             ('favorites', 'start-favorites.png'), ('settings', 'start-settings.png'),
@@ -347,7 +349,7 @@ class Shell(Gtk.Window):
             if action[0]=='item' and action[1].kind=='computer' and action[1].focus_item in (None,action[3]):
                 p.fill(x+(64-width)//2-2+label_offset,y+36,width+4,15,(255,255,0))
             p.fill(x+(64-width)//2-1+label_offset,y+37,width+2,13,NAVY)
-        p.text(label,x+(64-width)//2+label_offset,y+36,SHADOW if ident=='printer-add' else LIGHT if selected else BLACK);self.hit(x,y,70,54,action)
+        p.text(label,x+(64-width)//2+label_offset,y+36,LIGHT if selected else BLACK);self.hit(x,y,70,54,action)
     @property
     def drive(self):
         win = self.state.active
@@ -1325,8 +1327,7 @@ class Shell(Gtk.Window):
             return
         if kind=='printer-refresh':self.refresh_printers();return
         if kind=='printer-add':
-            from win95lx.apps.dialogs import message_box
-            message_box(self,'Add Printer','The Add Printer Wizard is not implemented yet. Existing printers configured on this computer can be opened and managed here.',Gtk.MessageType.INFO)
+            self.launch_accessory('printer-wizard')
             return
         if self.state.dialog == 'shutdown':
             if kind == 'shutdown-option':

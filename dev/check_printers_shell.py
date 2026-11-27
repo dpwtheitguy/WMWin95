@@ -54,12 +54,41 @@ def main():
             shell.present();shell.get_window().focus(Gdk.CURRENT_TIME);render('printers-return');px,py=item(win,'Fixture');click(px,py);key('Return');assert 'printer:Fixture'in shell.accessory_windows;shell.accessory_windows['printer:Fixture'].destroy();flush_draws(Gtk)
             shell.present();shell.get_window().focus(Gdk.CURRENT_TIME);before=backend.calls;key('F5');wait();assert backend.calls>before;checks.append('Physical Return opens selected queue and F5 refreshes backend inventory')
             backend.failed=True;key('F5');wait();render('printers-service-error');assert shell.printer_namespace().error and not shell.printer_namespace().printers;assert not any(a[0]=='item'and a[1]is win and a[3]=='Fixture'for *_,a in shell.hits);checks.append('Service failure removes stale queue entry and renders explicit error')
-            backend.failed=False;backend.empty=True;key('F5');wait();render('printers-empty');assert not shell.printer_namespace().error and not shell.printer_namespace().printers;assert [label for _,label,_ in shell.printer_namespace().entries()]==['Add Printer'];checks.append('Actual empty inventory shows no fake installed printers; unfinished Add Printer has no fabricated installation')
-            with patch('win95lx.apps.dialogs.message_box',return_value=Gtk.ResponseType.OK)as blocked:
-                px,py=item(win,'Add Printer');click(px,py);click(px,py);assert blocked.call_count==1 and 'not implemented'in blocked.call_args.args[2];assert not shell.accessory_windows
-            checks.append('Physical Add Printer activation explains unfinished wizard and never creates a mock printer')
+            backend.failed=False;backend.empty=True;key('F5');wait();render('printers-empty');assert not shell.printer_namespace().error and not shell.printer_namespace().printers;assert [label for _,label,_ in shell.printer_namespace().entries()]==['Add Printer'];checks.append('Actual empty inventory shows no fake installed printers')
+            from win95lx.control_panel.printer_installation import InstallationDiscovery,PrinterDriver
+            class InstallationClient:
+                installs=0
+                def discover(self):return InstallationDiscovery((PrinterDriver('everywhere','Generic','IPP Everywhere',True),),(),('ipp',),())
+                def install(self,plan):self.installs+=1;raise AssertionError('Cancel must never install a printer.')
+            client=InstallationClient()
+            with patch('win95lx.apps.printer_wizard.PrinterInstallationClient',return_value=client):
+                px,py=item(win,'Add Printer');click(px,py);click(px,py)
+                assert 'printer-wizard'in shell.accessory_windows
+                wizard=shell.accessory_windows['printer-wizard'];assert wizard.get_title()=='Add Printer Wizard'
+                deadline=time.monotonic()+3
+                while wizard.busy and time.monotonic()<deadline:flush_draws(Gtk);time.sleep(.005)
+                assert not wizard.busy;key('Escape');flush_draws(Gtk)
+                assert 'printer-wizard'not in shell.accessory_windows and client.installs==0
+            checks.append('Physical Add Printer opens actual wizard through registered factory; Escape removes task and performs no installation')
+            cached=Printer('w95lx_'+'a'*32,'Cached Human Printer')
+            provider=PrinterNamespace(backend);provider.printers=(cached,)
+            with patch.object(backend,'printer',return_value=cached):
+                queue=provider.open(shell,cached.name)
+                assert queue.get_title()=='Cached Human Printer','Initial paint must use the known display name without waiting for CUPS.'
+                queue.destroy();flush_draws(Gtk)
+            checks.append('New queue uses cached human caption immediately, before asynchronous service readback')
             from win95lx.shell.widgets import Painter
             observed=[];surface=cairo.ImageSurface(cairo.FORMAT_RGB24,100,100);painter=Painter(cairo.Context(surface),shell.font);original=painter.image
+            from win95lx.shell.widgets import BLACK,LIGHT
+            label_colors=[];original_text=painter.text
+            def record_text(text,x,y,color=BLACK,**kwargs):
+                if text=='Add Printer':label_colors.append(color)
+                return original_text(text,x,y,color,**kwargs)
+            painter.text=record_text
+            for selected in (False,True):shell.icon(painter,'printer-add','Add Printer',0,0,('test',),selected)
+            assert label_colors==[BLACK,LIGHT],label_colors
+            painter.text=original_text
+            checks.append('Working Add Printer uses native black normal label and white selected label, never unfinished-control gray')
             painter.image=lambda image,*a,**k:(observed.append(image),original(image,*a,**k))[-1]
             shell.icon(painter,4,'Fixture.desktop',0,0,('test',));assert shell.images[30]in observed and shell.images[29]not in observed;checks.append('Actual Explorer icon renderer uses shell32 GROUP_ICON30 shortcut arrow, never29')
             from win95lx.shell import computer_view

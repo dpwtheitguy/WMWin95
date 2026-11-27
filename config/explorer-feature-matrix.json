@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "checked_date": "2026-11-26",
+  "checked_date": "2026-11-27",
   "scope": "Research and unintegrated tree foundation, not Explorer acceptance",
   "feature_status_definitions": {
     "implemented_partial": "Existing implementation; not full historical acceptance",
@@ -80,23 +80,23 @@
     },
     {
       "id": "view.small_icons",
-      "status": "missing",
-      "source": "src/win95lx/explorer/drive_browser.py",
-      "observation": "Native metrics and layout needed.",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/namespace_view.py",
+      "observation": "Small Icons exists for virtual namespace views; filesystem-folder Small Icons and full native acceptance remain open.",
       "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
     },
     {
       "id": "view.list",
-      "status": "missing",
-      "source": "src/win95lx/explorer/drive_browser.py",
-      "observation": "Column-wise small-icon flow and horizontal scroll needed.",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/namespace_view.py",
+      "observation": "Column-wise List exists for virtual namespace views with scrolling; filesystem-folder List and full native acceptance remain open.",
       "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
     },
     {
       "id": "view.details",
-      "status": "missing",
-      "source": "src/win95lx/explorer/drive_browser.py",
-      "observation": "Columns, headers, sorting, resize and file metadata needed.",
+      "status": "implemented_partial",
+      "source": "src/win95lx/shell/namespace_view.py",
+      "observation": "Details exists for virtual namespace views; filesystem metadata columns, resizing/sorting and full native acceptance remain open.",
       "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
     },
     {
@@ -257,7 +257,7 @@
       "id": "operation.shortcuts",
       "status": "implemented_partial",
       "source": "src/win95lx/explorer/namespace.py",
-      "observation": "Safe .desktop Type=Link namespace shortcuts, not binary .lnk or symlinks.",
+      "observation": "Typed .desktop Type=Link shortcuts, not binary .lnk or symlinks. Measured drive/Control Panel left-drop shortcut offer and right-drop shortcut/Cancel; original source stays. 32px IE4 desktop cell checks accepted only for named states.",
       "acceptance": "Native-state capture + behavior/error/persistence checks; unit and guest regression before acceptance."
     },
     {
@@ -684,7 +684,13 @@
     ],
     "new_tests": "tests/test_explorer_tree_model.py",
     "new_test_count": 13,
-    "ui_integrated": false
+    "ui_integrated": false,
+    "namespace_shortcut_followup": {
+      "report": "reports/NAMESPACE_SHORTCUT_FIDELITY_2026-11-27.md",
+      "visual_report": "reports/SHORTCUT_VISUAL_AUDIT_2026-11-27.md",
+      "modal_ghost_regression": "dev/check_namespace_modal_ghost.py",
+      "scope": "Three prepared OSR2.5 configurations; not RTM/OSR1 or complete Explorer acceptance."
+    }
   },
   "architecture_gate": {
     "priority": "P0",

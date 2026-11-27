@@ -33,3 +33,37 @@ packaging must declare this dependency instead of relying on development setup.
 Read-only GetServerSettings success is not evidence that a user can administer
 queues; privileged action capability and actual server errors require separate
 validation. Test-page output syntax needs validation beyond raw byte receipt.
+
+## Create-only Add Printer service (2026-11-27)
+
+`dev/guest_install_printer_service.sh` installs the reviewed module from the
+root-owned immutable guest release, enables and restarts its systemd unit. The
+script requires the existing QEMU guest identity guard, root UID and dedicated
+guest hostname. No corresponding host policy is installed.
+
+The desktop remains non-admin. `/run/win95lx-printers/control.sock` accepts only
+the configured `win95` UID through SO_PEERCRED. Its two typed requests are
+read-only discovery and new-printer creation; it cannot delete printers, change
+server settings, modify a named existing queue, install packages or set the
+server default. Requests are serialized and run in bounded disposable workers.
+CUPS has no exclusive Add-Modify primitive, so the helper allocates unpredictable
+internal queue identities and stores human names separately. A durable intent
+precedes mutation; uncertain outcomes preserve the new queue and report partial
+completion instead of deleting potentially changed data. Server administrators
+remain authoritative. The root-only journal is under
+`/var/lib/win95lx/printer-installations/`.
+
+The unit restricts address families to AF_UNIX, protects home/system files,
+limits writable paths to its runtime directory and journal, and uses
+NoNewPrivileges. CUPS itself handles configured printer transports. No lpadmin,
+sudo or general administrative group is added to the desktop account. Optional
+test pages and per-user defaults use the normal user's existing printing path.
+
+Root validated the deployed service from the visible non-admin session: real
+wizard Finish created a ready unshared queue against an owned IPP emulator,
+readback and journal agreed, and the entered human name appeared in Printers.
+Only the exact owned test destinations were removed through reviewed developer
+maintenance, with original queues and daemon default restored. Evidence:
+`private/applets-followup-20261127/`. This is a simulated printer endpoint, not
+physical-hardware acceptance. Queue deletion/configuration administration is a
+separate unfinished capability; this service does not silently grant it.

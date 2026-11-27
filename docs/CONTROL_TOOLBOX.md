@@ -105,3 +105,28 @@ nominal/untinted. `selected_icon_mask` caches up to128 strong immutable source
 surface/phase keys. Load a new surface for a changed asset; if mutating alpha in
 place, explicitly clear the cache. Actual-renderer comparisons belong in
 `check-shortcut-visuals`, not only tests repeating resource IDs.
+
+## Applet transactions and real input
+
+Desktop Themes adapts the existing Wallpaper, Mouse and Sounds providers through
+`control_panel/theme_preferences.py`. Snapshot both active state and exact saved
+bytes; include a provider which mutates then raises in rollback. Refresh the
+actual shell image cache, reload authoritative closed-app preferences and guard
+conflicting pending Properties windows. Resolve image profile changes at preview
+and Apply time. `make check-themes` exercises actual GDK pixels and input at two
+viewport sizes in256/TrueColor. Only named Current/control regions are accepted;
+selected-photo conversion and global palette realization remain open.
+
+Add Printer separates stable queue identity from its human label. Use the
+create-only `PrinterInstallationClient` on a worker, not CUPS discovery or
+installation inside drawing/GTK callbacks. Keep Finish single-dispatch while
+bounded work is in flight, report partial identity truthfully and reveal the
+initial selected manufacturer/model in long lists. `make check-printer-wizard`
+checks real input at both sizes; `make check-printer-installation-backend` is
+explicitly limited to the owned development guest. See the guest privilege ledger
+for the service installer. Never infer write permission from readable inventory.
+
+QMP event acknowledgement is not an input/paint completion barrier. Observe the
+expected state before issuing the next action and distinguish transitional
+captures from reproducible defects. For exact color claims capture the final
+framebuffer after GTK palette filtering; a direct DrawingArea render bypasses it.

@@ -1,19 +1,24 @@
 """Native printer queue view backed by CUPS, without a second shell namespace.
 
-Unregistered until original-reference and physical-input acceptance completes.
+Queue management and Add Printer have separate bounded acceptance reports.
 All service calls run on one serialized worker; drawing never waits for CUPS.
 """
 from concurrent.futures import ThreadPoolExecutor
+import re
 from gi.repository import Gtk,Gdk,GLib,GdkPixbuf
 from win95lx.apps.fonts import FontWindow,FontMenu
 from win95lx.control_panel.printer_preferences import Printers,PrinterError
 from win95lx.shell.widgets import BLACK,LIGHT,NAVY,FACE,SHADOW
 
+def printer_label(printer):
+    return printer.description if re.fullmatch('w95lx_[0-9a-f]{32}',printer.name)and printer.description else printer.name
+
 class PrinterQueueWindow(FontWindow):
-    def __init__(self,shell,name,backend=None):
+    def __init__(self,shell,name,backend=None,*,label=None):
         self.name=name;self.backend=backend or Printers();self.jobs=();self.printer=None;self.capability=None;self.selected=None;self.scroll=0;self.busy=False;self.closed=False;self.status=True;self.notice='Connecting to printer...'
         self.executor=ThreadPoolExecutor(max_workers=1,thread_name_prefix='win95lx-printer')
-        super().__init__(shell,name,(562,185),'printers-queue-frame.png')
+        self.initial_label=label or ('Printer'if re.fullmatch('w95lx_[0-9a-f]{32}',name)else name)
+        super().__init__(shell,self.initial_label,(562,185),'printers-queue-frame.png')
         icon=self.assets/'printer-16.png'
         if icon.exists():self.set_icon(GdkPixbuf.Pixbuf.new_from_file(str(icon)))
         self.connect('destroy',self.cleanup)
@@ -37,7 +42,7 @@ class PrinterQueueWindow(FontWindow):
             if self.closed:return False
             self.busy=False
             try:
-                self.printer,self.jobs,self.capability=future.result();self.notice=''
+                self.printer,self.jobs,self.capability=future.result();self.notice='';self.set_title(printer_label(self.printer))
                 if self.selected not in {job.ident for job in self.jobs}:self.selected=None
             except Exception as error:
                 self.printer=None;self.jobs=();self.selected=None
@@ -81,7 +86,7 @@ class PrinterQueueWindow(FontWindow):
         from win95lx.shell.widgets import Painter
         p=Painter(cr,self.shell.font);w,h=self.get_size();self.chrome(p,w,h)
         # Replace the captured reference title even at native dimensions.
-        p.fill(24,4,w-80,18,NAVY if self.caption_active else SHADOW);p.text(self.name,24,6,LIGHT,bold=True)
+        p.fill(24,4,w-80,18,NAVY if self.caption_active else SHADOW);p.cr.save();p.cr.rectangle(24,4,w-80,18);p.cr.clip();p.text(printer_label(self.printer)if self.printer else self.initial_label,24,6,LIGHT,bold=True);p.cr.restore()
         p.fill(4,23,w-8,19,FACE)
         for name,x,width in (('Printer',10,42),('Document',52,61),('View',113,35),('Help',148,34)):
             p.menu_text(name,x,25,mnemonic=0);self.hit((x-4,23,width,19),('menu',name,x-4))
@@ -151,10 +156,12 @@ class PrinterNamespace:
     def load(self):return self.backend.inventory(),self.backend.capabilities()
     def publish(self,snapshot):self.printers,self.capability=snapshot;self.error=None
     def entries(self):
-        return (('printer-add','Add Printer',('printer-add',)),)+tuple(('printer-default' if printer.default else 'printer',printer.name,('printer-queue',printer.name))for printer in self.printers)
+        ordered=sorted(self.printers,key=lambda p:(printer_label(p).casefold(),p.name.casefold()));labels=[printer_label(p)for p in ordered]
+        return (('printer-add','Add Printer',('printer-add',)),)+tuple(('printer-default' if printer.default else 'printer',label+(' ('+printer.name+')'if sum(other.casefold()==label.casefold()for other in labels)>1 else''),('printer-queue',printer.name))for printer,label in zip(ordered,labels))
     def description(self,name):
         printer=next((p for p in self.printers if p.name==name),None)
         if printer is None:return 'Adds a printer using the Add Printer Wizard.' if name=='Add Printer' else ''
         return '\n'.join(text for text in(printer.description,printer.status,printer.location,printer.model)if text)
     def open(self,shell,name):
-        window=PrinterQueueWindow(shell,name,self.backend);window.show_all();return window
+        printer=next((printer for printer in self.printers if printer.name==name),None)
+        window=PrinterQueueWindow(shell,name,self.backend,label=printer_label(printer)if printer else None);window.show_all();return window

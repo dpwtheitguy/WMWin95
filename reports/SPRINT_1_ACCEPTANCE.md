@@ -140,3 +140,15 @@ corrections preserved in the evidence. [Consolidated delivery and limits](NAMESP
 [native behavior](NAMESPACE_CROSSDROP_2026-11-27.md), and
 [shortcut visuals](SHORTCUT_VISUAL_AUDIT_2026-11-27.md) separate measured regions
 from whole-OS claims and describe Classic/IE4/configured-Plus coverage.
+
+## Applet follow-up — 27 November 2026
+
+Release `ecf12b033a5104fe` adds the working Desktop Themes wallpaper/pointers/
+sounds subset and real create-only Add Printer workflow. Control Panel now has12
+entries. Final-source guest units:426, one opt-in skip; a preceding full check-ui
+pass and final affected-target reruns are recorded separately. Actual non-admin
+UI effects, exact preference restoration and owned queue cleanup were verified.
+Checkpoint `applets-printer-themes-ready-20261127` exists and was verified.
+[Applet delivery](APPLET_DELIVERY_2026-11-27.md) records native regions, genuine
+findings, known photo-preview discrepancy, unsupported controls and evidence.
+This does not expand the original eight assignments into whole-OS acceptance.

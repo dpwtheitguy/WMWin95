@@ -471,6 +471,14 @@ from stage_namespace_drop_assets import stage as stage_namespace_drop_assets
 records.extend(stage_namespace_drop_assets(output))
 from stage_printers_assets import stage as stage_printers_assets
 records.extend(stage_printers_assets(output))
+from stage_theme_assets import stage as stage_theme_assets
+records.extend(stage_theme_assets(output))
+theme_library=json.loads((output/'themes-library.json').read_text())
+descriptions=json.loads((output/'cpl-descriptions.json').read_text())
+descriptions['Desktop Themes']=theme_library['description']
+(output/'cpl-descriptions.json').write_text(json.dumps(descriptions,indent=2)+'\n')
+records.append({'source':'private/cabsets/plus95/THEMES.CPL','type':'STRING','id':3,
+                'output':'cpl-descriptions.json','source_sha256':hashlib.sha256((ROOT/'private/cabsets/plus95/THEMES.CPL').read_bytes()).hexdigest()})
 from stage_fonts_assets import stage as stage_fonts_assets
 records.extend(stage_fonts_assets(output))
 from collect_font_library import collect as collect_font_library
