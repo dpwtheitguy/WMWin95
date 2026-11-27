@@ -3,7 +3,7 @@
 from fnmatch import fnmatchcase
 from pathlib import Path
 
-from gi.repository import Gdk, GdkPixbuf, Gtk, Pango
+from gi.repository import Gdk, GdkPixbuf, Gtk, Pango, GObject
 import cairo
 
 from win95lx.assets.bitmap import BitmapFont
@@ -550,6 +550,18 @@ def file_notice(parent, state, filename):
         dialog.destroy()
 
 
+class NamespaceDropDialog(Gtk.Dialog):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        # GtkDialog attaches a DELETE_EVENT→response handler during construction.
+        # Block that one signal's inherited handlers before adding our controls.
+        signal=GObject.signal_lookup('delete-event',Gtk.Widget)
+        GObject.signal_handlers_block_matched(self,GObject.SignalMatchType.ID,signal,0,None,None,None)
+    def do_delete_event(self,event):
+        # Native MB_YESNO has no Cancel response or active close operation.
+        return True
+
+
 def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageType.WARNING, profile=None):
     from win95lx.sound import notify
     notify(parent,{Gtk.MessageType.ERROR:'SystemHand',Gtk.MessageType.WARNING:'SystemExclamation',Gtk.MessageType.QUESTION:'SystemQuestion',Gtk.MessageType.INFO:'SystemAsterisk'}.get(kind,'.Default'))
@@ -560,8 +572,14 @@ def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageTy
     icon = cairo.ImageSurface.create_from_png(str(path)) if path.is_file() else None
     preserve = (title == 'Notepad' and text ==
                 'The text in the Untitled file has changed.\n\nDo you want to save the changes?')
+    from win95lx.shell.command_button import draw_command_button
+    namespace_drop=profile=='namespace-drop'
+    if namespace_drop:
+        native_frame=assets/'namespace-drop-prompt.png'
+        if not native_frame.is_file():raise RuntimeError('Native namespace drop artwork has not been staged.')
+        frame=cairo.ImageSurface.create_from_png(str(native_frame));preserve=True
     shortcut=profile=='shortcut'
-    width=374 if shortcut else 266
+    width=326 if namespace_drop else 374 if shortcut else 266
     text_top=38 if shortcut else 31
     text_width=300 if shortcut else 196
     close_x=width-(21 if shortcut else 22)
@@ -578,8 +596,8 @@ def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageTy
         lines.append(line)
     height = 119 if shortcut else max(126, 82+len(lines)*13)
     if preserve:
-        height = 126
-    dialog = Gtk.Dialog(title=title, transient_for=parent, modal=True)
+        height = 119 if namespace_drop else 126
+    dialog = (NamespaceDropDialog if namespace_drop else Gtk.Dialog)(title=title, transient_for=parent, modal=True)
     dialog.set_decorated(False)
     dialog.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
     dialog.get_style_context().add_class('win95-native-file')
@@ -611,7 +629,9 @@ def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageTy
                 p.text(line,62,text_top+index*13)
             context.restore()
         for label, response, button, x in controls:
-            if not preserve or selected != default:
+            if namespace_drop:
+                draw_command_button(p,label.replace('_','&',1),(x,button_y,75,23),default=response==selected,focused=button.has_focus(),pressed=bool(button.get_state_flags()&Gtk.StateFlags.ACTIVE))
+            elif not preserve or selected != default:
                 p.fill(x-1,button_y-1,77,25,FACE)
                 p.button(label.lstrip('_'),x,button_y,75,23,default=response==selected,
                          pressed=bool(button.get_state_flags() & Gtk.StateFlags.ACTIVE))
@@ -621,7 +641,7 @@ def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageTy
     fixed, canvas = fixed_canvas(dialog, width, height, draw)
     for index,(label,response) in enumerate(buttons):
         gap=3 if shortcut else 6
-        x = (width-(len(buttons)*75+(len(buttons)-1)*gap))//2+index*(75+gap)
+        x = 84+index*81 if namespace_drop else (width-(len(buttons)*75+(len(buttons)-1)*gap))//2+index*(75+gap)
         button = artwork_button(fixed,canvas,label.lstrip('_'),(x,button_y,75,23),
                                 lambda _button, response=response: dialog.response(response))
         controls.append((label,response,button,x))
@@ -633,10 +653,11 @@ def native_prompt(parent, title, text, buttons, default, art, kind=Gtk.MessageTy
         button.connect('notify::has-focus', focused)
     responses = {response for _,response in buttons}
     cancel = Gtk.ResponseType.CANCEL if Gtk.ResponseType.CANCEL in responses else Gtk.ResponseType.NO if Gtk.ResponseType.NO in responses else default
-    artwork_button(fixed,canvas,'Close',(close_x,4,18,16),lambda *_: dialog.response(cancel))
+    if not namespace_drop:artwork_button(fixed,canvas,'Close',(close_x,4,18,16),lambda *_: dialog.response(cancel))
     def key(_dialog,event):
+        if namespace_drop and event.keyval==Gdk.KEY_F4 and event.state&Gdk.ModifierType.MOD1_MASK:return True
         if event.keyval == Gdk.KEY_Escape:
-            dialog.response(cancel)
+            if not namespace_drop:dialog.response(cancel)
         elif event.keyval in (Gdk.KEY_Return,Gdk.KEY_KP_Enter):
             dialog.response(selected)
         elif Gtk.ResponseType.YES in responses and event.keyval in (Gdk.KEY_y,Gdk.KEY_Y,Gdk.KEY_n,Gdk.KEY_N):

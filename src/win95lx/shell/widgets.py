@@ -12,22 +12,32 @@ def drag_mask(width,height):
     return cairo.ImageSurface.create_for_data(pixels,cairo.FORMAT_A8,width,height,stride)
 
 
+@lru_cache(maxsize=128)
+def selected_icon_mask(image,phase=0):
+    """Cache static asset alpha/checker masks; offset IE4 folder art uses phase1.
+
+    Callers must supply immutable icon surfaces. A newly loaded asset gets a
+    new key; the bounded cache does not retain every explored file thumbnail.
+    If a caller deliberately changes source alpha, clear this cache first.
+    """
+    import sys
+    if type(phase)is not int or phase not in(0,1):raise ValueError('Icon selection phase must be0 or1.')
+    width,height=image.get_width(),image.get_height();stride=cairo.ImageSurface.format_stride_for_width(cairo.FORMAT_A8,width)
+    mask=bytearray(stride*height);data=image.get_data();source_stride=image.get_stride()
+    for yy in range(height):
+        for xx in range(width):
+            alpha=255 if image.get_format()==cairo.FORMAT_RGB24 else data[yy*source_stride+xx*4+(3 if sys.byteorder=='little' else 0)]
+            if (xx+yy)%2==phase:mask[yy*stride+xx]=alpha if isinstance(alpha,int)else alpha[0]
+    return cairo.ImageSurface.create_for_data(mask,cairo.FORMAT_A8,width,height,stride)
+
+
 class Painter:
     def __init__(self,cr,font):self.cr=cr;self.font=font;cr.set_antialias(cairo.ANTIALIAS_NONE)
     def fill(self,x,y,w,h,color):
         self.cr.set_source_rgb(*(v/255 for v in color));self.cr.rectangle(int(x),int(y),int(w),int(h));self.cr.fill()
-    def selected_image(self,image,x,y):
-        import sys
+    def selected_image(self,image,x,y,*,phase=0):
         self.image(image,x,y)
-        width,height=image.get_width(),image.get_height()
-        stride=cairo.ImageSurface.format_stride_for_width(cairo.FORMAT_A8,width)
-        mask=bytearray(stride*height);data=image.get_data();source_stride=image.get_stride()
-        for yy in range(height):
-            for xx in range(width):
-                alpha=255 if image.get_format()==cairo.FORMAT_RGB24 else data[yy*source_stride+xx*4+(3 if sys.byteorder=='little' else 0)]
-                if (xx+yy)%2==0:mask[yy*stride+xx]=alpha if isinstance(alpha,int) else alpha[0]
-        surface=cairo.ImageSurface.create_for_data(mask,cairo.FORMAT_A8,width,height,stride)
-        self.cr.save();self.cr.set_source_rgb(0,0,.5);self.cr.mask_surface(surface,x,y);self.cr.restore()
+        self.cr.save();self.cr.set_source_rgb(0,0,.5);self.cr.mask_surface(selected_icon_mask(image,phase),x,y);self.cr.restore()
 
     def text(self,text,x,y,color=BLACK,bold=False):
         self.cr.set_source_rgb(*(v/255 for v in color))

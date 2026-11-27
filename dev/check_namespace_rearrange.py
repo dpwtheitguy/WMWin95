@@ -18,22 +18,26 @@ T.XTestFakeMotionEvent.argtypes=[ctypes.c_void_p,ctypes.c_int,ctypes.c_int,ctype
 T.XTestFakeButtonEvent.argtypes=[ctypes.c_void_p,ctypes.c_uint,ctypes.c_int,ctypes.c_ulong]
 T.XTestFakeKeyEvent.argtypes=[ctypes.c_void_p,ctypes.c_uint,ctypes.c_int,ctypes.c_ulong]
 def xdo(*args):
+ with (a.output/'events.log').open('a') as log:log.write(' '.join(map(str,args))+'\n')
  if args[0]=='mousemove':T.XTestFakeMotionEvent(XD,-1,int(args[-2]),int(args[-1]),0)
  elif args[0] in ('mousedown','mouseup'):T.XTestFakeButtonEvent(XD,int(args[1]),args[0]=='mousedown',0)
  elif args[0]=='key':
   code=X.XKeysymToKeycode(XD,Gdk.keyval_from_name(args[1]));T.XTestFakeKeyEvent(XD,code,True,0);T.XTestFakeKeyEvent(XD,code,False,0)
  X.XFlush(XD);flush_draws(Gtk)
+import faulthandler;faulthandler.dump_traceback_later(90,exit=True)
 checks=[]
 with tempfile.TemporaryDirectory() as home,patch('pathlib.Path.home',return_value=Path(home)):
- shell=Shell(ROOT/'private/shell-assets');shell.disconnect_by_func(Gtk.main_quit);shell.show_all();flush_draws(Gtk)
+ from win95lx.explorer.drive_browser import DriveBrowser
+ shell=Shell(ROOT/'private/shell-assets');shell._drive=DriveBrowser(Path(home));assert shell._drive.view.root==Path(home).resolve()
+ shell.disconnect_by_func(Gtk.main_quit);shell.show_all();flush_draws(Gtk)
  try:
   def render(name):
    flush_draws(Gtk);im=cairo.ImageSurface(cairo.FORMAT_RGB24,shell.width,shell.height);shell.draw(shell.area,cairo.Context(im));im.write_to_png(str(a.output/(name+'.png')))
   def item(win,label):return next((x+min(w-1,10),y+min(h-1,10)) for x,y,w,h,act in shell.hits if act[0]=='item' and act[1] is win and act[3]==label)
-  def drag(start,end,via=None):
-   xdo('mousemove','--sync',*start);xdo('mousedown',1)
+  def drag(start,end,via=None,button=1):
+   xdo('mousemove','--sync',*start);xdo('mousedown',button)
    if via:xdo('mousemove','--sync',*via)
-   xdo('mousemove','--sync',*end);xdo('mouseup',1)
+   xdo('mousemove','--sync',*end);xdo('mouseup',button)
   with patch.object(shell,'transfer_files',side_effect=AssertionError('namespace must not transfer files')):
    for kind,label in (('computer','(C:)'),('control','Mouse')):
     shell.open(kind);win=shell.state.active;win.x=win.y=20;win.width=640;win.height=450;render(kind+'-before')
@@ -56,8 +60,72 @@ with tempfile.TemporaryDirectory() as home,patch('pathlib.Path.home',return_valu
     for x,y,w,h,act in shell.hits:
      if act[0]=='item' and act[1] is win:
       vx,vy,vw,vh=win.namespace_viewport;assert vx<=x and vy<=y and x+w<=vx+vw and y+h<=vy+vh
+   from win95lx.explorer.namespace import read_shortcut
+   shell.desktop_folder.mkdir(parents=True,exist_ok=True)
+   shell.open('computer');win=shell.state.active;win.x=win.y=20;win.width=640;win.height=450
+   for mode in ('large','small','list','details'):
+    shell.action(('namespace-view',win,mode));render('cross-'+mode)
+    if not win.namespace_auto:shell.action(('namespace-auto',win));render('cross-'+mode+'-auto')
+    start=item(win,'(C:)');end=(shell.width-20,shell.height-65);before=set(shell.desktop_folder.iterdir())
+    with patch('win95lx.apps.dialogs.message_box',return_value=Gtk.ResponseType.NO) as prompt:
+     drag(start,end);prompt.assert_called_once();assert prompt.call_args.kwargs['profile']=='namespace-drop'
+    assert set(shell.desktop_folder.iterdir())==before
+    with patch('win95lx.apps.dialogs.message_box',return_value=Gtk.ResponseType.YES):drag(start,end)
+    created=set(shell.desktop_folder.iterdir())-before;assert len(created)==1;created_path=created.pop();assert read_shortcut(created_path).target=='drive';shell.desktop_icons.move('file:'+created_path.name,(80,20+('large','small','list','details').index(mode)*75))
+    render('cross-'+mode+'-created')
+   checks.append('All four source views and AutoArrangeON permit external shortcut drops; native-profile No writes nothing and Yes creates typed namespace Link')
+   shell.action(('namespace-view',win,'large'));render('ghost-before');start=item(win,'(C:)');end=(shell.width-30,shell.height-80)
+   xdo('mousemove','--sync',*start);xdo('mousedown',1);xdo('mousemove','--sync',*end);render('ghost-outside-source');assert shell.namespace_pointer_point==end and shell.namespace_item_drag is not None
+   xdo('key','Escape');xdo('mouseup',1);assert shell.namespace_item_drag is None
+   checks.append('Actual pointer outside source retains global drag ghost until release; Escape cancels without prompt or write')
+   before=set(shell.desktop_folder.iterdir());positions=shell.shortcut_icons.path.read_bytes();start=item(win,'(C:)')
+   with patch('win95lx.apps.dialogs.message_box',side_effect=[Gtk.ResponseType.YES,Gtk.ResponseType.OK]) as prompt,patch('win95lx.explorer.namespace.create_shortcut',side_effect=PermissionError('/private/unwanted/path')):
+    drag(start,end);assert prompt.call_count==2 and '/private/' not in prompt.call_args.args[2]
+   assert set(shell.desktop_folder.iterdir())==before and shell.shortcut_icons.path.read_bytes()==positions
+   with patch.object(shell,'file_drop_destination',return_value=(None,Path('loop'))),patch.object(shell._drive.view,'resolve',side_effect=RuntimeError('symlink loop')),patch('win95lx.apps.dialogs.message_box',return_value=Gtk.ResponseType.OK) as prompt:
+    drag(start,end);prompt.assert_called_once();assert 'no longer available' in prompt.call_args.args[2]
+   assert set(shell.desktop_folder.iterdir())==before
+   checks.append('Permission and looping-destination failures show native concise errors without private paths, new files, source movement or changes to existing positions/files')
+   start=item(win,'Control Panel')
+   with patch('win95lx.apps.dialogs.message_box',return_value=Gtk.ResponseType.YES):drag(start,end)
+   assert any(read_shortcut(path) and read_shortcut(path).target=='control' for path in shell.desktop_folder.iterdir())
+   for path in shell.desktop_folder.iterdir():
+    if read_shortcut(path) and read_shortcut(path).target=='control':shell.desktop_icons.move('file:'+path.name,(80,320))
+   checks.append('Control Panel virtual root also creates its own typed namespace shortcut')
+   start=item(win,'(C:)');before=set(shell.desktop_folder.iterdir())
+   drag(start,start,button=3);assert shell.start_context and not any(row and row[0] in ('Close','My Computer','Work Offline') for row in shell.start_context.rows),(shell.start_context.rows if shell.start_context else None,shell.popup,shell.namespace_item_drag);xdo('key','Escape');assert shell.start_context is None
+   drag(start,(start[0]+1,start[1]+1),via=(start[0]+15,start[1]+15),button=3);assert shell.start_context is None
+   for cancel in ('escape','outside','cancel'):
+    drag(start,end,button=3);menu=shell.start_context;assert menu and menu.rows[0][0]=='Create Shortcut(s) Here'
+    if cancel=='escape':
+     # Some multimedia/unmapped keyvals have no symbolic GDK name.
+     event=Gdk.Event.new(Gdk.EventType.KEY_PRESS);event.keyval=0;event.state=Gdk.ModifierType(0)
+     with patch.object(Gdk,'keyval_name',return_value=None):shell.key(shell,event)
+     assert shell.start_context is menu
+     xdo('key','Escape')
+    elif cancel=='outside':xdo('mousemove','--sync',2,shell.height-40);xdo('mousedown',1);xdo('mouseup',1)
+    else:xdo('mousemove','--sync',menu.x+30,menu.y+menu.height-10);xdo('mousedown',1);xdo('mouseup',1)
+    assert shell.start_context is None and set(shell.desktop_folder.iterdir())==before
+   drag(start,end,button=3);menu=shell.start_context
+   with patch('win95lx.apps.dialogs.message_box',side_effect=AssertionError('Explicit right-drop link action must not reprompt')):
+    xdo('mousemove','--sync',menu.x+35,menu.y+10);xdo('mousedown',1);xdo('mouseup',1)
+   assert len(set(shell.desktop_folder.iterdir())-before)==1
+   checks.append('Logical rightclick uses distinct item context; latched return avoids context; rightdrop Cancel/Escape/outside writesnothing; explicit CreateShortcutHere writes Link without reprompt')
+   # Same virtual link can target a real folder, never move the source object.
+   target=shell._drive.view.root/'Drop Target';target.mkdir();shell.open('drive',target.relative_to(shell._drive.view.root));folder=shell.state.active;folder.x=shell.width-230;folder.y=280;folder.width=220;folder.height=250
+   render('folder-target');start=item(win,'(C:)');end=(folder.x+180,folder.y+100)
+   with patch('win95lx.apps.dialogs.message_box',return_value=Gtk.ResponseType.YES):drag(start,end)
+   links=list(target.iterdir());assert len(links)==1 and read_shortcut(links[0]).target=='drive';render('folder-created')
+   checks.append('Actual folder-window drop writes a Link in that folder without moving virtual drive; existing files preserved')
+   render('source-activation-before');start=item(win,'(C:)');assert shell.state.active is win
+   # An exposed background source activates before its drag; covered items do not.
+   empty=shell._drive.view.root/'Empty Cover';empty.mkdir();shell.open('drive',empty.relative_to(shell._drive.view.root));cover=shell.state.active;cover.x=start[0]+90;cover.y=30;cover.width=220;cover.height=250
+   render('source-exposed-background');xdo('mousemove','--sync',*start);xdo('mousedown',1);assert shell.state.active is win and shell.namespace_item_drag is not None;xdo('key','Escape');xdo('mouseup',1)
+   shell.state.windows.remove(cover);shell.state.windows.append(cover);cover.x=start[0]-100;cover.y=start[1]-140;render('source-covered-empty-client');xdo('mousemove','--sync',*start);xdo('mousedown',1);assert shell.namespace_item_drag is None and shell.icon_drag is None and shell.state.active is cover;xdo('mouseup',1)
+   point=shell.desktop_icons.position('file:'+next(iter(shell.desktop_folder.iterdir())).name,shell.width,shell.height,shell.desktop_file_defaults.get('file:'+next(iter(shell.desktop_folder.iterdir())).name));desktop_point=(point[0]+25,point[1]+10);cover.x=desktop_point[0]-100;cover.y=desktop_point[1]-140;render('desktop-covered-empty-client');xdo('mousemove','--sync',*desktop_point);xdo('mousedown',1);assert shell.icon_drag is None and shell.namespace_item_drag is None;xdo('mouseup',1)
+   checks.append('Partly exposed background namespace source activates and starts drag; empty foreground client blocks covered namespace and desktop icon click-through')
    from win95lx.shell.desktop_icons import ShortcutIcons
    reopened=ShortcutIcons();assert reopened.position('namespace:computer:large','(C:)',None) is not None;assert reopened.position('namespace:control:large','Mouse',None) is not None
    checks.append('Stable namespace/view/label keys survive independent store reopen; all rendered item hits are client-clipped')
   (a.output/'report.json').write_text(json.dumps({'status':'pass','display':D.get_name(),'screen':[shell.width,shell.height],'checks':checks,'real_pointer':True},indent=2)+'\n');print(json.dumps(checks))
- finally:shell.destroy()
+ finally:shell.destroy();faulthandler.cancel_dump_traceback_later()

@@ -41,8 +41,6 @@ def draw(shell,p,win,entries,x,y,width,height,*,defaults=None):
     p.cr.save();p.cr.rectangle(x,y,vw,vh);p.cr.clip()
     for i,(ident,label,target) in enumerate(entries):
         dx,dy=layout.positions[i]
-        drag=getattr(shell,'namespace_item_drag',None)
-        if drag and drag[0] is win and drag[1]==label and getattr(shell,'namespace_item_point',None) is not None:dx,dy=shell.namespace_item_point
         xx,yy=x+dx-sx,y+dy-sy
         selected=shell.item_selection in ((win,label),(win,None)) and shell.state.active is win and shell.popup is None
         action=('item',win,target,label,(dx,dy))

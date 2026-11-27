@@ -6,9 +6,13 @@ from pathlib import Path
 DEFAULTS = {'computer': (0, 2), 'recycle': (0, 152)}
 ICON_WIDTH, ICON_HEIGHT = 76, 54
 TASKBAR_HEIGHT = 28
+# Native desktop ListView pitch; folder icon geometry is a separate profile.
+DESKTOP_CELL_SIZE = (75, 75)
 
 
 class DesktopIcons:
+    CELL_SIZE = DESKTOP_CELL_SIZE
+
     def __init__(self, path=None):
         self.path = path if path is not None else Path.home() / '.config' / 'win95lx' / 'desktop-icons.json'
         self.positions = DEFAULTS.copy()
@@ -23,8 +27,8 @@ class DesktopIcons:
 
     @staticmethod
     def clamp(x, y, width, height):
-        return (max(0, min(x, width-ICON_WIDTH)),
-                max(0, min(y, height-TASKBAR_HEIGHT-ICON_HEIGHT)))
+        return (max(0, min(x, width-DESKTOP_CELL_SIZE[0])),
+                max(0, min(y, height-TASKBAR_HEIGHT-DESKTOP_CELL_SIZE[1])))
 
     def position(self, name, width, height, default=None):
         return self.clamp(*self.positions.get(name, default), width, height)
@@ -37,16 +41,17 @@ class DesktopIcons:
 
 def desktop_file_slots(entries, height, occupied=()):
     """Find free desktop cells around the actual positions of existing icons."""
-    rows = max(1, (height-TASKBAR_HEIGHT-2)//ICON_HEIGHT)
+    cell_width,cell_height=DESKTOP_CELL_SIZE
+    rows = max(1, (height-TASKBAR_HEIGHT-2)//cell_height)
     occupied = list(occupied) if occupied else list(DEFAULTS.values())
     index = 0
     for label, folder in entries:
         while True:
-            point = index//rows*ICON_WIDTH, 2+index%rows*ICON_HEIGHT
+            point = index//rows*cell_width, 2+index%rows*cell_height
             index += 1
             x,y = point
-            if all(x+ICON_WIDTH <= ox or ox+ICON_WIDTH <= x
-                   or y+ICON_HEIGHT <= oy or oy+ICON_HEIGHT <= y for ox,oy in occupied):
+            if all(x+cell_width <= ox or ox+cell_width <= x
+                   or y+cell_height <= oy or oy+cell_height <= y for ox,oy in occupied):
                 break
         occupied.append(point)
         yield label, folder, point

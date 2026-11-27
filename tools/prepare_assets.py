@@ -467,6 +467,8 @@ from stage_command_button_assets import stage as stage_command_button_assets
 records.extend(stage_command_button_assets(output))
 from stage_accessibility_assets import stage as stage_accessibility_assets
 records.extend(stage_accessibility_assets(output))
+from stage_namespace_drop_assets import stage as stage_namespace_drop_assets
+records.extend(stage_namespace_drop_assets(output))
 from stage_printers_assets import stage as stage_printers_assets
 records.extend(stage_printers_assets(output))
 from stage_fonts_assets import stage as stage_fonts_assets

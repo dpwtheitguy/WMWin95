@@ -29,7 +29,8 @@ def read_shortcut(path):
 
 
 def write_shortcut(directory,name,link):
-    directory=Path(directory);directory.mkdir(parents=True,exist_ok=True)
+    directory=Path(directory)
+    if not directory.is_dir():raise NotADirectoryError("The shortcut destination is no longer available.")
     name=name.replace('/','_').replace(':','').replace('\n',' ').replace('\r',' ')
     url='win95lx:'+link.target if link.kind=='namespace' else Path(link.target).absolute().as_uri()
     index=1
@@ -42,10 +43,18 @@ def write_shortcut(directory,name,link):
         path=directory/filename
         parser=ConfigParser(interpolation=None);parser.optionxform=str
         parser['Desktop Entry']={'Type':'Link','Name':path.stem,'URL':url}
+        created=False
         try:
-            with path.open('x',encoding='utf-8') as stream:parser.write(stream)
+            with path.open('x',encoding='utf-8') as stream:
+                created=True;parser.write(stream)
             return path
-        except FileExistsError:index+=1
+        except FileExistsError:
+            if created:
+                path.unlink(missing_ok=True);raise
+            index+=1
+        except BaseException:
+            if created:path.unlink(missing_ok=True)
+            raise
 
 
 def create_shortcut(desktop,label):
@@ -80,3 +89,12 @@ def resolve_shortcut(path,limit=32):
 
 
 def display_name(name):return Path(name).stem if str(name).casefold().endswith('.desktop') else str(name)
+
+
+def folder_shortcut_destination(path,root):
+    """Resolve a bounded folder Link for virtual-item drops, never execute it."""
+    root=Path(root).resolve();link=resolve_shortcut(path)
+    target=root if link.kind=='namespace' and link.target=='drive' else Path(link.target) if link.kind=='path' else None
+    if target is None or not target.is_dir():raise ValueError('The shortcut does not refer to an available folder.')
+    target=target.resolve(strict=True);target.relative_to(root)
+    return target

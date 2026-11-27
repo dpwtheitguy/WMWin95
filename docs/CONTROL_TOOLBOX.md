@@ -83,3 +83,25 @@ exercise both actual renderers; a test repeating the implementation's incorrect
 resource choice cannot establish fidelity. `check_printers_shell.py` checks both
 renderer identities, and `check_selection_details.py` compares the composed
 shortcut pixels against the original arrow resource.
+
+### Desktop icon cells and selection masks
+
+Use `draw_icon_label` / `icon_label_metrics` from `shell/icon_labels.py` for
+measured desktop text. The IE4 profile uses two unselected lines and expands
+active selected text; inactive selection shrinks again. Classic is a separate
+unlimited-line profile. Pass the system desktop color rather than sampling
+wallpaper; native text unions are opaque. Focus inversion on standard VGA
+colors is palette-index XOR15, not RGB inversion. Nonstandard palettes need
+independent evidence/overrides. Current user-facing runtime remains IE4.
+
+Desktop new-item pitch and viewport clamp use `DesktopIcons.CELL_SIZE`75×75;
+folder-cell geometry remains separate. Preserve manually stored coordinates.
+Long labels can extend the item hit rectangle beyond one cell; clip hits to the
+desktop client rather than allowing text under the taskbar to act as a target.
+
+`Painter.selected_image(..., phase=0)` keeps existing semantics. The IE4 desktop
+folder asset is one pixel above nominal origin and needs phase1; overlay30 stays
+nominal/untinted. `selected_icon_mask` caches up to128 strong immutable source
+surface/phase keys. Load a new surface for a changed asset; if mutating alpha in
+place, explicitly clear the cache. Actual-renderer comparisons belong in
+`check-shortcut-visuals`, not only tests repeating resource IDs.

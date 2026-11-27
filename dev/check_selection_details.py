@@ -86,7 +86,10 @@ def main():
    x,y=shell.desktop_file_defaults['file:'+path.name]
    for yy in range(32):
     for xx in range(32):
-     b,overlay=base[yy*32+xx],arrow[yy*32+xx]
+     # Independently measured IE4 desktop folder base is Y-1; arrow stays nominal.
+     by=yy+1 if resource==4 else yy
+     b=base[by*32+xx] if by<32 else (0,0,0,0)
+     overlay=arrow[yy*32+xx]
      expected=overlay[:3] if overlay[3] else b[:3] if b[3] else (0,128,128)
      assert icons[2][(y+yy)*icons[0]+x+21+xx][:3]==expected,(path.name,xx,yy)
   checks.append('namespace drive folder document target icons and original arrow overlay')

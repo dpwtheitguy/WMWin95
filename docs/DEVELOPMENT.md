@@ -86,3 +86,8 @@ Latest handoff supersedes the ten-entry build above: release
 `59dbd3dd304c5c52`,11 Control Panel entries including supported existing-printer
 management, namespace rearrangement and corrected shortcut overlay. See
 `reports/LUNCH_DELIVERY_2026-11-27.md` for evidence and unfinished wizard scope.
+
+Namespace/shortcut follow-up supersedes that build: `70026f549a5d4525`, still11
+Control Panel entries, with native virtual-object shortcut drops and corrected
+desktop cells. Checkpoint `namespace-shortcuts-ready-20261127`; evidence in
+`reports/NAMESPACE_SHORTCUT_FIDELITY_2026-11-27.md`.

@@ -45,3 +45,28 @@ Easter eggs are fidelity features documented in `docs/EASTER_EGGS.md`. The
 Volcano behavior depends on the 3D Text screensaver component. CLSID folder
 resolution belongs to the shared namespace registry independently of an ActiveX
 runtime; a recognized GUID is not permission to execute arbitrary COM code.
+
+## Measured desktop differences (2026-11-27 follow-up)
+
+The shortcut audit found genuine shell-generation differences; keep these in
+component profiles rather than applying one global pixel adjustment:
+
+| Component | Prepared Classic reference | Prepared IE4 reference |
+| --- | --- | --- |
+| Standard large desktop spacing | 75×75 | 75×75 (small spacing112×17) |
+| Unselected long icon label | Full multiline text | Two lines with ellipsis |
+| Default folder shortcut base | Original shell32 GROUP_ICON4, nominal Y | Measured Explorer folder asset, Y−1 |
+| Shortcut arrow | GROUP_ICON30, nominal origin | GROUP_ICON30, nominal origin |
+
+These are observed configurations of Windows95C, not all release versions. Plus
+installation is separate from shell generation; Plus/themed variations and
+selected long-label behavior need their own evidence. The runtime remains the
+IE4 baseline until a real profile switch is implemented and validated.
+
+The IE4 native desktop ListView reports opaque system-desktop text background,
+not arbitrary wallpaper-based text contrast. Classic native focus colors on
+standard VGA colors follow palette-index XOR15 (teal→red, navy→yellow,
+black→white, silver→gray). Preserve measured color/profile inputs in the reusable
+label renderer; do not hardcode red for every desktop background. Current
+product appearance-color controls remain unavailable, so introducing a helper
+parameter does not establish a working user-facing theme-color switch.

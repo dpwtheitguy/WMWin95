@@ -36,7 +36,7 @@ def main():
         assets=Path(directory)/'assets';stage(assets)
         for source in(ROOT/'private/shell-assets').iterdir():
             if not(assets/source.name).exists():(assets/source.name).symlink_to(source)
-        shell=Shell(assets);shell.disconnect_by_func(Gtk.main_quit);backend=Backend();shell.printer_provider=PrinterNamespace(backend);shell.show_all();flush_draws(Gtk)
+        shell=Shell(assets);assert shell.desktop_folder.is_dir(),'Fresh profile must initialize Desktop before creating shortcuts';shell.disconnect_by_func(Gtk.main_quit);backend=Backend();shell.printer_provider=PrinterNamespace(backend);shell.show_all();flush_draws(Gtk)
         def render(name):
             flush_draws(Gtk);surface=cairo.ImageSurface(cairo.FORMAT_RGB24,shell.width,shell.height);shell.draw(shell.area,cairo.Context(surface));surface.write_to_png(str(args.output/(name+'.png')))
         def item(win,label):return next((xx+min(ww-1,10),yy+min(hh-1,10))for xx,yy,ww,hh,action in shell.hits if action[0]=='item'and action[1]is win and action[3]==label)

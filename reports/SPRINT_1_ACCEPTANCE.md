@@ -127,3 +127,16 @@ comparison limits,355-unit-test run with two skips, live captures and checkpoint
 are recorded in [delivery evidence](LUNCH_DELIVERY_2026-11-27.md). This does not
 accept the Add Printer wizard, all Explorer view/menu parity, Desktop Themes or
 the Easter eggs.
+
+
+## November27 namespace and shortcut fidelity
+
+Current visible release `70026f549a5d4525` adds original virtual-object drag/drop
+shortcut offers, direct logical-secondary drop context, preserved grab offsets
+and corrected32px desktop shortcut labels/selection/profile artwork. Actual
+non-admin VM creation was verified.379 guest tests ran with one opt-in skip;
+rendered and interaction regression groups completed with failures and
+corrections preserved in the evidence. [Consolidated delivery and limits](NAMESPACE_SHORTCUT_FIDELITY_2026-11-27.md),
+[native behavior](NAMESPACE_CROSSDROP_2026-11-27.md), and
+[shortcut visuals](SHORTCUT_VISUAL_AUDIT_2026-11-27.md) separate measured regions
+from whole-OS claims and describe Classic/IE4/configured-Plus coverage.

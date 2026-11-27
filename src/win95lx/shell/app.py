@@ -22,6 +22,7 @@ from win95lx.shell.shortcut_folders import FOLDER_TITLES, ShortcutFolders
 from win95lx.shell.shutdown_dialog import ShutdownDialog, is_development_guest
 from win95lx.shell.run_dialog import RunDialog
 from win95lx.shell.start_context import StartContext, SystemContext
+from win95lx.shell.namespace_drop import NamespaceDropContext,drag_image_origin
 from win95lx.shell.system_menu import ARROWS, MENU_WIDTH, WindowOperation, options as system_options
 from win95lx.display_modes import DISPLAY_MODES, discover_modes, remember_resolution, set_resolution
 from win95lx.explorer.trash import TrashStore
@@ -66,8 +67,9 @@ class Shell(Gtk.Window):
         for name in ('volume','volume-muted'):
             icon=assets/(name+'-icon.png')
             if icon.exists():self.small_images[name]=cairo.ImageSurface.create_from_png(str(icon))
+        self.desktop_focus=True
         self.namespace_drag = None
-        self.namespace_item_drag = self.namespace_item_point = None
+        self.namespace_item_drag = self.namespace_item_point = self.namespace_pointer_point = None
         self.task_order = []
         self.active_task = None
         self.desktop_icons = DesktopIcons()
@@ -153,6 +155,7 @@ class Shell(Gtk.Window):
         documents.mkdir(exist_ok=True)
         self.drive = DriveBrowser(Path('/') if is_development_guest() else documents)
         self.desktop_folder = (Path.home() if is_development_guest() else documents)/'Desktop'
+        self.desktop_folder.mkdir(exist_ok=True)
         self.desktop_files = []
         self.desktop_file_defaults = {}
         self.refresh_desktop_files()
@@ -427,6 +430,7 @@ class Shell(Gtk.Window):
             self.item_selection=None;win.focus_item=None;self.popup=None
 
     def open(self,kind,folder=None):
+        self.desktop_focus=False
         if kind in cpl_catalog.targets().values() and kind not in ('display','printers'):
             self.launch_accessory(kind);return
         if kind == 'drive':
@@ -581,6 +585,7 @@ class Shell(Gtk.Window):
         self.desktop_file_defaults = {f'file:{label}': point for label, _, point in slots}
         desktop_items += tuple((4 if folder else self.drive_file_icon(label), label, f'file:{label}')
                                for label, folder, _ in slots)
+        desktop_active=self.desktop_focus and self.is_active() and not (self.state.start_open or self.popup or self.state.dialog)
         for ident,label,kind in desktop_items:
             x, y = self.desktop_icons.position(kind, width, height, self.desktop_file_defaults.get(kind))
             if self.icon_drag and self.icon_drag[0] == kind and self.icon_drag_point is not None:
@@ -588,22 +593,22 @@ class Shell(Gtk.Window):
             shortcut=kind.startswith('file:') and label.casefold().endswith('.desktop')
             if shortcut:ident=self.shortcut_image(self.desktop_folder/label,ident)
             if ident in self.images:
-                if self.state.selection==kind:p.selected_image(self.images[ident],x+21,y)
-                else:p.image(self.images[ident], x+21, y)
+                if self.state.selection==kind and desktop_active:p.selected_image(self.images[ident],x+21,y-1 if ident==4 else y,phase=1 if ident==4 else 0)
+                else:p.image(self.images[ident], x+21, y-1 if ident==4 else y)
             if shortcut and 30 in self.images:p.image(self.images[30],x+21,y)
             from win95lx.explorer.namespace import display_name
-            label = taskbar.title_that_fits(self.font, display_name(label), ICON_WIDTH-4, False)
-            label_width=self.font.width(label)
-            label_x=x+37-label_width//2
+            from win95lx.shell.icon_labels import draw_icon_label
             selected=self.state.selection==kind
             if kind.startswith('file:'):
                 selected = selected or self.file_hover == (None,self.desktop_folder.relative_to(self._drive.view.root)/kind[5:])
             elif kind == 'recycle':
                 selected = selected or self.file_hover == (None,RECYCLE_TARGET)
-            if selected:
-                p.fill(label_x-1,y+35,label_width+2,15,NAVY)
-            p.text(label,label_x,y+35,LIGHT)
-            self.hit(x,y,ICON_WIDTH,ICON_HEIGHT,('desktop',kind))
+            label_metrics=draw_icon_label(p,display_name(label),x+37,y+36,width=70,desktop=True,
+                            selected=selected,focused=self.state.selection==kind,
+                            active=desktop_active)
+            hit_width=max(0,min(DesktopIcons.CELL_SIZE[0],width-x))
+            hit_height=max(0,min(max(DesktopIcons.CELL_SIZE[1],label_metrics['rect'][1]+label_metrics['rect'][3]-y),height-28-y))
+            if hit_width and hit_height:self.hit(x,y,hit_width,hit_height,('desktop',kind))
         for win in self.state.windows:
             if not win.minimized:self.window(p,win)
         if self.file_drag and self.file_drag_point:
@@ -617,6 +622,19 @@ class Shell(Gtk.Window):
                 ix=win.x+explorer_chrome.PANE_X+point[0]+16+gx-start_x
                 iy=win.y+explorer_chrome.PANE_Y+point[1]+gy-start_y
                 p.drag_image(icon,ix,iy)
+        if self.namespace_item_drag and self.namespace_pointer_point:
+            win,label,point,start_x,start_y,initial_scroll=self.namespace_item_drag
+            ident=next((entry[0] for entry in cpl_catalog.entries() if entry[1]==label),None) if win.kind=='control' else {'(C:)':9,'Control Panel':36,'Printers':'printers'}.get(label)
+            image=self.images.get(ident)
+            if image:
+                gx,gy=self.namespace_pointer_point;vx,vy,_,_=win.namespace_viewport
+                large=win.namespace_view=='large'
+                origin=drag_image_origin((vx,vy),point,(start_x,start_y),(gx,gy),initial_scroll,image_x=(15 if win.kind=='computer' and win.web_view else 16) if large else 0)
+                small=self.small_images.get(ident) if not large else None
+                if small:p.drag_image(small,*origin)
+                elif not large:
+                    p.cr.save();p.cr.translate(*origin);p.cr.scale(.5,.5);p.drag_image(image,0,0);p.cr.restore()
+                else:p.drag_image(image,*origin)
         bar=height-28
         p.fill(0,bar,width,28,FACE)
         p.fill(0,bar+1,width,1,LIGHT)
@@ -1292,8 +1310,12 @@ class Shell(Gtk.Window):
             self.state.dialog=None
 
     def action(self,action,event=None):
+        if action[0]=='desktop':self.desktop_focus=True
+        elif action[0] in ('open','accessory') or len(action)>1 and hasattr(action[1],'kind'):self.desktop_focus=False
         kind=action[0]
-        if kind=='printer-queue':
+        if kind=='namespace-create-drop':
+            self.drop_namespace_shortcuts(action[1],action[2],action[3],action[4],ask=False)
+        elif kind=='printer-queue':
             key='printer:'+action[1]
             existing=self.accessory_windows.get(key)
             if existing is not None:existing.present();return
@@ -1435,6 +1457,8 @@ class Shell(Gtk.Window):
             win, target, label, point = action[1:]
             previous=self.item_selection
             win.focus_item=label
+            if win.kind in ('computer','control','printers'):
+                self.state.windows.remove(win);self.state.windows.append(win)
             win.info_scroll=0
             self.item_selection = (win, label)
             if win.kind=='computer' and event and getattr(event,'state',0)&Gdk.ModifierType.CONTROL_MASK:
@@ -1449,8 +1473,8 @@ class Shell(Gtk.Window):
             if win.kind == 'drive':
                 self.state.windows.remove(win)
                 self.state.windows.append(win)
-            if event and event.type == Gdk.EventType._2BUTTON_PRESS and target:
-                self.namespace_item_drag=self.namespace_item_point=None
+            if event and event.button==1 and event.type == Gdk.EventType._2BUTTON_PRESS and target:
+                self.namespace_item_drag=self.namespace_item_point=self.namespace_pointer_point=None
                 self.file_drag = None
                 self.shortcut_drag = self.shortcut_drag_point = None
                 if isinstance(target, tuple):
@@ -1468,10 +1492,11 @@ class Shell(Gtk.Window):
                 self.file_drag_point = None
                 self.file_drag_origin = label, point, event.x, event.y
                 self.file_drag = win, label, event.x, event.y
-            elif event and event.button == 1 and win.kind in ('computer','control','printers'):
-                if not win.namespace_auto and win.namespace_view in ('large','small'):
-                    self.namespace_item_drag=(win,label,point,event.x,event.y,win.namespace_scroll)
-                    self.namespace_item_point=None
+            elif event and event.button in (1,3) and win.kind in ('computer','control','printers'):
+                self.namespace_item_drag=(win,label,point,event.x,event.y,win.namespace_scroll)
+                self.namespace_drag_button=event.button
+                self.namespace_item_point=None
+                self.namespace_pointer_point=None
             elif event and event.button == 1 and win.kind == 'start-folder':
                 self.state.windows.remove(win)
                 self.state.windows.append(win)
@@ -2101,6 +2126,10 @@ class Shell(Gtk.Window):
             event = ScaledPointer(event, self.pointer_scale)
         if event.button == 1:
             self.get_window().focus(event.time)
+        pointer_hits=self.hits
+        if not (self.state.start_open or self.popup or self.start_context or self.state.dialog):
+            front=next((w for w in reversed(self.state.windows) if not w.minimized and w.x<=event.x<w.x+w.width and w.y<=event.y<w.y+w.height),None)
+            pointer_hits=[hit for hit in self.hits if not (hit[-1][0]=='item' and hit[-1][1] is not front or hit[-1][0]=='desktop' and front is not None)]
         if self.suspended:
             self.suspended=False
             self.area.queue_draw()
@@ -2148,6 +2177,10 @@ class Shell(Gtk.Window):
                     return True
         if self.state.dialog and event.button==3:
             return True
+        if event.button==3 and not self.state.start_open and not self.popup:
+            item=next((a for x,y,w,h,a in reversed(pointer_hits) if a[0]=='item' and a[1].kind in ('computer','control') and x<=event.x<x+w and y<=event.y<y+h),None)
+            if item:
+                self.get_window().focus(event.time);self.action(item,event);self.area.queue_draw();return True
         if event.button == 3 and self.open_start_context(event):
             return True
         if event.button == 3:
@@ -2183,7 +2216,7 @@ class Shell(Gtk.Window):
                 return True
         if event.button==3:
             target=next((a for x,y,w,h,a in reversed(self.hits) if x<=event.x<x+w and y<=event.y<y+h and a[0]=='desktop'),None);self.popup=(min(int(event.x),self.width-133),min(int(event.y),self.height-90),target[1] if target else None);self.area.queue_draw();return True
-        hits=self.hits
+        hits=pointer_hits
         if self.state.start_open:
             hits=[hit for hit in self.hits[:self.menu_hit_start] if hit[4]==('start',)]
             hits.extend(self.hits[self.menu_hit_start:])
@@ -2218,6 +2251,45 @@ class Shell(Gtk.Window):
                     return win, action[3], action[2][1]
             return win, None, win.folder
         return None
+
+    def drop_namespace_shortcuts(self,win,label,directory,desktop_point=None,*,ask=True):
+        """Virtual objects cannot be transferred; the observed native fallback is a link."""
+        from win95lx.apps.dialogs import message_box,YES_NO
+        from win95lx.explorer.namespace import create_shortcut
+        if ask:
+            answer=message_box(self,'Shortcut','You cannot move or copy this item to this location.\nDo you want to create a shortcut to the item instead?',Gtk.MessageType.QUESTION,YES_NO,Gtk.ResponseType.YES,profile='namespace-drop')
+            if answer!=Gtk.ResponseType.YES:return
+        created=[]
+        try:
+            if not directory.is_dir():raise NotADirectoryError()
+            labels=(label,) if self.item_selection!=(win,None) else (cpl_catalog.labels() if win.kind=='control' else ('(C:)','Control Panel'))
+            for selected in labels:created.append(create_shortcut(directory,selected))
+        except (OSError,KeyError):
+            for path in created:
+                try:path.unlink()
+                except OSError:pass
+            message_box(self,'Shortcut','The shortcut could not be created. Check that the destination is available and can be written to.',Gtk.MessageType.ERROR)
+            return
+        self.refresh_file_views()
+        if desktop_point and len(created)==1:
+            self.state.selection='file:'+created[0].name;self.desktop_focus=True;self.item_selection=None
+            try:self.desktop_icons.move('file:'+created[0].name,self.desktop_icons.clamp(desktop_point[0]-21,desktop_point[1],self.width,self.height))
+            except OSError:pass
+
+    def namespace_drop_destination(self,x,y):
+        from win95lx.explorer.namespace import folder_shortcut_destination
+        top=next((w for w in reversed(self.state.windows) if not w.minimized and w.x<=x<w.x+w.width and w.y<=y<w.y+w.height),None)
+        for hx,hy,hw,hh,action in reversed(self.hits):
+            path=None
+            if top and top.kind=='drive' and action[0]=='item' and action[1] is top and action[3].casefold().endswith('.desktop'):
+                px,py=action[4];rect=folder_drop_rect(top.x+explorer_chrome.PANE_X+px,top.y+explorer_chrome.PANE_Y+py,min(72,self.font.width(action[3])))
+                if contains(rect,x,y):path=self.browser_for(top).view.resolve(self.browser_for(top).directory/action[3])
+            elif top is None and action[0]=='desktop' and action[1].startswith('file:') and action[1].casefold().endswith('.desktop'):
+                if contains(folder_drop_rect(hx,hy,min(72,self.font.width(action[1][5:])),True),x,y):path=self.desktop_folder/action[1][5:]
+            if path is not None:
+                folder=folder_shortcut_destination(path,self._drive.view.root)
+                return top,folder.relative_to(self._drive.view.root)
+        return self.file_drop_destination(x,y)
 
     def file_drop_destination(self, x, y, sources=()):
         for win in reversed(self.state.windows):
@@ -2368,17 +2440,46 @@ class Shell(Gtk.Window):
     def release(self, _area, event):
         if self.pointer_scale != 1 and (self.file_drag or self.shortcut_drag or self.icon_drag or self.namespace_item_drag):
             event = ScaledPointer(event, self.pointer_scale)
-        if event.button==1 and self.namespace_item_drag:
+        if self.namespace_item_drag and event.button==getattr(self,'namespace_drag_button',1):
             win,label,point,start_x,start_y,initial_scroll=self.namespace_item_drag
             started=self.namespace_item_point is not None or drag_started(event.x-start_x,event.y-start_y)
-            if started and not win.namespace_auto and win.namespace_view in ('large','small') and contains(win.namespace_viewport,event.x,event.y):
-                from win95lx.explorer.namespace_layout import drag_position
-                position=drag_position(point,(start_x,start_y),(event.x,event.y),initial_scroll,win.namespace_scroll,win.namespace_layout.viewport,win.namespace_layout.cell)
-                try:
-                    self.shortcut_icons.move('namespace:'+win.kind+':'+win.namespace_view,label,position)
-                    self.namespace_item_point=position
-                except OSError as error:print(f'Could not save namespace icon position: {error}',flush=True)
-            self.namespace_item_drag=self.namespace_item_point=None
+            self.namespace_item_drag=self.namespace_item_point=self.namespace_pointer_point=None
+            # A modal drop question runs a nested loop before release returns.
+            # Invalidate now so the old global ghost is removed behind it.
+            self.area.queue_draw()
+            if started:
+                try:destination=self.namespace_drop_destination(event.x,event.y)
+                except (OSError,ValueError,RuntimeError):
+                    from win95lx.apps.dialogs import message_box
+                    message_box(self,'Shortcut','The shortcut destination is no longer available.',Gtk.MessageType.ERROR)
+                    self.area.queue_draw();return True
+                top=next((w for w in reversed(self.state.windows) if not w.minimized and w.x<=event.x<w.x+w.width and w.y<=event.y<w.y+w.height),None)
+                if top is win and contains(win.namespace_viewport,event.x,event.y):
+                    if not win.namespace_auto and win.namespace_view in ('large','small'):
+                        from win95lx.explorer.namespace_layout import drag_position
+                        position=drag_position(point,(start_x,start_y),(event.x,event.y),initial_scroll,win.namespace_scroll,win.namespace_layout.viewport,win.namespace_layout.cell)
+                        try:self.shortcut_icons.move('namespace:'+win.kind+':'+win.namespace_view,label,position)
+                        except OSError:print('Could not save namespace icon position.',flush=True)
+                elif destination and destination[1]!=RECYCLE_TARGET:
+                    try:directory=self._drive.view.resolve(destination[1])
+                    except (OSError,ValueError,RuntimeError):
+                        from win95lx.apps.dialogs import message_box
+                        message_box(self,'Shortcut','The shortcut destination is no longer available.',Gtk.MessageType.ERROR)
+                    else:
+                        large=win.namespace_view=='large'
+                        desktop_point=drag_image_origin(win.namespace_viewport,point,(start_x,start_y),(event.x,event.y),initial_scroll,image_x=(15 if win.kind=='computer' and win.web_view else 16) if large else 0) if destination[0] is None and directory==self.desktop_folder else None
+                        if event.button==3:
+                            self.start_context=NamespaceDropContext.at_drop(event.x,event.y,[('Create Shortcut(s) Here',('namespace-create-drop',win,label,directory,desktop_point)),None,('Cancel',('dismiss',))],183,self.width,self.height)
+                        else:self.drop_namespace_shortcuts(win,label,directory,desktop_point)
+            elif event.button==3:
+                rows=[]
+                for row in self.namespace_file_rows(win):
+                    if row is None:
+                        if rows and rows[-1] is not None:rows.append(None)
+                    elif row.command not in ('close','computer','offline'):
+                        rows.append((row.label,('computer-menu',win,row.command) if row.enabled else None))
+                while rows and rows[-1] is None:rows.pop()
+                self.start_context=StartContext(event.x,event.y,rows,max(124,max((self.font.width(row[0])+42 for row in rows if row),default=124)),self.width,self.height)
             self.area.queue_draw()
         if event.button == 1:
             self.namespace_drag = None
@@ -2441,6 +2542,7 @@ class Shell(Gtk.Window):
             if self.namespace_item_point is not None or drag_started(event.x-start_x,event.y-start_y):
                 from win95lx.explorer.namespace_layout import drag_position
                 self.namespace_item_point=drag_position(point,(start_x,start_y),(event.x,event.y),initial_scroll,win.namespace_scroll,win.namespace_layout.viewport,win.namespace_layout.cell)
+                self.namespace_pointer_point=(event.x,event.y)
                 self.area.queue_draw()
             return True
         if self.namespace_drag:
@@ -2578,7 +2680,9 @@ class Shell(Gtk.Window):
                     self.apply_window_operation(win, operation.original)
                 self.window_operation = None
         elif self.start_context:
-            if name == 'Escape':
+            if isinstance(self.start_context,NamespaceDropContext) and ((name or '').casefold()=='s' or name in ('Return','KP_Enter') and self.start_context.selected is None):
+                action=self.start_context.rows[0][1];self.start_context=None;self.action(action)
+            elif name == 'Escape':
                 self.start_context = None
             elif name in ('Up', 'Down'):
                 positions = [y for y, row in self.start_context.entries() if row and row[1]]
@@ -2625,7 +2729,7 @@ class Shell(Gtk.Window):
         elif not ctrl and self.wallpaper_combo_key(name, alt):
             pass
         elif name=='Escape' and not ctrl:
-            self.namespace_item_drag=self.namespace_item_point=None
+            self.namespace_item_drag=self.namespace_item_point=self.namespace_pointer_point=None
             self.shortcut_drag = self.shortcut_drag_point = self.shortcut_drop = None
             self.file_drag = self.file_drag_origin = self.file_drag_point = self.file_hover = None
             self.icon_drag = self.icon_drag_point = None

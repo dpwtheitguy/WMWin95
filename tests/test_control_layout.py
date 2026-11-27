@@ -42,7 +42,7 @@ class ControlLayout(unittest.TestCase):
             path = Path(directory)/'desktop-icons.json'
             icons = DesktopIcons(path)
             slots = list(desktop_file_slots([('Projects', True), ('note.txt', False)], 600))
-            self.assertEqual(slots[0], ('Projects', True, (0, 56)))
+            self.assertEqual(slots[0], ('Projects', True, (0, 77)))
             icons.move('file:Projects', (90, 120))
             self.assertEqual(DesktopIcons(path).position('file:Projects', 800, 600), (90,120))
             self.assertEqual(icons.position('file:note.txt', 800, 600, slots[1][2]), slots[1][2])
@@ -50,7 +50,16 @@ class ControlLayout(unittest.TestCase):
     def test_new_desktop_icons_avoid_moved_system_icons(self):
         slots = list(desktop_file_slots([('Source', True), ('Target', True)], 600,
                                        [(0,2),(0,90)]))
-        self.assertEqual([point for _,_,point in slots], [(0,164),(0,218)])
+        self.assertEqual([point for _,_,point in slots], [(0,227),(0,302)])
+
+    def test_desktop_native_pitch_fits_wrapped_labels_and_new_columns(self):
+        entries=[('Long file name '+str(i),False) for i in range(9)]
+        points=[point for _,_,point in desktop_file_slots(entries,600,[(0,2)])]
+        self.assertEqual(points[:3],[(0,77),(0,152),(0,227)])
+        self.assertEqual(points[6:9],[(75,2),(75,77),(75,152)])
+        # Two native 13-pixel text lines at y+36 fit before the next row.
+        self.assertLess(36+2*13,75)
+        self.assertEqual(DesktopIcons.clamp(999,999,800,600),(725,497))
 
     def test_active_randr_mode_skips_reconfiguration(self):
         with patch('win95lx.display_modes._run', return_value=(
