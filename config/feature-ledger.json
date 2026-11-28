@@ -491,5 +491,28 @@
     "not_applicable": "Explicit scoped reason required.",
     "accepted": "Named criteria and exact conditions satisfied; never inferred from another profile."
   },
-  "default_variant_status": "not_tested"
+  "default_variant_status": "not_tested",
+  "early_visual_gate_policy": {
+    "shared_controls": [
+      "osr2_5-classic",
+      "osr2_5-ie4"
+    ],
+    "theme_sensitive_additional": [
+      "osr2_5-ie4-plus95"
+    ],
+    "conditions": [
+      "resolution",
+      "color_depth",
+      "locale",
+      "font_settings",
+      "focus",
+      "selection",
+      "OS/component versions"
+    ],
+    "missing_release_evidence": "not_tested",
+    "absent_feature": "documented not_applicable",
+    "failure_action": "hold change before expanding consumers",
+    "reference_reuse": "reuse matching sealed captures; invalidate on relevant input changes",
+    "note": "Three OSR2.5 configurations do not prove RTM/SP1/OSR1 parity."
+  }
 }

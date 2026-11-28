@@ -37,3 +37,23 @@ No evidence inheritance across profiles; missing entries mean not tested. A
 prepared reference is not feature acceptance. Keep detailed captures/reports
 linked separately and hand off changed facts rather than repeated full reports.
 This ledger is planning metadata, not an applet runtime dependency.
+
+## Early visual gate across reference configurations
+
+Before expanding a shared control, compare a small representative state in both
+prepared classic and IE4 Desktop Update references. Add the Plus95 reference for
+theme-sensitive colors/fonts/metrics/assets or Plus-only features. Match guest
+resolution, color depth, locale, font settings, focus and selection, and record
+the actual OS/component versions. Capture normal/focused/disabled/pressed states
+where relevant before propagating the control to more consumers.
+
+Reuse sealed matching captures when inputs have not changed. Keep separate
+expected profiles where Windows differs; do not average them into one design.
+A feature absent from a profile needs documented not-applicable evidence rather
+than a fabricated screenshot. Failed gates hold that change. Final full-window
+and physical input tests remain required.
+
+These prepared references are configurations of OSR2.5. They do not establish
+RTM, retailSP1 or OSR1 acceptance. Record unavailable release/profile evidence as
+not_tested in the feature ledger, with a follow-up instead of silently inheriting
+acceptance from OSR2.5.
