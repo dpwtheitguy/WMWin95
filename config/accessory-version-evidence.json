@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "checked_date": "2026-11-28",
+  "scope": "Read-only inventory of local extraction sets; not installed-VM/UI acceptance for every release.",
+  "observations": [
+    {
+      "application": "notepad",
+      "source_set": "windows95-rtm-all",
+      "source": "private/cabsets/windows95-rtm-all/notepad.exe",
+      "size": 34304,
+      "sha256": "6bcd5e9cbe1605fa2f36ad0f5a6d65bff016c52806afa44adde7d0932839b324",
+      "file_versions": [
+        "4.0.0.950"
+      ],
+      "section_sha256": {
+        ".text": "dbdfc85467d819b13be28b43936710d409f0f06c06c417d383c0ae19ad422093",
+        ".bss": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".data": "59c5185ec70bcb78cce4534d97fcab135de84d8af7b6c4aa3b75ab7b8481f193",
+        ".idata": "fadb4f6a7a8e4d0fafa5ed94038b170e4bb3e64d0c78613f4c48dab3d88216c8",
+        ".rsrc": "741d591a92441605784c53eebe550d68497a370bf22cc0cf083ba0ec07924988",
+        ".reloc": "e1c1c3ce14daa860c685491bffd515a1862fcf88039facfc78b58f4fb9cbd066"
+      }
+    },
+    {
+      "application": "wordpad",
+      "source_set": "windows95-rtm-all",
+      "source": "private/cabsets/windows95-rtm-all/wordpad.exe",
+      "size": 183296,
+      "sha256": "75d4bf611b107df98b7ee3d15755e0b5baa10534fb5e2ac2babed05c608193ea",
+      "file_versions": [
+        "4.0.950.0"
+      ],
+      "section_sha256": {
+        ".text": "edf59d6c4ea4637c9afc9a56543c5d4147ab29d8e9e9d833aeb5297d998b3fc3",
+        ".bss": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".rdata": "794702cba7f566fa1a9c393f20d54158b04210276b472f96dacc92ff5ab5c598",
+        ".data": "664909bcfd2a2f7bce089058ce6a737d43fb7120e81a942b9b3aeabce8bd43ea",
+        ".idata": "727ca62fcb871874f25f2711c78d2861e76cae586976abbf6874c2372081307e",
+        ".rsrc": "7451ed90f2526e6d0dd3b23de933e09932138e42a87c913a98cee7c641f2abf2",
+        ".reloc": "abff8c04ff1b69c864ef460ee3e9f4ca4a9a57d05cb4a39e713455bc68afb471"
+      }
+    },
+    {
+      "application": "notepad",
+      "source_set": "windows95-osr1-all",
+      "source": "private/cabsets/windows95-osr1-all/notepad.exe",
+      "size": 34304,
+      "sha256": "0c90f92bedb3e437d0d9339219cb1f2898f44ed8172d88cf4bb62d29e9796f06",
+      "file_versions": [
+        "4.0.0.950"
+      ],
+      "section_sha256": {
+        ".text": "dbdfc85467d819b13be28b43936710d409f0f06c06c417d383c0ae19ad422093",
+        ".bss": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".data": "59c5185ec70bcb78cce4534d97fcab135de84d8af7b6c4aa3b75ab7b8481f193",
+        ".idata": "3c26fd420b7840ef04bf3861098260607b711b172506577d542a3fb684fe96be",
+        ".rsrc": "741d591a92441605784c53eebe550d68497a370bf22cc0cf083ba0ec07924988",
+        ".reloc": "e1c1c3ce14daa860c685491bffd515a1862fcf88039facfc78b58f4fb9cbd066"
+      }
+    },
+    {
+      "application": "wordpad",
+      "source_set": "windows95-osr1-all",
+      "source": "private/cabsets/windows95-osr1-all/wordpad.exe",
+      "size": 183296,
+      "sha256": "b0e8bd932b7288fc22ddb6bdfa11aff51c50daadca7f60b7439b9b44f2c7b5b9",
+      "file_versions": [
+        "4.0.950.0"
+      ],
+      "section_sha256": {
+        ".text": "edf59d6c4ea4637c9afc9a56543c5d4147ab29d8e9e9d833aeb5297d998b3fc3",
+        ".bss": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".rdata": "794702cba7f566fa1a9c393f20d54158b04210276b472f96dacc92ff5ab5c598",
+        ".data": "664909bcfd2a2f7bce089058ce6a737d43fb7120e81a942b9b3aeabce8bd43ea",
+        ".idata": "eb2766bf2f3d5e424f7f51ddf7c69bb9a9c13c19d661e50cc9655ccfbbd44afa",
+        ".rsrc": "7451ed90f2526e6d0dd3b23de933e09932138e42a87c913a98cee7c641f2abf2",
+        ".reloc": "abff8c04ff1b69c864ef460ee3e9f4ca4a9a57d05cb4a39e713455bc68afb471"
+      }
+    },
+    {
+      "application": "notepad",
+      "source_set": "windows95",
+      "source": "private/cabsets/windows95/notepad.exe",
+      "size": 34304,
+      "sha256": "6bcd5e9cbe1605fa2f36ad0f5a6d65bff016c52806afa44adde7d0932839b324",
+      "file_versions": [
+        "4.0.0.950"
+      ],
+      "section_sha256": {
+        ".text": "dbdfc85467d819b13be28b43936710d409f0f06c06c417d383c0ae19ad422093",
+        ".bss": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".data": "59c5185ec70bcb78cce4534d97fcab135de84d8af7b6c4aa3b75ab7b8481f193",
+        ".idata": "fadb4f6a7a8e4d0fafa5ed94038b170e4bb3e64d0c78613f4c48dab3d88216c8",
+        ".rsrc": "741d591a92441605784c53eebe550d68497a370bf22cc0cf083ba0ec07924988",
+        ".reloc": "e1c1c3ce14daa860c685491bffd515a1862fcf88039facfc78b58f4fb9cbd066"
+      }
+    },
+    {
+      "application": "wordpad",
+      "source_set": "windows95",
+      "source": "private/cabsets/windows95/wordpad.exe",
+      "size": 183296,
+      "sha256": "75d4bf611b107df98b7ee3d15755e0b5baa10534fb5e2ac2babed05c608193ea",
+      "file_versions": [
+        "4.0.950.0"
+      ],
+      "section_sha256": {
+        ".text": "edf59d6c4ea4637c9afc9a56543c5d4147ab29d8e9e9d833aeb5297d998b3fc3",
+        ".bss": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".rdata": "794702cba7f566fa1a9c393f20d54158b04210276b472f96dacc92ff5ab5c598",
+        ".data": "664909bcfd2a2f7bce089058ce6a737d43fb7120e81a942b9b3aeabce8bd43ea",
+        ".idata": "727ca62fcb871874f25f2711c78d2861e76cae586976abbf6874c2372081307e",
+        ".rsrc": "7451ed90f2526e6d0dd3b23de933e09932138e42a87c913a98cee7c641f2abf2",
+        ".reloc": "abff8c04ff1b69c864ef460ee3e9f4ca4a9a57d05cb4a39e713455bc68afb471"
+      }
+    }
+  ],
+  "conclusions": [
+    "For each app, RTM-labelled and Windows95C extraction executables are byte-identical.",
+    "For each app, all three extraction sets have identical .text and .rsrc hashes, including menus/dialogs/strings.",
+    "OSR1-labelled files have different full hashes/import data; do not infer new visible features from that alone.",
+    "No per-release application UI fork is justified by this evidence. Shared controls, fonts, colors, locale and runtime DLL versions require separate comparison."
+  ],
+  "sources": [
+    "https://jeffpar.github.io/kbarchive/kb/161/Q161020/",
+    "https://jeffpar.github.io/kbarchive/kb/178/Q178972/"
+  ]
+}

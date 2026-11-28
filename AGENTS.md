@@ -26,3 +26,14 @@ private asset input in `config/installer-dependencies.json`; see
 `docs/INSTALLER_DEPENDENCIES.md`. Dependency installation belongs to setup, never
 an applet click handler. Capture target package versions and resolver logs;
 package presence alone does not accept feature behavior.
+
+## Feature ledger
+
+Use `config/feature-ledger.json` as the compact work index; validate/query with
+`tools/feature_ledger.py`. Update meaningful implementation, validation, delivery
+and blocker changes with evidence paths. RTM/OSR release, Plus components, IE4
+Desktop Update, Active Desktop and folder Web View are separate dimensions.
+No evidence inheritance across profiles; missing entries mean not tested. A
+prepared reference is not feature acceptance. Keep detailed captures/reports
+linked separately and hand off changed facts rather than repeated full reports.
+This ledger is planning metadata, not an applet runtime dependency.

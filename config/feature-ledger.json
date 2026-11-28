@@ -1,0 +1,495 @@
+{
+  "schema": 2,
+  "updated_local_date": "2026-11-28",
+  "timezone": "America/Los_Angeles",
+  "purpose": "Compact coordination index, not a replacement for evidence or a claim of whole-product acceptance.",
+  "rules": [
+    "Implementation, validation and deployment are separate facts.",
+    "Evidence applies only to recorded source/environment/state; changed source requires affected checks.",
+    "Failed fidelity gates hold release even when unit tests pass.",
+    "Update a row on meaningful state change; agents hand off only changed facts, blockers and evidence paths.",
+    "Keep private captures and original assets outside public Git.",
+    "Acceptance never propagates across RTM/OSR releases or Plus/Desktop Update configurations.",
+    "Each accepted variant must retain explicit state/environment conditions and evidence.",
+    "A prepared reference is not a passed feature test; missing media/reference stays explicit.",
+    "Source fingerprints cover listed files only; they do not certify the whole build or transfer old evidence to changed code.",
+    "Applications use measured component/binary identities; an OS release label alone must not invent Notepad/WordPad menu or feature changes."
+  ],
+  "features": [
+    {
+      "id": "THEME-CORE",
+      "title": "Theme presets, Save/Delete and native import",
+      "owner": "root",
+      "implementation": "implemented",
+      "validation": "bounded functional acceptance",
+      "delivery": "deployed:2258dd3; guest86f0ce24d8a32c5d",
+      "next_action": "Retain accepted core while qualifying preview changes",
+      "source_files": [
+        "src/win95lx/control_panel/theme_store.py",
+        "src/win95lx/control_panel/theme_import.py"
+      ],
+      "source_sha256": "4bc9c29c90491742ef8051f8cc8c1fc51a2a50e110a575b073bac565fb322682",
+      "evidence": [
+        "reports/THEME_LEGACY_IMPORT_2026-11-27.md",
+        "reports/MORNING_DELIVERY_2026-11-28.md"
+      ],
+      "blockers": [],
+      "variants": {
+        "osr2_5-ie4-plus95": {
+          "status": "partial_evidence",
+          "scope": "Original Plus95 definitions/binaries and measured native states; full-profile visual/functional equivalence is not accepted.",
+          "evidence": [
+            "reports/THEME_LEGACY_IMPORT_2026-11-27.md",
+            "reports/MORNING_DELIVERY_2026-11-28.md"
+          ]
+        }
+      },
+      "acceptance_dimensions": [
+        "windows_release",
+        "shell_generation",
+        "plus_pack",
+        "plus_components",
+        "active_desktop",
+        "folder_web_view",
+        "capture_conditions"
+      ]
+    },
+    {
+      "id": "SAVER-RUNTIME",
+      "title": "Original95/Plus runtime and idle coordination",
+      "owner": "root",
+      "implementation": "implemented",
+      "validation": "actual guest and isolated lifecycle acceptance",
+      "delivery": "deployed:2258dd3; guest86f0ce24d8a32c5d",
+      "next_action": "Qualify remaining individual settings and embedded monitor separately",
+      "source_files": [
+        "src/win95lx/control_panel/screensaver_runtime.py",
+        "src/win95lx/apps/screensaver_ownership.py"
+      ],
+      "source_sha256": "3f5beb2db1d44d290dcbc4065adba88cda4ea0fabe282e82d31e56085f5ae07e",
+      "evidence": [
+        "reports/SCREENSAVER_RUNTIME_GROUPS_2026-11-27.md",
+        "reports/SCREENSAVER_OWNERSHIP_2026-11-27.md"
+      ],
+      "blockers": [
+        "Embedded monitor preview incomplete",
+        "Not every Settings option or pixel state accepted"
+      ],
+      "variants": {
+        "osr2_5-ie4-plus95": {
+          "status": "partial_evidence",
+          "scope": "Original Plus95 definitions/binaries and measured native states; full-profile visual/functional equivalence is not accepted.",
+          "evidence": [
+            "reports/SCREENSAVER_RUNTIME_GROUPS_2026-11-27.md",
+            "reports/SCREENSAVER_OWNERSHIP_2026-11-27.md"
+          ]
+        }
+      },
+      "acceptance_dimensions": [
+        "windows_release",
+        "shell_generation",
+        "plus_pack",
+        "plus_components",
+        "active_desktop",
+        "folder_web_view",
+        "capture_conditions"
+      ]
+    },
+    {
+      "id": "NET-HARDWARE",
+      "title": "Approved secondary-adapter configuration",
+      "owner": "themes_storage",
+      "implementation": "candidate implemented",
+      "validation": "119 Network tests, fixture UI and real normal-desktop secondary Ethernet capability/apply/readback/restore pass; complete QA cleanup and primary baseline equality verified",
+      "delivery": "not deployed; Network applet unregistered",
+      "next_action": "Review user-facing Network registration and installer-approved adapter policy; qualify DHCP and Wi-Fi separately",
+      "source_files": [
+        "src/win95lx/control_panel/network_service.py",
+        "src/win95lx/control_panel/network_preferences.py",
+        "dev/guest_approve_network_profiles.py"
+      ],
+      "source_sha256": "80b2b7a164d9f92c06e1dc4dd498a66cfaa86079184df7a034f7301819a42e4a",
+      "evidence": [
+        "reports/NETWORK_CAPABILITIES_2026-11-28.md"
+      ],
+      "blockers": [
+        "Primary-adapter, DHCP, Wi-Fi and complete Network applet remain unaccepted"
+      ],
+      "variants": {},
+      "acceptance_dimensions": [
+        "windows_release",
+        "shell_generation",
+        "plus_pack",
+        "plus_components",
+        "active_desktop",
+        "folder_web_view",
+        "capture_conditions"
+      ]
+    },
+    {
+      "id": "EXPL-RECYCLE-MODAL",
+      "title": "Recycle Bin menu dismissal before prompts",
+      "owner": "power_applet",
+      "implementation": "candidate implemented",
+      "validation": "8 unit and owned-Xvfb grab tests pass; native UAT pending",
+      "delivery": "not deployed",
+      "next_action": "Compare reference and complete real pointer/keyboard prompt matrix",
+      "source_files": [
+        "src/win95lx/apps/menu_modal.py",
+        "src/win95lx/shell/app.py"
+      ],
+      "source_sha256": "5c994f6d310fd00db4c2e4e92df9990feed4b74a72b18d5b33bf1378efcbc525",
+      "evidence": [
+        "reports/RECYCLE_MODAL_LIFECYCLE_2026-11-28.md"
+      ],
+      "blockers": [
+        "Native visual comparison and full UAT pending"
+      ],
+      "variants": {
+        "osr2_5-ie4": {
+          "status": "partial_evidence",
+          "scope": "Native menu dismissal/prompt behavior captured; prompt default/text/art differ and remain unaccepted.",
+          "evidence": [
+            "reports/RECYCLE_MODAL_LIFECYCLE_2026-11-28.md"
+          ]
+        }
+      },
+      "acceptance_dimensions": [
+        "windows_release",
+        "shell_generation",
+        "plus_pack",
+        "plus_components",
+        "active_desktop",
+        "folder_web_view",
+        "capture_conditions"
+      ]
+    },
+    {
+      "id": "THEME-PREVIEW",
+      "title": "Dynamic themed preview",
+      "owner": "themes_native_ui",
+      "implementation": "candidate implemented",
+      "validation": "functional tests pass; native256 pixel gate FAILED",
+      "delivery": "HELD: do not release this candidate",
+      "next_action": "Diagnose shared256 palette before expanding preview work",
+      "source_files": [
+        "src/win95lx/apps/theme_preview.py",
+        "src/win95lx/apps/desktop_themes.py"
+      ],
+      "source_sha256": "280207d355d3b8cb594e6b72308c702772cc2a1d09b963f6796a6f75bd721881",
+      "evidence": [
+        "reports/THEME_DYNAMIC_PREVIEW_2026-11-28.md"
+      ],
+      "blockers": [
+        "126433/130869 mismatching pixels versus prior108900/130869 in measured Nature case",
+        "Palette and GDI geometry mismatch"
+      ],
+      "variants": {
+        "osr2_5-ie4-plus95": {
+          "status": "failed",
+          "scope": "Nature pending preview,800x600,8bpp: recorded full-region pixel comparison fails; remaining geometry differences also open.",
+          "evidence": [
+            "reports/THEME_DYNAMIC_PREVIEW_2026-11-28.md"
+          ]
+        }
+      },
+      "acceptance_dimensions": [
+        "windows_release",
+        "shell_generation",
+        "plus_pack",
+        "plus_components",
+        "active_desktop",
+        "folder_web_view",
+        "capture_conditions"
+      ]
+    },
+    {
+      "id": "INSTALL-DEPS",
+      "title": "Manifest-driven dependency installation",
+      "owner": "root",
+      "implementation": "implemented",
+      "validation": "10 audit/installer tests and actual guest simulation pass",
+      "delivery": "pushed:5087128; maintenance tooling",
+      "next_action": "Clean-image install remains a separate acceptance gate",
+      "source_files": [
+        "tools/install_dependencies.py",
+        "tools/check_dependencies.py",
+        "config/installer-dependencies.json"
+      ],
+      "source_sha256": "020062279b6943baa2ad04be380aa1b5bad15c76a008cb7db92d6bce7fb40254",
+      "evidence": [
+        "reports/DEPENDENCY_INSTALLER_2026-11-28.md"
+      ],
+      "blockers": [
+        "No clean-image installer acceptance yet"
+      ],
+      "variants": {},
+      "acceptance_dimensions": [
+        "windows_release",
+        "shell_generation",
+        "plus_pack",
+        "plus_components",
+        "active_desktop",
+        "folder_web_view",
+        "capture_conditions"
+      ]
+    },
+    {
+      "id": "APP-NOTEPAD-LEVELS",
+      "title": "Notepad generation parity",
+      "owner": "root",
+      "implementation": "Shared application; no speculative per-release UI fork",
+      "validation": "Static original binary/code/resource inventory only; cross-generation live UI comparison pending",
+      "delivery": "Existing app deployed; no new runtime functional-level switch introduced",
+      "next_action": "Compare installed application/dependency versions and native UI states; add overrides only for demonstrated differences",
+      "source_files": [
+        "src/win95lx/apps/notepad.py"
+      ],
+      "source_sha256": "a6760ce7e1e6427036737de44308efbe6fff1aacfa8f80e3009a3bcab53bdfbf",
+      "evidence": [
+        "config/accessory-version-evidence.json"
+      ],
+      "blockers": [
+        "No OSR2/OSR2.1-specific installed accessory comparison yet",
+        "RTM/OSR1 live GUI parity not established"
+      ],
+      "acceptance_dimensions": [
+        "windows_release",
+        "shell_generation",
+        "plus_pack",
+        "plus_components",
+        "active_desktop",
+        "folder_web_view",
+        "capture_conditions"
+      ],
+      "variants": {}
+    },
+    {
+      "id": "APP-WORDPAD-LEVELS",
+      "title": "Wordpad generation parity",
+      "owner": "root",
+      "implementation": "Shared application; no speculative per-release UI fork",
+      "validation": "Static original binary/code/resource inventory only; cross-generation live UI comparison pending",
+      "delivery": "Existing app deployed; no new runtime functional-level switch introduced",
+      "next_action": "Compare installed application/dependency versions and native UI states; add overrides only for demonstrated differences",
+      "source_files": [
+        "src/win95lx/apps/wordpad.py"
+      ],
+      "source_sha256": "12abe8d20027bb3c804865b2701d0b16c7d8df98126ceb8cca5e754cf4427656",
+      "evidence": [
+        "config/accessory-version-evidence.json"
+      ],
+      "blockers": [
+        "No OSR2/OSR2.1-specific installed accessory comparison yet",
+        "RTM/OSR1 live GUI parity not established"
+      ],
+      "acceptance_dimensions": [
+        "windows_release",
+        "shell_generation",
+        "plus_pack",
+        "plus_components",
+        "active_desktop",
+        "folder_web_view",
+        "capture_conditions"
+      ],
+      "variants": {}
+    }
+  ],
+  "dimensions": {
+    "windows_release": [
+      "rtm",
+      "retail_sp1",
+      "osr1",
+      "osr2",
+      "osr2_1",
+      "osr2_5"
+    ],
+    "shell_generation": [
+      "classic",
+      "ie4_desktop_update"
+    ],
+    "plus_pack": [
+      "none",
+      "plus95"
+    ],
+    "notes": [
+      "IE browser installation is not equivalent to IE4 Desktop Update.",
+      "Plus95 components are independent of shell generation.",
+      "Active Desktop and folder Web View are independent settings requiring Desktop Update when enabled.",
+      "Profiles describe requested/reference configurations, not a claim that every combination is historically installed or tested.",
+      "Ledger logic tracks evidence; it does not change runtime feature flags.",
+      "A Plus pack label does not prove each optional component was installed; component inventory can remain unknown.",
+      "Retail+SP1 and OEM OSR1 are tracked separately even though the displayed A label can overlap."
+    ],
+    "plus_components": [
+      "desktop_themes",
+      "screensavers",
+      "pointers",
+      "fonts"
+    ]
+  },
+  "profiles": {
+    "rtm-classic": {
+      "windows_release": "rtm",
+      "shell_generation": "classic",
+      "plus_pack": "none",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "not_available",
+      "reference": null,
+      "plus_components": []
+    },
+    "osr1-classic": {
+      "windows_release": "osr1",
+      "shell_generation": "classic",
+      "plus_pack": "none",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "not_available",
+      "reference": null,
+      "plus_components": []
+    },
+    "osr2-classic": {
+      "windows_release": "osr2",
+      "shell_generation": "classic",
+      "plus_pack": "none",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "not_available",
+      "reference": null,
+      "plus_components": []
+    },
+    "osr2_1-classic": {
+      "windows_release": "osr2_1",
+      "shell_generation": "classic",
+      "plus_pack": "none",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "not_available",
+      "reference": null,
+      "plus_components": []
+    },
+    "osr2_5-classic": {
+      "windows_release": "osr2_5",
+      "shell_generation": "classic",
+      "plus_pack": "none",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "prepared_reference",
+      "reference": "private/run/windows95-classic.qmp",
+      "plus_components": []
+    },
+    "osr2_5-ie4": {
+      "windows_release": "osr2_5",
+      "shell_generation": "ie4_desktop_update",
+      "plus_pack": "none",
+      "ie_browser_version": null,
+      "active_desktop": null,
+      "folder_web_view": null,
+      "reference_status": "prepared_reference",
+      "reference": "private/run/windows95.qmp",
+      "plus_components": []
+    },
+    "osr2_5-ie4-plus95": {
+      "windows_release": "osr2_5",
+      "shell_generation": "ie4_desktop_update",
+      "plus_pack": "plus95",
+      "ie_browser_version": null,
+      "active_desktop": null,
+      "folder_web_view": null,
+      "reference_status": "prepared_reference",
+      "reference": "private/run/windows95-plus-reference.qmp",
+      "plus_components": null
+    },
+    "rtm-classic-plus95": {
+      "windows_release": "rtm",
+      "shell_generation": "classic",
+      "plus_pack": "plus95",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "not_available",
+      "reference": null,
+      "plus_components": null
+    },
+    "osr1-classic-plus95": {
+      "windows_release": "osr1",
+      "shell_generation": "classic",
+      "plus_pack": "plus95",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "not_available",
+      "reference": null,
+      "plus_components": null
+    },
+    "osr2-classic-plus95": {
+      "windows_release": "osr2",
+      "shell_generation": "classic",
+      "plus_pack": "plus95",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "not_available",
+      "reference": null,
+      "plus_components": null
+    },
+    "osr2_1-classic-plus95": {
+      "windows_release": "osr2_1",
+      "shell_generation": "classic",
+      "plus_pack": "plus95",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "not_available",
+      "reference": null,
+      "plus_components": null
+    },
+    "osr2_5-classic-plus95": {
+      "windows_release": "osr2_5",
+      "shell_generation": "classic",
+      "plus_pack": "plus95",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "not_available",
+      "reference": null,
+      "plus_components": null
+    },
+    "retail_sp1-classic": {
+      "windows_release": "retail_sp1",
+      "shell_generation": "classic",
+      "plus_pack": "none",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "not_available",
+      "reference": null,
+      "plus_components": []
+    },
+    "retail_sp1-classic-plus95": {
+      "windows_release": "retail_sp1",
+      "shell_generation": "classic",
+      "plus_pack": "plus95",
+      "ie_browser_version": null,
+      "active_desktop": false,
+      "folder_web_view": false,
+      "reference_status": "not_available",
+      "reference": null,
+      "plus_components": null
+    }
+  },
+  "variant_statuses": {
+    "not_tested": "No qualifying evidence for this exact profile; no inheritance from another release.",
+    "partial_evidence": "Only the explicitly listed behavior/control states have evidence.",
+    "failed": "A recorded acceptance gate failed.",
+    "not_applicable": "Explicit scoped reason required.",
+    "accepted": "Named criteria and exact conditions satisfied; never inferred from another profile."
+  },
+  "default_variant_status": "not_tested"
+}
