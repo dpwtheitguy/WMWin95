@@ -130,28 +130,79 @@
       "id": "EXPL-RECYCLE-MODAL",
       "title": "Recycle Bin menu dismissal before prompts",
       "owner": "power_applet",
-      "implementation": "candidate implemented",
-      "validation": "8 unit and owned-Xvfb grab tests pass; native UAT pending",
+      "implementation": "candidate implemented with separate measured classic, IE4 and Plus-stock question profiles",
+      "validation": "18 unit +2 TrashStore tests;12 whole-dialog default-state comparisons exact across3 references;12 IE4 +6 Classic +6 Plus physical cases pass",
       "delivery": "not deployed",
-      "next_action": "Compare reference and complete real pointer/keyboard prompt matrix",
+      "next_action": "Integrate staged asset cache then guest acceptance; qualify held-input/independent-owner/error physical paths",
       "source_files": [
         "src/win95lx/apps/menu_modal.py",
-        "src/win95lx/shell/app.py"
+        "src/win95lx/apps/recycle_prompt.py",
+        "src/win95lx/shell/app.py",
+        "tools/stage_recycle_prompt_assets.py"
       ],
-      "source_sha256": "5c994f6d310fd00db4c2e4e92df9990feed4b74a72b18d5b33bf1378efcbc525",
+      "source_sha256": "9d9979c07be4d5664e11d00ffa2ae24bca09a62d1b7853b9ce08e21f1d6cfa7b",
       "evidence": [
         "reports/RECYCLE_MODAL_LIFECYCLE_2026-11-28.md"
       ],
       "blockers": [
-        "Native visual comparison and full UAT pending"
+        "Full Recycle workflow matrix is not accepted"
       ],
       "variants": {
         "osr2_5-ie4": {
           "status": "partial_evidence",
-          "scope": "Native menu dismissal/prompt behavior captured; prompt default/text/art differ and remain unaccepted.",
+          "scope": "All4 default/focused-Yes native questions exact419x132/419x135;12 physical cancellation/default/grab/focus/exactly-once cases at800/1280; full workflow incomplete",
           "evidence": [
-            "reports/RECYCLE_MODAL_LIFECYCLE_2026-11-28.md"
+            "reports/RECYCLE_MODAL_LIFECYCLE_2026-11-28.md",
+            "private/recycle-modal-20261128/pixel-four-profile-asserted/report.json",
+            "private/recycle-modal-20261128/four-profile-shell800/report.json",
+            "private/recycle-modal-20261128/four-profile-shell1280/report.json"
           ]
+        },
+        "osr2_5-classic": {
+          "status": "partial_evidence",
+          "scope": "Original pre-IE4 installedExplorer4.0.0.950/Shell324.0.0.1111; captured800x600/256colors/96dpi;4 separate default-Yes questions exact;distinct native menu captured; reference restored",
+          "evidence": [
+            "reports/REFERENCE_SET_2026-11-26.md",
+            "reports/RECYCLE_MODAL_LIFECYCLE_2026-11-28.md",
+            "private/recycle-modal-20261128/pixel-classic-separate/report.json",
+            "private/recycle-modal-20261128/classic-restoration.json",
+            "private/recycle-modal-20261128/classic-shell800/report.json"
+          ]
+        },
+        "osr2_5-ie4-plus95": {
+          "status": "partial_evidence",
+          "scope": "Stocktheme800x600/256colors/96dpi;all4 independent native questions exact using explicitPlusframes;6Shellphysicalcases pass; colored/nondefaultPlus themes not qualified",
+          "evidence": [
+            "reports/RECYCLE_MODAL_LIFECYCLE_2026-11-28.md",
+            "private/recycle-modal-20261128/pixel-plus-separate/report.json",
+            "private/recycle-modal-20261128/plus-shell800/report.json",
+            "private/recycle-modal-20261128/plus-restoration.json"
+          ]
+        },
+        "rtm-classic": {
+          "status": "not_tested",
+          "scope": "Prepared OSR2.5 configurations do not qualify this release; obtain native release reference then repeat small Recycle gate",
+          "evidence": []
+        },
+        "retail_sp1-classic": {
+          "status": "not_tested",
+          "scope": "Prepared OSR2.5 configurations do not qualify this release; obtain native release reference then repeat small Recycle gate",
+          "evidence": []
+        },
+        "osr1-classic": {
+          "status": "not_tested",
+          "scope": "Prepared OSR2.5 configurations do not qualify this release; obtain native release reference then repeat small Recycle gate",
+          "evidence": []
+        },
+        "osr2-classic": {
+          "status": "not_tested",
+          "scope": "Prepared OSR2.5 configurations do not qualify this release; obtain native release reference then repeat small Recycle gate",
+          "evidence": []
+        },
+        "osr2_1-classic": {
+          "status": "not_tested",
+          "scope": "Prepared OSR2.5 configurations do not qualify this release; obtain native release reference then repeat small Recycle gate",
+          "evidence": []
         }
       },
       "acceptance_dimensions": [
@@ -291,6 +342,60 @@
         "active_desktop",
         "folder_web_view",
         "capture_conditions"
+      ],
+      "variants": {}
+    },
+    {
+      "id": "BUILD-ASSET-CACHE",
+      "title": "Verified incremental asset preparation",
+      "owner": "root",
+      "implementation": "implemented",
+      "validation": "54 cache/path tests pass; final source2622-file byte equivalence and19/19 warm hits verified",
+      "delivery": "validated maintenance tooling",
+      "next_action": "Use make prepare-assets receipts to assess cumulative benefit; keep product work primary",
+      "source_files": [
+        "tools/asset_cache.py",
+        "tools/prepare_assets.py",
+        "tools/prepare_base_assets.py",
+        "config/asset-stage-dependencies.json"
+      ],
+      "source_sha256": "04e9271481a2ffc5620e36643c58b8c3963504bf0a1b5d7cdce4a174d24bb432",
+      "evidence": [
+        "private/asset-cache-equivalence-20261128-v2/report.json",
+        "private/asset-cache-equivalence-20261128-v2/final-verification.json",
+        "docs/VISUAL_REGRESSION.md"
+      ],
+      "blockers": [],
+      "acceptance_dimensions": [
+        "source/tool hashes",
+        "runtime environment",
+        "reference conditions"
+      ],
+      "variants": {}
+    },
+    {
+      "id": "ASSET-PROVENANCE-LABELS",
+      "title": "Audit original font/sound generation labels",
+      "owner": "root",
+      "implementation": "investigation",
+      "validation": "Audit found source labels disagree with extraction directory names; underlying media identity needs verification",
+      "delivery": "not deployed",
+      "next_action": "Verify extraction/media provenance before correcting generation labels",
+      "source_files": [
+        "tools/collect_font_library.py",
+        "tools/stage_sound_library.py"
+      ],
+      "source_sha256": "89bdc75021b551be1ec3206f39b6473b232e2607d4c50f4415c1ca7849df6fc1",
+      "evidence": [
+        "config/asset-stage-dependencies.json"
+      ],
+      "blockers": [
+        "Do not rename generations from directory names alone"
+      ],
+      "acceptance_dimensions": [
+        "source/tool hashes",
+        "runtime environment",
+        "reference conditions"
       ],
       "variants": {}
     }

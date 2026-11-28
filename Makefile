@@ -131,3 +131,9 @@ check-screen-saver:
 	$(PYTHON) dev/check_screen_saver.py --size 1280x720 --output private/screenshots/saver-ui-$$(date +%s%N)-1280
 check-theme-import:
 	$(PYTHON) dev/run_theme_import_checks.py
+
+.PHONY: prepare-assets check-asset-cache
+prepare-assets:
+	$(PYTHON) tools/prepare_assets.py --report private/asset-stage-cache/reports/build-$$(date +%s%N).json
+check-asset-cache:
+	$(PYTHON) -m unittest discover -s tests -p 'test_asset*.py' -q

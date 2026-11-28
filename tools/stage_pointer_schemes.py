@@ -13,8 +13,8 @@ BASIC={'arrow':100,'help':112,'busy':111,'wait':102,'cross':103,'beam':101,'pen'
 REGISTRY={'arrow':'arrow','help':'help','appstarting':'busy','wait':'wait','crosshair':'cross','ibeam':'beam','nwpen':'pen','no':'no',
           'sizens':'size4','sizewe':'size3','sizenwse':'size2','sizenesw':'size1','sizeall':'move','uparrow':'up'}
 
-def main():
-    output=ROOT/'private/shell-assets';output.mkdir(parents=True,exist_ok=True);assets={};schemes={};source=ROOT/'private/cabsets/windows95'
+def main(output=None):
+    output=Path(output) if output is not None else ROOT/'private/shell-assets';output.mkdir(parents=True,exist_ok=True);assets={};schemes={};source=ROOT/'private/cabsets/windows95'
     def store(key,frames,sequence,durations,origin,digest):
         info=[]
         for index,frame in enumerate(frames):

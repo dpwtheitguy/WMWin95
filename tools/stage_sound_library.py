@@ -12,7 +12,7 @@ def stage(output):
         directory=ROOT/'private/cabsets'/folder
         if not directory.exists():continue
         aliases={}
-        infs=list(directory.glob('*.INF'))
+        infs=sorted(directory.glob('*.INF'))
         if tag=='plus':infs.append(ROOT/'private/reference/media/plus/PLUS.INF')
         for inf in infs:
             aliases.update({short.casefold():long for short,long in re.findall(r'([\w~]+\.WAV)<([^>]+)>',inf.read_text(errors='replace'),re.I)})
@@ -33,7 +33,7 @@ def stage(output):
     audio['the microsoft sound.wav']='sound-mssound.wav'
     for theme in sorted(plus.glob('*.THM')):
         if theme.name=='DEFAULT.THM':continue
-        mapping={key:'' for key in KEYS}
+        mapping={key:'' for key in sorted(KEYS)}
         sections=re.findall(r'\[AppEvents\\Schemes\\Apps\\([^\\]+)\\([^\\]+)\\.Current\]\s*\nDefaultValue=([^\r\n]*)',theme.read_text(encoding='cp1252'),re.I)
         for app,key,value in sections:
             if key not in KEYS:continue

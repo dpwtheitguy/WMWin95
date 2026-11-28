@@ -1,0 +1,432 @@
+{
+  "schema": 1,
+  "stages": {
+    "prepare_base_assets": {
+      "private_inputs": [
+        "private/cabsets/windows95",
+        "private/screenshots/interactive-20261110",
+        "private/screenshots/start-development-20261110"
+      ],
+      "notes": [
+        "Python version/implementation/defaultencoding/json order",
+        "zlib version and compression output",
+        "Pycairo/libcairo PNG decode behavior",
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes.",
+        "Previously wrote fixed ROOT/private/shell-assets; root refactoring output argument. Confirm passed output reaches all writes before cache isolation."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "src/win95lx/assets/bitmap.py",
+        "src/win95lx/assets/cursors.py",
+        "src/win95lx/assets/rle8.py",
+        "src/win95lx/control_panel/bitmap_font_policy.py",
+        "src/win95lx/control_panel/datetime_settings.py",
+        "src/win95lx/control_panel/font_catalog.py",
+        "src/win95lx/control_panel/mouse_preferences.py",
+        "src/win95lx/control_panel/preferences.py",
+        "src/win95lx/control_panel/screensaver_preferences.py",
+        "src/win95lx/control_panel/sound_preferences.py",
+        "src/win95lx/control_panel/theme_appearance.py",
+        "src/win95lx/control_panel/theme_import.py",
+        "src/win95lx/control_panel/theme_preferences.py",
+        "src/win95lx/control_panel/theme_store.py",
+        "src/win95lx/control_panel/wallpaper.py",
+        "src/win95lx/shell/widgets.py",
+        "tools/collect_font_library.py",
+        "tools/pixels.py",
+        "tools/prepare_assets.py",
+        "tools/resources.py",
+        "tools/stage_accessibility_assets.py",
+        "tools/stage_command_button_assets.py",
+        "tools/stage_control_panel_assets.py",
+        "tools/stage_fonts_assets.py",
+        "tools/stage_mouse_animation.py",
+        "tools/stage_multimedia_assets.py",
+        "tools/stage_namespace_drop_assets.py",
+        "tools/stage_pointer_schemes.py",
+        "tools/stage_printers_assets.py",
+        "tools/stage_screen_saver_ui.py",
+        "tools/stage_screensaver_assets.py",
+        "tools/stage_sound_library.py",
+        "tools/stage_theme_appearance.py",
+        "tools/stage_theme_assets.py",
+        "tools/stage_theme_customization_assets.py",
+        "tools/stage_theme_icons.py"
+      ]
+    },
+    "stage_mouse_animation": {
+      "private_inputs": [
+        "private/cabsets/windows95/main.cpl"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes.",
+        "Previously wrote fixed ROOT/private/shell-assets; root refactoring output argument. Confirm passed output reaches all writes before cache isolation."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "src/win95lx/assets/rle8.py",
+        "tools/pixels.py",
+        "tools/resources.py",
+        "tools/stage_mouse_animation.py"
+      ]
+    },
+    "stage_pointer_schemes": {
+      "private_inputs": [
+        "private/cabsets/windows95",
+        "private/cabsets/plus95",
+        "private/reference/media/plus/PLUS.INF"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes.",
+        "Previously wrote fixed ROOT/private/shell-assets; root refactoring output argument. Confirm passed output reaches all writes before cache isolation."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "src/win95lx/assets/bitmap.py",
+        "src/win95lx/assets/cursors.py",
+        "tools/pixels.py",
+        "tools/resources.py",
+        "tools/stage_pointer_schemes.py"
+      ]
+    },
+    "stage_control_panel_assets": {
+      "private_inputs": [
+        "private/cabsets/windows95",
+        "private/reference/classic-installed-versions/START.REG",
+        "private/screenshots/cpl-20261126"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "src/win95lx/assets/bitmap.py",
+        "src/win95lx/control_panel/datetime_settings.py",
+        "src/win95lx/control_panel/preferences.py",
+        "src/win95lx/control_panel/sound_preferences.py",
+        "tools/pixels.py",
+        "tools/resources.py",
+        "tools/stage_control_panel_assets.py",
+        "tools/stage_sound_library.py"
+      ]
+    },
+    "stage_multimedia_assets": {
+      "private_inputs": [
+        "private/cabsets/windows95/sndvol32.exe",
+        "private/screenshots/cpl-20261126/classic-reviewed-run2"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "src/win95lx/assets/bitmap.py",
+        "tools/pixels.py",
+        "tools/resources.py",
+        "tools/stage_multimedia_assets.py"
+      ]
+    },
+    "stage_sound_library": {
+      "private_inputs": [
+        "private/cabsets/windows95",
+        "private/cabsets/windows95-osr1-all",
+        "private/cabsets/windows95-rtm-all",
+        "private/cabsets/plus95",
+        "private/reference/media/plus/PLUS.INF"
+      ],
+      "notes": [
+        "Directory enumeration order of *.INF is currently unsorted; identical content in different insertion order can change aliases/output.",
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "src/win95lx/control_panel/sound_preferences.py",
+        "tools/stage_sound_library.py"
+      ]
+    },
+    "stage_command_button_assets": {
+      "private_inputs": [
+        "private/reference-tools/command-buttons-native/W95BTNS",
+        "private/reference-tools/command-buttons-v2/command-buttons.c",
+        "private/reference-tools/command-buttons-v2/W95BTNS.EXE",
+        "private/screenshots/command-buttons-20261126"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "tools/pixels.py",
+        "tools/stage_command_button_assets.py"
+      ]
+    },
+    "stage_accessibility_assets": {
+      "private_inputs": [
+        "private/accessibility-20261126",
+        "private/cabsets/windows95/access.cpl"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "tools/pixels.py",
+        "tools/stage_accessibility_assets.py"
+      ]
+    },
+    "stage_namespace_drop_assets": {
+      "private_inputs": [
+        "private/screenshots/namespace-transfer-native-20261127",
+        "private/reference-tools/namespace-prompt-metadata-v2-20261127",
+        "private/reference-tools/namespace-transfer-native-20261127/ie4-right-menu.json"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "tools/pixels.py",
+        "tools/stage_namespace_drop_assets.py"
+      ]
+    },
+    "stage_printers_assets": {
+      "private_inputs": [
+        "private/cabsets/windows95/shell32.dll",
+        "private/reference-tools/printers-native-20261127"
+      ],
+      "notes": [
+        "tools/native/w95probe.c is build-probe-only, not stage execution; prebuilt metadata captures are staging inputs.",
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "src/win95lx/assets/bitmap.py",
+        "tools/pixels.py",
+        "tools/resources.py",
+        "tools/stage_command_button_assets.py",
+        "tools/stage_printers_assets.py"
+      ]
+    },
+    "stage_theme_assets": {
+      "private_inputs": [
+        "private/cabsets/plus95",
+        "private/reference/media/plus/PLUS.INF",
+        "private/reference-tools/themes-batch-export-v2-20261127/W95THM2",
+        "private/themes-20261127/native-settled.png",
+        "private/themes-20261127/native-current-clean.png"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "src/win95lx/assets/bitmap.py",
+        "src/win95lx/assets/cursors.py",
+        "src/win95lx/control_panel/mouse_preferences.py",
+        "src/win95lx/control_panel/screensaver_preferences.py",
+        "src/win95lx/control_panel/sound_preferences.py",
+        "src/win95lx/control_panel/theme_appearance.py",
+        "src/win95lx/control_panel/theme_preferences.py",
+        "src/win95lx/control_panel/theme_store.py",
+        "src/win95lx/control_panel/wallpaper.py",
+        "src/win95lx/shell/widgets.py",
+        "tools/pixels.py",
+        "tools/resources.py",
+        "tools/stage_theme_assets.py"
+      ]
+    },
+    "stage_theme_icons": {
+      "private_inputs": [
+        "private/cabsets/plus95",
+        "private/reference/media/plus/PLUS.INF"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [
+        "themes-library.json (themes-base; reads provenance source paths and mutates catalog)"
+      ],
+      "conservative_code_closure": [
+        "src/win95lx/assets/bitmap.py",
+        "src/win95lx/assets/cursors.py",
+        "src/win95lx/control_panel/mouse_preferences.py",
+        "src/win95lx/control_panel/screensaver_preferences.py",
+        "src/win95lx/control_panel/sound_preferences.py",
+        "src/win95lx/control_panel/theme_appearance.py",
+        "src/win95lx/control_panel/theme_preferences.py",
+        "src/win95lx/control_panel/theme_store.py",
+        "src/win95lx/control_panel/wallpaper.py",
+        "src/win95lx/shell/widgets.py",
+        "tools/pixels.py",
+        "tools/stage_theme_icons.py"
+      ]
+    },
+    "stage_theme_appearance": {
+      "private_inputs": [
+        "private/cabsets/plus95",
+        "private/reference/media/plus/PLUS.INF"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [
+        "themes-library.json from stage_theme_icons, preserving icon/saver definitions"
+      ],
+      "conservative_code_closure": [
+        "src/win95lx/assets/bitmap.py",
+        "src/win95lx/assets/cursors.py",
+        "src/win95lx/control_panel/mouse_preferences.py",
+        "src/win95lx/control_panel/screensaver_preferences.py",
+        "src/win95lx/control_panel/sound_preferences.py",
+        "src/win95lx/control_panel/theme_appearance.py",
+        "src/win95lx/control_panel/theme_import.py",
+        "src/win95lx/control_panel/theme_preferences.py",
+        "src/win95lx/control_panel/theme_store.py",
+        "src/win95lx/control_panel/wallpaper.py",
+        "src/win95lx/shell/widgets.py",
+        "tools/stage_theme_appearance.py"
+      ]
+    },
+    "stage_theme_customization_assets": {
+      "private_inputs": [
+        "private/theme-customization-20261127/save-current-metadata",
+        "private/theme-customization-20261127/selected-nature-metadata",
+        "private/theme-customization-20261127/delete-owned-metadata"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "tools/pixels.py",
+        "tools/stage_command_button_assets.py",
+        "tools/stage_theme_customization_assets.py"
+      ]
+    },
+    "stage_screen_saver_ui": {
+      "private_inputs": [
+        "private/theme-customization-20261127/saver-ie4-native",
+        "private/theme-customization-20261127/saver-nature-native"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "tools/pixels.py",
+        "tools/stage_command_button_assets.py",
+        "tools/stage_screen_saver_ui.py"
+      ]
+    },
+    "stage_screensaver_assets": {
+      "private_inputs": [
+        "private/cabsets/windows95",
+        "private/cabsets/plus95"
+      ],
+      "notes": [
+        "fcntl/flock, rename/fsync and symlink rejection; no Wine execution or compiler in staging.",
+        "Catalog currently embeds absolute source paths; key must bind checkout root or provenance must be canonicalized by root review.",
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "src/win95lx/control_panel/theme_appearance.py",
+        "tools/stage_screensaver_assets.py"
+      ]
+    },
+    "stage_fonts_assets": {
+      "private_inputs": [
+        "private/cabsets/windows95",
+        "private/screenshots/fonts-20261126"
+      ],
+      "notes": [
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "src/win95lx/assets/bitmap.py",
+        "tools/pixels.py",
+        "tools/resources.py",
+        "tools/stage_fonts_assets.py"
+      ]
+    },
+    "collect_font_library": {
+      "private_inputs": [
+        "private/cabsets/windows95",
+        "private/cabsets/plus95",
+        "private/cabsets/windows95-osr1-all",
+        "private/cabsets/windows95-rtm-all",
+        "private/cabsets/windows98-se/base",
+        "private/cabsets/plus98"
+      ],
+      "notes": [
+        "ctypes.util.find_library fontconfig resolution",
+        "Fontconfig/FreeType dependency shared-library bytes and versions",
+        "Locale/runtime error text emitted into unreadable-font reason",
+        "No fc-cache process during collect; Fontconfig file query runs in process.",
+        "Input path absence is significant, including optional evidence/media roots; hash complete recursive directory path inventory and bytes.",
+        "Current catalog filename is font-library/inventory.json, not catalog.json.",
+        "Absolute checkout ROOT/CWD: source metadata uses ROOT-relative paths except screensaver package provenance; all runtime search paths/module resolution must match controlled invocation."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "src/win95lx/control_panel/bitmap_font_policy.py",
+        "src/win95lx/control_panel/font_catalog.py",
+        "tools/collect_font_library.py",
+        "tools/resources.py"
+      ]
+    },
+    "stage_recycle_prompt_assets": {
+      "private_inputs": [
+        "private/recycle-modal-20261128"
+      ],
+      "notes": [
+        "stage_all runs classic and IE4 paths; missing either profile must invalidate/fail, not silently reuse other profile."
+      ],
+      "upstream_outputs": [],
+      "conservative_code_closure": [
+        "tools/stage_recycle_prompt_assets.py",
+        "tools/pixels.py"
+      ]
+    },
+    "theme_descriptions": {
+      "private_inputs": [
+        "private/cabsets/plus95/THEMES.CPL"
+      ],
+      "upstream_outputs": [
+        "themes-library.json",
+        "cpl-descriptions.json"
+      ],
+      "notes": [
+        "Updates only Desktop Themes description in the CPL metadata."
+      ]
+    }
+  },
+  "notes": [
+    "Hash files by content plus relative path/type; recursively hash selected tree path inventories.",
+    "Missing optional input paths are explicit cache identity states; missing\u2192present and removed/renamed entries invalidate.",
+    "Do not use private/ as one broad root. Exclude VM qcow2/raw images, run keys/credentials, generated shell-assets, cache stores, prefixes and QA output trees.",
+    "Absolute input names embedded in screensaver provenance bind the build root until canonicalized; source absolute path strings cannot be omitted from key.",
+    "AST code lists conservatively include imports inside unexecuted helper branches; dynamic imports and external native libraries require explicit runtime fingerprint.",
+    "Runtime-only Wine/OpenGL/X11 availability does not affect saver staging; do not invalidate static cache for prefix/session state.",
+    "Populate a fresh empty stage destination; existing files/mtime are not trusted inputs. Compare sorted output path/type/content inventories, not only manifest record count."
+  ],
+  "shared_runtime": [
+    "Python executable and version",
+    "zlib compiled/runtime versions",
+    "Pycairo + libcairo versions and dependency shared-library identity",
+    "Fontconfig/FreeType shared libraries and loader resolution for font-library stage",
+    "Absolute repository root while absolute provenance remains"
+  ],
+  "excluded_external_build_only": [
+    "private/cross-tools/root and MinGW compiler (only build_harness paths; stage reads prebuilt binaries)",
+    "Wine/wineserver executable and user prefixes",
+    "QEMU/reference VM disk images and current VM process state"
+  ],
+  "finalize_private_inputs": [
+    "private/cabsets/plus95/THEMES.CPL"
+  ],
+  "generation_label_defects": [
+    "collect_font_library.SOURCES maps win95-rtm to windows95-osr1-all and win95-osr2 to windows95-rtm-all; audit separately, do not fix while proving cache byte equality."
+  ]
+}

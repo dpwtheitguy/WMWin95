@@ -107,3 +107,55 @@ Sounds native scheme geometry is `(33,332,300,21)` with text origin `(37,336)`;
 its editable Name combo uses different geometry. The regression is in
 `dev/check_sounds.py`, including a long custom label. Native evidence and
 implementation captures remain separate under private screenshots.
+
+## Incremental private asset preparation
+
+`python3 tools/prepare_assets.py` now uses a verified stage cache. Inputs include
+source bytes and path inventory, local conversion-code dependencies, declared
+font/palette/reference inputs, prior-stage outputs and runtime conditions.
+Dependency declarations live in `config/asset-stage-dependencies.json`; update
+them when a converter gains another input. Never infer visual acceptance from a
+cache hit. Original reference captures remain independent and immutable.
+
+Use `--force` to rebuild stages, or `--no-cache` to bypass cache reads/writes.
+`--output` accepts only private build locations. `--report` writes a compact
+hit/miss/timing JSON outside the bundle. Optional externally prepared WebView
+metadata must be supplied consistently when comparing clean builds.
+
+Cached stage artifacts retain relative output identities, content hashes and
+permissions. Hits restore intermediate catalogs before later stages modify them.
+Missing/tampered artifacts are restored from verified blobs; corrupt cache
+entries rebuild. Failed or changing inputs never publish a valid cache entry;
+the orchestrator aborts an unstable build. Build reports do not replace native
+pixel, physical input, persistence or rollback checks.
+
+`dev/check_asset_build_equivalence.py --output <new-private-directory>` compares
+the pre-cache orchestration at its pinned commit with the same current converters,
+a fresh cache build and an all-hit rebuild. It compares every generated path and
+file SHA256, and requires all warm stages to hit. This is the refactor acceptance
+check; intentionally adding stages/assets later requires an explicitly reviewed
+baseline update rather than hiding new output differences.
+
+Initial verified run:2622 files identical;19/19 warm hits; legacy45.48s,
+cold67.26s, warm16.46s on the recorded host. The initial cache costs more;
+unchanged rebuilds save conversion work. Evidence:
+`private/asset-cache-equivalence-20261128-v2/report.json`.
+
+Regression coverage includes source/code/font/palette/reference changes,
+renamed/added/removed inputs, corrupt/missing blobs, path redirection, failed
+builders, intermediate-catalog replay, profile switches on the same filename,
+separate-stage allocation, swapped entry metadata and preserved JSON ordering.
+The first comparison rejected two metadata-order differences; deterministic
+sound ordering and cache result-order preservation corrected them before reuse
+was accepted. Original artwork bytes were not changed by these fixes.
+
+Use `make prepare-assets` for normal preparation with a per-run JSON receipt in
+`private/asset-stage-cache/reports/`. These receipts retain stage hits/misses and
+measured elapsed time for cumulative review. Run `make check-asset-cache` for the
+fast cache/path regression subset. This does not replace final asset-equivalence
+or Windows visual acceptance when conversion behavior changes.
+
+The final source, including private-path/input-overlap guards, was rechecked:
+all2622 files still match and all19 warm stages hit. That later run measured
+89.48s cold and18.54s warm; timings vary with host load. Final source fingerprints
+and scope are in `private/asset-cache-equivalence-20261128-v2/final-verification.json`.

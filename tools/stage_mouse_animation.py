@@ -16,12 +16,12 @@ def chunks(data):
   if tag in (b'RIFF',b'LIST'):yield from chunks(value[4:])
   pos+=8+length+(length%2)
 
-def main():
+def main(output=None):
  source=ROOT/'private/cabsets/windows95/main.cpl';avi=next(d for k,i,l,d,f in extract(source.read_bytes()) if k=='AVI' and i==100)
  parts=list(chunks(avi));header=next(d for k,d in parts if k==b'strf');width,height=struct.unpack_from('<ii',header,4)
  assert struct.unpack_from('<H',header,14)[0]==8 and struct.unpack_from('<I',header,16)[0]==1
  palette=[(header[i+2],header[i+1],header[i],255) for i in range(40,len(header),4)]
- output=ROOT/'private/shell-assets';previous=None;count=0
+ output=Path(output) if output is not None else ROOT/'private/shell-assets';output.mkdir(parents=True,exist_ok=True);previous=None;count=0
  for tag,frame in parts:
   if tag!=b'00dc':continue
   previous=decode(frame,width,height,previous);write(output/f'mouse-test-{count:02}.png',width,height,[palette[index][:3]+(0 if palette[index][:3]==(0,255,255) else 255,) for index in previous]);count+=1
