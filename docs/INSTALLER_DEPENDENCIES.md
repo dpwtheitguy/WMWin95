@@ -30,11 +30,14 @@ functional acceptance evidence with a release. Let apt resolve transitive
 packages rather than copying machine-specific dependency versions into the
 portable requirement list. Enable i386 before resolving its packages.
 
-The current guest bootstrap scripts install the proven Wine and GL dependencies;
-the final installer still needs to consume this manifest directly. That wiring
-is an outstanding installer task, not a completed installer claim. Installation
-must finish required packages before first use; button handlers must not invoke
-apt. Per-user Wine initialization runs asynchronously and is reused.
+`tools/install_dependencies.py` now consumes this manifest in the guarded
+development guest. It checks the guest marker, root maintenance identity, OS and
+architecture, then runs a no-removal APT simulation. `--apply` enables declared
+foreign architectures, refreshes package indexes, simulates and installs the
+selected profile. No package commands run on an applet click. The existing
+bootstrap scripts remain useful references; final hardware installer integration
+and a clean-image end-to-end install are still outstanding. Per-user Wine
+initialization runs asynchronously and is reused.
 
 Original SCR/DLL/font/art payloads are private inputs, separately hashed in the
 asset catalogs. A Linux package manifest does not provide those files. Import
