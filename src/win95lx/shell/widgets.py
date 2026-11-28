@@ -1,6 +1,7 @@
 """Shared classic controls drawn on integer pixels with original bitmap glyphs."""
 import cairo
 from functools import lru_cache
+from win95lx.control_panel.theme_appearance import appearance
 FACE=(192,192,192);LIGHT=(255,255,255);SHADOW=(128,128,128);BLACK=(0,0,0);NAVY=(0,0,128);TEAL=(0,128,128)
 @lru_cache(maxsize=8)
 def drag_mask(width,height):
@@ -34,30 +35,32 @@ def selected_icon_mask(image,phase=0):
 class Painter:
     def __init__(self,cr,font):self.cr=cr;self.font=font;cr.set_antialias(cairo.ANTIALIAS_NONE)
     def fill(self,x,y,w,h,color):
-        self.cr.set_source_rgb(*(v/255 for v in color));self.cr.rectangle(int(x),int(y),int(w),int(h));self.cr.fill()
+        self.cr.set_source_rgb(*(v/255 for v in (appearance.color(color) if isinstance(color,str) else color)));self.cr.rectangle(int(x),int(y),int(w),int(h));self.cr.fill()
     def selected_image(self,image,x,y,*,phase=0):
         self.image(image,x,y)
         self.cr.save();self.cr.set_source_rgb(0,0,.5);self.cr.mask_surface(selected_icon_mask(image,phase),x,y);self.cr.restore()
 
-    def text(self,text,x,y,color=BLACK,bold=False):
-        self.cr.set_source_rgb(*(v/255 for v in color))
+    def text(self,text,x,y,color=BLACK,bold=False,role=None):
+        font=appearance.font(role,self.font) if role else self.font
+        self.cr.set_source_rgb(*(v/255 for v in (appearance.color(color) if isinstance(color,str) else color)))
         for char in text:
-            width,points=self.font.glyph(char)
+            width,points=font.glyph(char)
             for xx,yy in points:self.cr.rectangle(int(x+xx),int(y+yy),2 if bold else 1,1)
             x+=width+int(bold)
         self.cr.fill()
-    def menu_text(self,label,x,y,color=BLACK,mnemonic=None):
-        self.text(label,x,y,color)
+    def menu_text(self,label,x,y,color='MenuText',mnemonic=None):
+        font=appearance.font('menu',self.font)
+        self.text(label,x,y,color,role='menu')
         if mnemonic is not None and mnemonic != '':
             index=mnemonic if isinstance(mnemonic,int) else label.casefold().find(mnemonic.casefold())
             if 0<=index<len(label):
-                self.fill(x+self.font.width(label[:index]),y+12,self.font.width(label[index]),1,color)
+                self.fill(x+font.width(label[:index]),y+min(getattr(font,'height',13)-1,12),font.width(label[index]),1,color)
 
     def bevel(self,x,y,w,h,sunken=False):
-        self.fill(x,y,w,h,FACE)
-        a,b=(SHADOW,LIGHT) if sunken else (LIGHT,BLACK)
+        self.fill(x,y,w,h,'ButtonFace')
+        a,b=('ButtonShadow','ButtonHilight') if sunken else ('ButtonHilight','ButtonDkShadow')
         self.fill(x,y,w,1,a);self.fill(x,y,1,h,a);self.fill(x+w-1,y,1,h,b);self.fill(x,y+h-1,w,1,b)
-        if not sunken:self.fill(x+w-2,y+1,1,h-2,SHADOW);self.fill(x+1,y+h-2,w-2,1,SHADOW)
+        if not sunken:self.fill(x+w-2,y+1,1,h-2,'ButtonShadow');self.fill(x+1,y+h-2,w-2,1,'ButtonShadow')
     def window_frame(self, x, y, width, height):
         self.fill(x, y, width, height, FACE)
         self.fill(x+1, y+1, width-2, 1, LIGHT)

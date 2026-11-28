@@ -90,3 +90,31 @@ Implement the original folder-renaming product-team credits, Volcano 3D Text
 screensaver behavior, and CLSID namespace folders. Requirements and regression
 matrix: [hidden features](docs/EASTER_EGGS.md). They are pending implementation;
 retain the Control Panel work as the primary active stream.
+
+## Applet completeness requirement — 27 November 2026
+
+Complete Themes before labeling its delivery finished: historical Plus95/IE4
+research and native screenshots; working Save As/Delete/custom definitions;
+Current settings, component mixing, browse/import and Windows Default; feasible
+appearance providers;30 distinct valid customization workflows plus negative,
+rollback and persistence tests. Record genuine incompatibilities and remaining
+software gaps. Future applets follow the same complete-as-possible gate in
+AGENTS.md. Network is the next applet; its asynchronous inventory/input work may
+continue independently, but registration requires actual guest authorization and
+feature-level effect/rollback acceptance.
+
+## Overnight continuation — 27 November 2026
+
+User priority: working Themes and Windows95/Plus screensavers, followed by
+Network; Explorer only after these gates. Root owns packaging, regression,
+recovery checkpoints, user-VM deployment and main remote commit. Saver runtime
+agent owns shared trusted runtime-group prefixes (avoid22x581MB caches and
+preserve Plus global settings), original font profile and actual cold/warm
+checks. UI agent owns remaining Theme/preview completeness and integration.
+Network agent is authorized for the reviewed guest-only scoped service and
+normal desktop caller tests against disposable dummy networking; primary
+adapter/routes/resolver must remain unchanged. Do not replace actual effect
+checks with saved preferences. Deliver a capability report and remaining gaps;
+do not call unfinished applets fully supported. Existing verified recovery:
+`before-screensaver-integration-20261127` and
+`after-screensaver-gl-runtime-20261127`.

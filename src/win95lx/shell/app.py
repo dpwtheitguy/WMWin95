@@ -225,6 +225,11 @@ class Shell(Gtk.Window):
         computer_small = assets / 'my-computer-16.png'
         if computer_small.exists():
             self.small_images['computer'] = cairo.ImageSurface.create_from_png(str(computer_small))
+        from win95lx.control_panel.theme_icons import load_icons
+        load_icons(self)
+        from win95lx.control_panel.theme_appearance import load_session
+        for component, error in load_session(Path.home()/'.config/win95lx', assets/'font-library'):
+            print('Appearance preference unavailable:', component, error)
         self.area=Gtk.DrawingArea();self.add(self.area);self.area.add_events(Gdk.EventMask.BUTTON_PRESS_MASK|Gdk.EventMask.BUTTON_RELEASE_MASK|Gdk.EventMask.POINTER_MOTION_MASK);self.area.connect('draw',self.draw);self.area.connect('button-press-event',self.press);self.area.connect('button-release-event',self.release);self.area.connect('motion-notify-event',self.motion);self.connect('key-press-event',self.key);self.connect('destroy',Gtk.main_quit)
         screen = self.get_screen()
         self.area.add_events(Gdk.EventMask.SCROLL_MASK)
@@ -264,6 +269,8 @@ class Shell(Gtk.Window):
             except (OSError,RuntimeError,ValueError,TypeError) as error:print('Could not restore accessibility settings:',error,flush=True)
         self.connect('realize',self.cursor)
         GLib.timeout_add_seconds(1,self.tick)
+        from win95lx.apps.screensaver_host import host_for
+        GLib.idle_add(lambda:(host_for(self),False)[1])
     def resize_to_display(self, screen):
         from win95lx.shell.window_bounds import fit_bounds
         width, height = screen.get_width(), screen.get_height()
@@ -452,6 +459,8 @@ class Shell(Gtk.Window):
             if existing is None:
                 self.navigate_drive(self.state.active, folder)
         if kind=='display':
+            from win95lx.apps.screensaver_host import host_for
+            host_for(self).cancel()
             self.display_tab = 'background'
             self.state.active.width, self.state.active.height = display_settings.FRAME_SIZE
             self.resize_to_display(self.get_screen())
@@ -820,8 +829,13 @@ class Shell(Gtk.Window):
         elif win.kind=='display':
             if self.display_tab == 'background':
                 background.draw(p, win, self)
+                self.hit(win.x+83,win.y+29,81,21,('display-tab','screensaver'))
                 return
-            display_settings.draw(p, win, self)
+            if self.display_tab=='screensaver':
+                from win95lx.control_panel import screen_saver
+                screen_saver.draw(p,win,self)
+            else:display_settings.draw(p, win, self)
+            self.hit(win.x+83,win.y+29,81,21,('display-tab','screensaver'))
         elif win.kind in APPLETS:APPLETS[win.kind](p,win,self.button)
     @staticmethod
     def drive_pane_size(win):
@@ -1502,7 +1516,14 @@ class Shell(Gtk.Window):
                 self.state.windows.remove(win)
                 self.state.windows.append(win)
                 self.shortcut_drag = win, label, target, point, event.x, event.y
+        elif kind.startswith('saver-'):
+            if event and event.type in (Gdk.EventType._2BUTTON_PRESS,Gdk.EventType._3BUTTON_PRESS):return
+            from win95lx.control_panel import screen_saver
+            screen_saver.action(self,action)
         elif kind=='display-tab':
+            if self.display_tab=='screensaver' and action[1]!='screensaver':
+                from win95lx.apps.screensaver_host import host_for
+                host_for(self).stop_preview()
             self.display_tab = action[1]
             self.resolution_focus = None
         elif kind=='wallpaper-select':
@@ -1529,6 +1550,11 @@ class Shell(Gtk.Window):
         elif kind=='wallpaper-mode':
             self.wallpaper_combo.open()
         elif kind=='wallpaper-apply':
+            if hasattr(self,'screen_saver_host') and self.screen_saver_host.dirty:
+                try:self.screen_saver_host.apply()
+                except (OSError,ValueError,RuntimeError) as error:
+                    from win95lx.apps.dialogs import message_box
+                    message_box(self,'Display Properties',str(error),Gtk.MessageType.ERROR);return
             try:
                 self.wallpaper.apply(self.pending_wallpaper,self.pending_wallpaper_mode,
                                      self.pending_pattern,self.pending_pattern_rows)
@@ -1589,13 +1615,20 @@ class Shell(Gtk.Window):
                 self.move_resolution_slider(win, event.x)
             self.resolution_drag = win, offset
         elif kind == 'resolution-apply':
+            if hasattr(self,'screen_saver_host') and self.screen_saver_host.dirty:
+                try:self.screen_saver_host.apply()
+                except (OSError,ValueError,RuntimeError) as error:
+                    from win95lx.apps.dialogs import message_box
+                    message_box(self,'Display Properties',str(error),Gtk.MessageType.ERROR);return
             self.try_resolution(*action[1:])
         elif kind == 'resolution-help':
             from win95lx.apps.dialogs import message_box
             message_box(self, 'Display Properties',
                         'Use Desktop area or Screen area to change the guest resolution. '
                         'Both sliders control the same display.', Gtk.MessageType.INFO)
-        elif kind=='close':self.state.windows.remove(action[1]);self.popup=None;play_event(self.assets,'Close')
+        elif kind=='close':
+            if action[1].kind=='display' and hasattr(self,'screen_saver_host'):self.screen_saver_host.cancel()
+            self.state.windows.remove(action[1]);self.popup=None;play_event(self.assets,'Close')
         elif kind=='minimize':
             if not action[1].minimized:play_event(self.assets,'Minimize')
             action[1].minimized=True
@@ -2125,6 +2158,7 @@ class Shell(Gtk.Window):
     def press(self,area,event):
         if self.pointer_scale != 1:
             event = ScaledPointer(event, self.pointer_scale)
+        if hasattr(self,'screen_saver_host') and self.screen_saver_host.dismiss_idle_input():return True
         if event.button == 1:
             self.get_window().focus(event.time)
         pointer_hits=self.hits
@@ -2667,9 +2701,13 @@ class Shell(Gtk.Window):
         return True
 
     def key(self,window,event):
+        if hasattr(self,'screen_saver_host') and self.screen_saver_host.dismiss_idle_input():return True
         name=Gdk.keyval_name(event.keyval)
         ctrl=event.state&Gdk.ModifierType.CONTROL_MASK
         alt=event.state&Gdk.ModifierType.MOD1_MASK
+        if self.state.active and self.state.active.kind=='display' and self.display_tab=='screensaver' and not self.state.start_open and not self.start_context and not self.window_operation:
+            from win95lx.control_panel import screen_saver
+            if screen_saver.key(self,event):return True
         if self.suspended:
             self.suspended=False
         elif self.window_operation:

@@ -1,5 +1,7 @@
 """Shared native-pixel property sheet, pending edits and accessible controls."""
 from pathlib import Path
+from types import SimpleNamespace
+from win95lx.control_panel.theme_appearance import appearance, DEFAULT_COLORS, DEFAULT_FONTS
 import cairo
 import subprocess
 from gi.repository import Gtk,Gdk,GLib,GdkPixbuf
@@ -25,14 +27,62 @@ class PropertySheet(Gtk.Window):
         self.tab=0;self.hits=[];self.disabled=[];self.button_specs=[];self.command_mnemonics={};self.command_actions={('ok',),('cancel',)};self.focus_action=None;self.pressed=None;self.press_inside=True;self.dragging=None;self.caption_drag=None;self.caption_active=True
         self.area=Gtk.DrawingArea();self.area.set_size_request(*self.size);self.add(self.area)
         self.area.add_events(Gdk.EventMask.BUTTON_PRESS_MASK|Gdk.EventMask.BUTTON_RELEASE_MASK|Gdk.EventMask.POINTER_MOTION_MASK|Gdk.EventMask.SCROLL_MASK)
-        for signal,handler in (('draw',self.draw),('button-press-event',self.press),('button-release-event',self.release),('motion-notify-event',self.motion)):
+        for signal,handler in (('draw',self._appearance_draw),('button-press-event',lambda a,e:self._appearance_event(self.press,a,e)),('button-release-event',lambda a,e:self._appearance_event(self.release,a,e)),('motion-notify-event',lambda a,e:self._appearance_event(self.motion,a,e))):
             self.area.connect(signal,handler)
         self.connect('key-press-event',self.key)
         self.connect('focus-in-event',lambda *_:self.caption_focus(True));self.connect('focus-out-event',lambda *_:self.caption_focus(False))
         self.connect('realize',lambda *_:self.get_window().set_cursor(shell.cursor_for('arrow')))
         self.connect('map-event',self.mapped)
+        appearance.listeners.append(self._appearance_changed)
+        self.connect('destroy',self._appearance_destroyed)
+        self._appearance_changed()
         from win95lx.control_panel.display_preferences import install_palette_filter
         install_palette_filter(self,lambda:shell.display_preferences.palette)
+
+    @property
+    def body_offset(self):return max(0,appearance.metric('caption_height')-18)
+    @property
+    def physical_size(self):return self.size[0],self.size[1]+self.body_offset
+    def logical_to_physical(self,rect):
+        x,y,w,h=rect
+        return (x,y+self.body_offset,w,h) if y>=22 else (x,y+self.body_offset//2,w,h)
+    def _appearance_changed(self):
+        self.area.set_size_request(*self.physical_size)
+        if self.get_realized():self.resize(*self.physical_size)
+        self.area.queue_draw()
+    def _appearance_destroyed(self,*_):
+        if self._appearance_changed in appearance.listeners:appearance.listeners.remove(self._appearance_changed)
+    def _appearance_event(self,handler,area,event):
+        if not self.body_offset:return handler(area,event)
+        # Hit maps and subclass slider/entry math remain native logical pixels.
+        # Convert once at the signal boundary; root coordinates stay physical.
+        values={name:getattr(event,name) for name in ('x','y','x_root','y_root','button','state','time','type') if hasattr(event,name)}
+        y=values.get('y',0)
+        values['y']=y-self.body_offset if y>=22+self.body_offset else max(0,y-self.body_offset//2)
+        return handler(area,SimpleNamespace(**values))
+    def _appearance_draw(self,area,cr):
+        delta=self.body_offset
+        if not delta:
+            result=self.draw(area,cr)
+        else:
+            w,h=self.size;surface=cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h);ctx=cairo.Context(surface)
+            result=self.draw(area,ctx)
+            cr.save();cr.rectangle(0,0,w,22);cr.clip();cr.set_source_surface(surface,0,0);cr.paint();cr.restore()
+            cr.save();cr.rectangle(0,22+delta,w,h-22);cr.clip();cr.set_source_surface(surface,0,delta);cr.paint();cr.restore()
+            p=Painter(cr,self.shell.font)
+            # Extend only native border strips; artwork/body retain their pixels.
+            for x,width in ((0,3),(w-3,3)):
+                cr.save();cr.rectangle(x,22,width,delta);cr.clip();cr.set_source_surface(surface,0,delta);cr.paint();cr.restore()
+        themed=appearance.values['colors']!=DEFAULT_COLORS or appearance.values['fonts']!=DEFAULT_FONTS or delta
+        if themed:
+            w,h=self.size;p=Painter(cr,self.shell.font)
+            p.fill(3,3,w-6,17+delta,'ActiveTitle' if self.caption_active else 'InactiveTitle')
+            font=appearance.font('caption',self.shell.font)
+            p.text(self.title,5,3+max(0,(17+delta-font.height)//2),'TitleText' if self.caption_active else 'InactiveTitleText',bold=font is self.shell.font,role='caption')
+            # Original caption command glyphs stay centered and are never palette-swapped.
+            for x in (w-39,w-21):
+                p.cr.save();p.cr.rectangle(x,4+delta//2,16,15);p.cr.clip();p.image(self.frames[self.tab],0,delta//2);p.cr.restore()
+        return result
 
     def mapped(self,*_):
         from win95lx.shell.window_bounds import fit_bounds

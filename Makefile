@@ -117,3 +117,17 @@ check-printer-wizard:
 
 check-printer-installation-backend:
 	$(PYTHON) dev/check_printer_installation_backend.py --owned-guest-service --output private/screenshots/printer-installation-$$(date +%s%N)
+
+.PHONY: check-theme-customization check-theme-appearance check-screen-saver check-theme-import
+check-ui: check-theme-customization check-theme-appearance check-screen-saver check-theme-import
+check-theme-customization:
+	$(PYTHON) dev/check_theme_customization.py --size 800x600 --output private/screenshots/theme-customization-$$(date +%s%N)-800
+	$(PYTHON) dev/check_theme_customization.py --size 1280x720 --output private/screenshots/theme-customization-$$(date +%s%N)-1280
+check-theme-appearance:
+	$(PYTHON) dev/check_theme_appearance.py --size 800x600 --output private/screenshots/theme-appearance-$$(date +%s%N)-800
+	$(PYTHON) dev/check_theme_appearance.py --size 1280x720 --output private/screenshots/theme-appearance-$$(date +%s%N)-1280
+check-screen-saver:
+	$(PYTHON) dev/check_screen_saver.py --size 800x600 --output private/screenshots/saver-ui-$$(date +%s%N)-800
+	$(PYTHON) dev/check_screen_saver.py --size 1280x720 --output private/screenshots/saver-ui-$$(date +%s%N)-1280
+check-theme-import:
+	$(PYTHON) dev/run_theme_import_checks.py

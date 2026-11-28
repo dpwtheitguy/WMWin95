@@ -12,24 +12,40 @@ from win95lx.apps.fonts import FontMenu
 
 
 def controller_for(shell, config=None):
-    from win95lx.control_panel.sound_preferences import SoundBackend, SoundPreferences
+    from win95lx.control_panel.sound_preferences import SoundBackend, SoundPreferences, BUILTINS
     from win95lx.control_panel.preferences import PreferenceController
     config = Path(config) if config else Path.home()/'.config/win95lx'
     data = json.loads((shell.assets/'themes-library.json').read_text())['themes']
+    from win95lx.control_panel.theme_store import ThemeStore
+    from win95lx.control_panel.theme_icons import IconThemeProvider
+    from win95lx.control_panel.theme_appearance import AppearanceProvider
+    from win95lx.control_panel.theme_preferences import ScreensaverThemeProvider
+    from win95lx.apps.screensaver_host import host_for
+    import shutil
+    saver_host=host_for(shell)
+    saver_available=saver_host.runtime is not None and saver_host.catalog is not None and callable(getattr(saver_host,'restore_theme',None)) and all(shutil.which(command)for command in (saver_host.runtime.wine,saver_host.runtime.wineboot,saver_host.runtime.wineserver))
     themes = {}
     profile = [None]
+    result = None
     def refresh_profile():
         palette=shell.display_preferences.palette
         if profile[0]==palette:return
+        resolved={}
         for name,theme in data.items():
             wallpaper=theme['wallpaper'];native=wallpaper.get('native_256')
             file=native['file'] if palette==1 and native else wallpaper['file']
-            themes[name]={**theme,'wallpaper':{**wallpaper,'file':str(shell.assets/file)}}
+            resolved[name]={**theme,'wallpaper':{**wallpaper,'file':str(shell.assets/file) if file else ''}}
+            if 'icons' in theme:
+                resolved[name]['icons']={role:{size:str((shell.assets/path).resolve()) for size,path in sizes.items()} for role,sizes in theme['icons'].items()}
+        if result is None:themes.update(resolved)
+        else:result.refresh_catalog(builtins=resolved)
         profile[0]=palette
     refresh_profile()
     sounds = PreferenceController(config/'sounds.json', SoundBackend(shell.assets), SoundPreferences)
-    factory = json.loads((shell.assets/'sound-library.json').read_text())['schemes']
-    def sound(value, previous): return previous.select(value, factory)
+    factory = {**BUILTINS,**json.loads((shell.assets/'sound-library.json').read_text())['schemes']}
+    def sound(value, previous):
+        if isinstance(value,dict):return replace(previous,scheme=value['scheme'],events=dict(value['events'])).validate()
+        return previous.select(value, factory)
     def refresh_wallpaper():
         # Persistence alone does not update the shell image cache. Decode before
         # repaint so Apply affects the actual desktop, including rollback.
@@ -39,8 +55,15 @@ def controller_for(shell, config=None):
             shell.wallpaper_images[wallpaper.name] = shell.load_background_image(path)
         shell.wallpaper_surface.cache_clear()
         shell.area.queue_draw()
-    result = ThemeController(themes, {'wallpaper': WallpaperProvider(shell.wallpaper, refresh_wallpaper),
+    result = ThemeController(themes, {'wallpaper': WallpaperProvider(shell.wallpaper, refresh_wallpaper, assets=shell.assets),
         'pointers': PointerThemeProvider(config/'mouse.json', lambda:shell.mouse_preferences, shell.apply_mouse_preferences, shell.pointer_library.names), 'sounds': CurrentPreferenceProvider(sounds, sound)}, config/'theme.json')
+    result.providers['icons']=IconThemeProvider(shell,config/'theme-icons.json')
+    for component in ('colors','fonts','metrics'):
+        result.providers[component]=AppearanceProvider(component,config/('theme-'+component+'.json'))
+    if saver_available:result.providers['screensaver']=ScreensaverThemeProvider(saver_host)
+    from win95lx.control_panel.theme_import import import_theme
+    def legacy_loader(data,path):return import_theme(data,path,result.capture_current(),config/'theme-icon-cache',shell.assets)
+    result.attach_store(ThemeStore(config/'themes',dict(themes),legacy_loader=legacy_loader))
     def preflight(components):
         refresh_profile()
         conflicts=[label for component,kind,label in (('pointers','mouse','Mouse Properties'),('sounds','sounds','Sounds Properties'))
@@ -51,11 +74,15 @@ def controller_for(shell, config=None):
             raise ValueError('Close '+ ' and '.join(conflicts)+' before applying these theme components. Your pending settings have been kept.')
     result.preflight=preflight
     result.refresh_profile=refresh_profile
-    result.reconcile_current({
-        'wallpaper':lambda value: shell.wallpaper.custom.get(shell.wallpaper.name)==str(Path(value['file']).resolve()) and shell.wallpaper.mode==value['mode'],
-        'pointers':lambda value:shell.mouse_preferences.scheme==value and not shell.mouse_preferences.overrides,
-        'sounds':lambda value:sounds.applied.scheme==value and sounds.applied.events==factory[value],
-    })
+    matches={
+        'wallpaper':lambda value: result.providers['wallpaper'].export_current()['file']==(str(Path(value['file']).resolve()) if value['file'] else '') and all(result.providers['wallpaper'].export_current().get(key)==value.get(key,default) for key,default in (('mode','center'),('pattern','(None)'),('pattern_rows',[0]*8))),
+        'pointers':lambda value: shell.mouse_preferences.scheme==(value['scheme'] if isinstance(value,dict) else value) and shell.mouse_preferences.overrides==(value.get('overrides',{}) if isinstance(value,dict) else {}),
+        'sounds':lambda value: sounds.applied.scheme==(value['scheme'] if isinstance(value,dict) else value) and sounds.applied.events==(value['events'] if isinstance(value,dict) else factory[value]),
+        'icons':lambda value:result.providers['icons'].export_current()==value,
+    }
+    for component in ('colors','fonts','metrics'):matches[component]=result.providers[component].matches
+    if 'screensaver'in result.providers:matches['screensaver']=result.providers['screensaver'].matches
+    result.reconcile_current(matches)
     return result
 
 
@@ -70,7 +97,7 @@ class DesktopThemesWindow(PropertySheet):
     def __init__(self, shell, controller=None):
         super().__init__(shell)
         self.controller = controller or controller_for(shell)
-        self.names = ('Current Windows settings', *sorted(self.controller.themes, key=str.casefold))
+        self.refresh_names()
         self.focus_action = ('theme',)
         self.menu_popup = None
         self.operation = None
@@ -79,12 +106,41 @@ class DesktopThemesWindow(PropertySheet):
         self.preview_layer=cairo.ImageSurface.create_from_png(str(self.assets/'themes-preview-current-layer.png'))
         self.preview_images = {}
         self.popup_window = None
+        self.saver_host=self.controller.providers['screensaver'].host if 'screensaver'in self.controller.providers else None
+        self.saver_listener=self.saver_host.subscribe(self.area.queue_draw) if self.saver_host else None
+        self.warm_saver()
         self.connect('destroy', self.cleanup)
 
+    def refresh_names(self):
+        self.names=('Current Windows settings',*sorted(self.controller.themes,key=str.casefold),'Other...')
+
     def cleanup(self, *_):
+        if self.saver_host and self.saver_listener:self.saver_host.unsubscribe(self.saver_listener)
         if self.popup_window: self.popup_window.destroy(); self.popup_window = None
         if self.menu_popup: self.menu_popup.destroy(); self.menu_popup = None
         if hasattr(self.controller, 'close'): self.controller.close()
+
+    def selected_saver(self):
+        current=self.controller.pending
+        if current is not None:return self.controller.themes[current.name].get('screensaver',{}).get('saver','')
+        return self.saver_host.applied.saver if self.saver_host else ''
+
+    def warm_saver(self):
+        host=self.saver_host
+        identity=self.selected_saver()
+        if host and identity and host.session_mode is None and not host.runtime.ready(identity):
+            available,reason=host.available('fullscreen',identity)
+            if available:host.warm(identity)
+
+    def saver_preparing(self):
+        current=self.controller.pending
+        return bool(self.saver_host and current is not None and 'screensaver'in current.components and self.selected_saver() and not self.saver_host.runtime.ready(self.selected_saver()))
+
+    def button(self,p,label,rect,action,enabled=True,reason=None):
+        if action[0]in('ok','apply')and self.saver_preparing():
+            enabled=False
+            reason='The selected screen saver is being prepared. Other theme options remain available.' if self.saver_host.busy else 'The selected screen saver could not be prepared. Clear Screen saver to apply the other theme options.'
+        return super().button(p,label,rect,action,enabled,reason)
 
     def draw(self, area, cr):
         if hasattr(self.controller,'refresh_profile'):self.controller.refresh_profile()
@@ -172,7 +228,7 @@ class DesktopThemesWindow(PropertySheet):
         # Caption close shares Cancel's command ID, but must not place Cancel
         # before the native Theme field in keyboard tab order.
         enabled={action for rect,action in self.hits}
-        return [action for action in [('theme',),*((('component',name) for name in COMPONENTS)),('ok',),('cancel',),('apply',)] if action in enabled]
+        return [action for action in [('theme',),('save',),('delete',),('theme-saver-preview',),*((('component',name) for name in COMPONENTS)),('ok',),('cancel',),('apply',)] if action in enabled]
 
     def draw_content(self, p):
         current = self.controller.pending
@@ -183,12 +239,14 @@ class DesktopThemesWindow(PropertySheet):
             theme = self.controller.themes[current.name]
             path = theme['wallpaper']['file']
             if path not in self.preview_images:
-                self.preview_images[path]=GdkPixbuf.Pixbuf.new_from_file(path).scale_simple(392,332,GdkPixbuf.InterpType.NEAREST)
+                try:self.preview_images[path]=GdkPixbuf.Pixbuf.new_from_file(path).scale_simple(392,332,GdkPixbuf.InterpType.NEAREST) if path else None
+                except Exception:self.preview_images[path]=None
             pixbuf=self.preview_images[path]
             from gi.repository import Gdk
             p.cr.save(); p.cr.rectangle(16,68,392,332); p.cr.clip()
-            Gdk.cairo_set_source_pixbuf(p.cr,pixbuf,16,68)
-            p.cr.paint(); p.cr.restore()
+            if pixbuf is not None:
+                Gdk.cairo_set_source_pixbuf(p.cr,pixbuf,16,68);p.cr.paint()
+            p.cr.restore()
         else:
             image = self.shell.wallpaper_surface(self.shell.wallpaper.name, self.shell.display_preferences.palette)
             if image is not None:
@@ -209,7 +267,7 @@ class DesktopThemesWindow(PropertySheet):
         for index, (label, component) in enumerate((('Screen saver','screensaver'),('Sound events','sounds'),('Mouse pointers','pointers'),('Desktop wallpaper','wallpaper'),('Icons','icons'),('Colors','colors'),('Font names and styles','fonts'),('Font and window sizes','metrics'))):
             x,y=438,(185,210,234,258,283,307,331,356)[index]
             p.fill(x,y,132,19,FACE)
-            active = component in COMPONENTS and current is not None
+            active = current is not None and component in self.controller.providers and component in theme
             selected = current is None or component in current.components
             p.image(self.checks['checked' if selected else 'unchecked'],x,y)
             if not active:
@@ -219,13 +277,48 @@ class DesktopThemesWindow(PropertySheet):
             else:p.text(label,x+19,y+2,LIGHT);p.text(label,x+18,y+1,SHADOW)
             if active and self.focus_action==('component',component):self.focus_outline(p,x+18,y,p.font.width(label)+2,16)
             if active:self.hit((x,y,132,19),('component',component))
-            else:self.disabled.append(((x,y,132,19),UNSUPPORTED.get('fonts' if component=='metrics' else component,'Select a theme first.')))
-        for rect, reason in (((270,31,69,23),'Saving custom desktop themes is not available in this version.'),((345,31,69,23),'Removing installed theme packages is not available in this version.'),((434,49,134,23),UNSUPPORTED['screensaver']),((434,79,134,23),'The pointers and sounds preview is not available in this version. Choose Apply to use the selected pointers and sounds.')):
-            x,y,w,h=rect;p.button('',x,y,w,h);self.disabled.append((rect,reason))
-        for label,x,y in (('Save As...',279,36),('Delete',363,36),('Screen Saver',465,54),('Pointers, Sounds, etc...',445,84)):
-            p.text(label,x,y,SHADOW)
+            else:
+                reason=UNSUPPORTED.get('fonts' if component=='metrics' else component,'Select a theme first.')
+                if component=='screensaver':reason='Select a theme first.' if current is None else 'Windows screen saver support is not installed on this computer.' if component not in self.controller.providers else 'This theme does not include a screen saver.'
+                self.disabled.append(((x,y,132,19),reason))
+        self.button(p,'&Save As...',(270,31,69,23),('save',),enabled=current is None,reason='Select Current Windows settings to save your desktop.')
+        self.button(p,'&Delete',(345,31,69,23),('delete',),enabled=current is not None,reason='Current Windows settings cannot be deleted.')
+        identity=self.selected_saver()
+        saver_enabled=bool(self.saver_host and identity and self.saver_host.runtime.ready(identity))
+        self.button(p,'Sc&reen Saver',(434,49,134,23),('theme-saver-preview',),enabled=saver_enabled,reason='Select a theme with an available screen saver and wait for preparation to finish.')
+        for rect,label,reason in (((434,79,134,23),'Pointers, Sounds, etc...','Use the Mouse and Sounds properties to customize these settings.'),):
+            self.button(p,label,rect,('unavailable',),enabled=False,reason=reason)
 
     def action(self, action):
+        if action[0]=='theme-saver-preview':
+            if self.saver_host:self.saver_host.launch('fullscreen',self.selected_saver(),self)
+            return
+        if action[0] in ('save','delete'):
+            from win95lx.apps.theme_dialogs import choose_theme_file,confirm_theme_delete,ThemeQuestion,run_dialog,Gtk
+            from win95lx.control_panel.theme_store import ThemeExistsError
+            store=self.controller.store
+            try:
+                if action[0]=='delete':
+                    current=self.controller.pending
+                    if current is None:return
+                    token=store.token(current.name)
+                    if confirm_theme_delete(self,current.name):self.controller.delete_theme(current.name,expected=token)
+                else:
+                    if self.controller.pending is not None:return
+                    store.directory.mkdir(parents=True,exist_ok=True)
+                    path=choose_theme_file(self,store.directory,saving=True,store=store)
+                    if not path:return
+                    token=store.token_path(path)
+                    try:self.controller.save_current(path=path)
+                    except ThemeExistsError:
+                        question=ThemeQuestion(self,'This theme already exists. Do you want to replace it?')
+                        try:answer=run_dialog(question)==Gtk.ResponseType.YES
+                        finally:question.destroy()
+                        if answer:self.controller.save_current(path=path,overwrite=True,expected=token)
+                self.refresh_names()
+            except OSError:self.error('The theme file could not be changed. Check the folder and try again.')
+            except (ValueError,RuntimeError) as error:self.error(error)
+            self.area.queue_draw();return
         if action[0]=='system':self.system_menu();return
         if action[0]=='minimize':self.command('minimize');return
         if action[0]=='theme':
@@ -237,7 +330,7 @@ class DesktopThemesWindow(PropertySheet):
             current=self.controller.pending;components=list(current.components);component=action[1]
             if component in components:components.remove(component)
             else:components.append(component)
-            self.controller.select(current.name,components);self.area.queue_draw();return
+            self.controller.select(current.name,components);self.warm_saver();self.area.queue_draw();return
         if action[0] in ('ok','apply') and self.controller.pending is None:
             self.controller.cancel()
             if action[0]=='ok': self.destroy()
@@ -248,12 +341,31 @@ class DesktopThemesWindow(PropertySheet):
     def choose(self, index):
         if index == 0:
             self.controller.pending = None
+        elif self.names[index]=='Other...':
+            from win95lx.apps.theme_dialogs import choose_theme_file
+            store=self.controller.store
+            try:
+                if store.is_default_directory:store.directory.mkdir(parents=True,exist_ok=True)
+            except OSError:
+                self.error('The themes folder could not be opened. Check the folder and try again.');return
+            path=choose_theme_file(self,store.directory,saving=False,store=store)
+            if path:
+                try:
+                    store=self.controller.store
+                    if path.parent.resolve()==store.default_directory.resolve() and path.stem in store.builtins and not path.exists():
+                        store.use_directory(store.default_directory);self.controller.refresh_catalog();self.controller.select(path.stem)
+                    else:self.controller.open_theme(path)
+                    self.refresh_names()
+                except OSError:self.error('The theme file could not be opened. Check the folder and try again.')
+                except ValueError as error:self.error(error)
         else:
             self.controller.select(self.names[index])
-        self.area.queue_draw()
+        self.warm_saver();self.area.queue_draw()
 
     def key(self,window,event):
         name=Gdk.keyval_name(event.keyval)
+        if self.saver_host and self.saver_host.busy and self.saver_host.session_mode=='fullscreen':
+            self.saver_host.stop_preview();return True
         if self.operation is not None:
             if name=='Escape':
                 self.move(*self.operation.original[:2]);self.operation=None;return True

@@ -1,3 +1,5 @@
+# Legacy development bootstrap list. Runtime/optional installation requirements
+# are maintained in config/installer-dependencies.json and tools/check_dependencies.py.
 # Proposed packages for the isolated Xubuntu development VM; not host installs.
 build-essential
 python3

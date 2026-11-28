@@ -6,7 +6,7 @@ from dataclasses import replace
 from threading import Thread
 from gi.repository import Gtk,Gdk,GLib
 from win95lx.apps.property_sheet import PropertySheet
-from win95lx.control_panel.network_preferences import NetworkManager,NetworkController,IPv4Entry,NetworkError
+from win95lx.control_panel.network_preferences import NetworkManager,NetworkController,NetworkState,IPv4Entry,NetworkError
 from win95lx.shell.widgets import FACE,BLACK,LIGHT,NAVY,SHADOW
 
 SHARING='File and printer sharing is unavailable: the sharing service and its configuration integration are not installed.'
@@ -41,17 +41,61 @@ class NetworkWindow(PropertySheet):
     tab_rects=((10,29,76,22),(86,29,71,22),(157,29,82,22))
     buttons=((202,427,75,23),(283,427,75,23))
     def __init__(self,shell,backend=None):
-        super().__init__(shell);self.controller=NetworkController(backend or NetworkManager());self.selected=0;self.busy=False
+        self.loading=self.busy=True;self.closed=False;self.load_error=None;self.list_top=0;self.list_drag=None;self.selected=0
+        super().__init__(shell)
+        if backend is None:
+            from win95lx.control_panel.network_service import installed_backend
+            backend=installed_backend()
+        self.controller=NetworkController(backend,NetworkState('localhost'))
+        self.connect('destroy',lambda *_:setattr(self,'closed',True))
+        self.connect('delete-event',lambda *_:self.busy and not self.loading)
+        self.area.connect('scroll-event',self.scroll_connections)
+        def load():
+            state=error=None
+            try:state=self.controller.backend.preferences().validate()
+            except Exception as caught:error=caught
+            GLib.idle_add(self.loaded,state,error)
+        Thread(target=load,daemon=True,name='win95lx-network-inventory').start()
+    def loaded(self,state,error):
+        if self.closed:return False
+        self.loading=self.busy=False
+        if error:self.load_error=str(error)if isinstance(error,(NetworkError,ValueError))else'The network connections could not be identified. Close this window and try again.'
+        else:
+            self.controller.applied=self.controller.pending=state
+            if state.connections:self.focus_action=('connection',0)
+        self.area.queue_draw();return False
+    def button(self,p,label,rect,action,enabled=True,reason=None):
+        if action==('ok',):enabled=enabled and not self.busy and not self.load_error
+        if action==('cancel',):enabled=enabled and not(self.busy and not self.loading)
+        return super().button(p,label,rect,action,enabled,reason)
     def draw_content(self,p):
+        if self.loading or self.load_error:
+            from win95lx.shell.icon_labels import wrap_label
+            p.fill(13,53,340,366,FACE)
+            text=self.load_error or'Please wait while your network connections are identified.'
+            for index,line in enumerate(wrap_label(text,p.font,300,20)):p.text(line,30,88+index*15)
+            return
         state=self.controller.pending
         if self.tab==0:
             p.fill(30,88,306,100,LIGHT)
             rows=state.connections
-            for index,c in enumerate(rows[:5]):
-                y=89+index*18;selected=index==self.selected
+            self.list_top=max(0,min(max(0,len(rows)-5),self.list_top))
+            row_width=290 if len(rows)>5 else 306
+            p.cr.save();p.cr.rectangle(30,88,row_width,100);p.cr.clip()
+            for offset,c in enumerate(rows[self.list_top:self.list_top+5]):
+                index=self.list_top+offset;y=89+offset*18;selected=index==self.selected
                 if selected:p.fill(30,y,306,17,NAVY)
                 p.text('TCP/IP -> '+c.name,48,y+2,LIGHT if selected else BLACK)
-                self.hit((30,y,306,17),('connection',index))
+                self.hit((30,y,row_width,17),('connection',index))
+            p.cr.restore()
+            if len(rows)>5:
+                from win95lx.shell.scrollbar import VerticalScrollbar
+                bar=VerticalScrollbar.for_page(100,len(rows)-5,5);bar.draw(p,320,88,self.list_top)
+                top=bar.thumb_top(self.list_top)
+                for rect,action in (((320,88,16,16),('connections-scroll',-1)),((320,172,16,16),('connections-scroll',1)),((320,88+top,16,bar.thumb),('connections-thumb',bar))):self.hit(rect,action)
+                if top>16:self.hit((320,104,16,top-16),('connections-scroll',-5))
+                end=top+bar.thumb
+                if end<84:self.hit((320,88+end,16,84-end),('connections-scroll',5))
             self.button(p,'Add...',(28,210,99,23),('add',),False,COMPONENTS)
             self.button(p,'Remove',(133,210,100,23),('remove',),False,'Connection-profile removal has not been implemented in this applet.')
             self.button(p,'Properties',(239,210,100,23),('properties',),bool(rows),'No network connection is available.')
@@ -61,7 +105,9 @@ class NetworkWindow(PropertySheet):
             p.fill(30,345,306,53,FACE)
             if rows:
                 c=rows[min(self.selected,len(rows)-1)]
+                p.cr.save();p.cr.rectangle(30,345,306,53);p.cr.clip()
                 for n,text in enumerate(('TCP/IP network connection',c.name,'Connected' if c.active else 'Not connected')):p.text(text,39,348+15*n)
+                p.cr.restore()
         elif self.tab==1:
             # Keep native captions and framing; replace source machine values.
             self.disabled.extend([((28,142,310,115),'Computer-name changes are temporarily unavailable until the stable guest identity runtime is deployed.'),((28,220,310,84),SHARING)])
@@ -75,9 +121,14 @@ class NetworkWindow(PropertySheet):
         from win95lx.apps.dialogs import message_box
         message_box(self,self.title,'Select a TCP/IP connection and choose Properties. Changes are pending until you choose OK. Cancel discards pending changes.\n\n'+COMPONENTS+'\n\n'+SHARING,Gtk.MessageType.INFO)
     def action(self,action):
-        if self.busy:return
         kind=action[0]
+        if self.load_error and kind not in('cancel','help','tab'):return
+        if self.busy:
+            if self.loading and kind=='cancel':return super().action(action)
+            return
         if kind=='connection':self.selected=action[1]
+        elif kind=='connections-scroll':self.list_top=max(0,min(max(0,len(self.controller.pending.connections)-5),self.list_top+action[1]))
+        elif kind=='connections-thumb':self.list_drag=(action[1],action[1].thumb_top(self.list_top),self.get_display().get_default_seat().get_pointer().get_position().y)
         elif kind=='properties':
             rows=self.controller.pending.connections
             if rows:TCPIPWindow(self,rows[min(self.selected,len(rows)-1)]).show_all()
@@ -86,16 +137,54 @@ class NetworkWindow(PropertySheet):
             def worker():
                 error=None
                 try:self.controller.apply()
-                except (OSError,ValueError,RuntimeError) as caught:error=caught
+                except Exception as caught:error=caught if isinstance(caught,(OSError,ValueError,RuntimeError))else NetworkError('The network settings could not be applied. Reopen Network to check the current settings.')
                 GLib.idle_add(self.finished,error)
             Thread(target=worker,daemon=True).start();return
         else:return super().action(action)
         self.area.queue_draw()
     def finished(self,error):
+        if self.closed:return False
         self.busy=False;self.area.set_sensitive(True)
         if error:self.error(error)
         else:self.destroy()
         return False
+    def focus_order(self):
+        order=super().focus_order()
+        order=[a for a in order if a[0]not in('connection','connections-scroll','connections-thumb')]
+        if self.tab==0 and self.controller.pending.connections and not self.loading:order.insert(0,('connection',self.selected))
+        return order
+    def key(self,window,event):
+        name=Gdk.keyval_name(event.keyval)or''
+        if self.busy:
+            if event.state&Gdk.ModifierType.CONTROL_MASK and name=='Escape':return super().key(window,event)
+            if self.loading and name in('Escape','F1'):return super().key(window,event)
+            return True
+        rows=self.controller.pending.connections
+        if self.tab==0 and rows and self.focus_action and self.focus_action[0]=='connection' and name in('Up','Down','Home','End','Page_Up','Page_Down'):
+            self.selected=0 if name=='Home'else len(rows)-1 if name=='End'else max(0,min(len(rows)-1,self.selected+{'Up':-1,'Down':1,'Page_Up':-5,'Page_Down':5}[name]))
+            self.list_top=max(0,min(max(0,len(rows)-5),min(self.list_top,self.selected)if self.selected<self.list_top else max(self.list_top,self.selected-4)))
+            self.focus_action=('connection',self.selected);self.area.queue_draw();return True
+        return super().key(window,event)
+    def scroll_connections(self,area,event):
+        if not self.busy and self.tab==0 and 30<=event.x<336 and 88<=event.y<188:
+            self.action(('connections-scroll',-1 if event.direction==Gdk.ScrollDirection.UP else 1));return True
+        return False
+    def press(self,area,event):
+        if event.button==1 and not self.busy:
+            for rect,action in reversed(self.hits):
+                if action[0].startswith('connections-')and self.contains(rect,event.x,event.y):
+                    self.focus_action=('connection',self.selected)
+                    if action[0]=='connections-thumb':self.list_drag=(action[1],action[1].thumb_top(self.list_top),event.y_root)
+                    else:self.action(action)
+                    return True
+        return super().press(area,event)
+    def motion(self,area,event):
+        if self.list_drag:
+            bar,top,origin=self.list_drag;self.list_top=bar.value_at(top+event.y_root-origin);self.area.queue_draw();return True
+        return super().motion(area,event)
+    def release(self,area,event):
+        if self.list_drag:self.list_drag=None;self.pressed=None;self.area.queue_draw();return True
+        return super().release(area,event)
 
 class TCPIPWindow(PropertySheet):
     title='TCP/IP Properties';asset_prefix='network-tcpip';size=(356,437)

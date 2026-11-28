@@ -473,6 +473,29 @@ from stage_printers_assets import stage as stage_printers_assets
 records.extend(stage_printers_assets(output))
 from stage_theme_assets import stage as stage_theme_assets
 records.extend(stage_theme_assets(output))
+from stage_theme_icons import stage as stage_theme_icons
+records.extend(stage_theme_icons(output))
+from stage_theme_appearance import stage as stage_theme_appearance
+records.extend(stage_theme_appearance(output))
+from stage_theme_customization_assets import stage as stage_theme_customization_assets
+records.extend(stage_theme_customization_assets(output))
+from stage_screen_saver_ui import stage as stage_screen_saver_ui
+records.extend(stage_screen_saver_ui(output))
+from stage_screensaver_assets import stage_bundle as stage_screensaver_bundle
+saver_catalog=stage_screensaver_bundle(output/'screensavers')
+for profile,definition in saver_catalog.get('font_profiles',{}).items():
+    for filename,digest in definition['files'].items():
+        records.append({'source':'private/cabsets/windows95/'+filename,'type':'SCREENSAVER_FONT_PROFILE',
+                        'profile':profile,'output':'screensavers/'+definition['directory']+'/'+filename,
+                        'sha256':digest})
+for identity,presentation in saver_catalog['presentations'].items():
+    for entry in presentation['provenance']:
+        records.append({'source':entry['source'],'type':'SCREENSAVER_PACKAGE',
+                        'presentation':identity,'output':'screensavers/'+presentation['directory']+'/'+entry['installed'],
+                        'sha256':entry['sha256']})
+records.append({'source':'original Windows95 and Plus95 private assets','type':'SCREENSAVER_CATALOG',
+                'output':'screensavers/catalog.json',
+                'sha256':hashlib.sha256((output/'screensavers/catalog.json').read_bytes()).hexdigest()})
 theme_library=json.loads((output/'themes-library.json').read_text())
 descriptions=json.loads((output/'cpl-descriptions.json').read_text())
 descriptions['Desktop Themes']=theme_library['description']

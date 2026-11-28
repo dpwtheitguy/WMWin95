@@ -21,3 +21,10 @@ For each Control Panel applet, maintain a feature-level capability inventory. A 
 Use `dev/capture_control_panel.py` for independent raw captures from the visible references. Review the resulting windows and tabs before accepting their inferred names or staging artwork. Save pre-change VM checkpoints and a verified working checkpoint after guest acceptance. Validate each applet through normal Control Panel routes, keyboard navigation, cancellation, reopen/persistence, failed backend application and affected real behavior. Compare native pixel geometry at multiple guest resolutions separately from host viewer zoom and pointer coordinates.
 
 The guest privilege experience must stay native to Windows 95: no sudo, terminal, polkit password or UAC-like elevation UI. Implement scoped privileged guest helpers for authorized operations and test from the active non-admin desktop. Keep developer maintenance authorization separate from product interactions. Never install the guest policies on the host.
+
+Applet completion is feature-level, not entry-point-level. The user requires
+applets to be delivered as complete as possible. Inventory the native sheet's
+controls and workflows before implementation, close feasible software gaps, and
+report incomplete work explicitly. Save/Delete and customization are core Themes
+features. Count30 distinct valid customization workflows separately from invalid
+input/failure cases and repeated resolutions; both sets need evidence.

@@ -264,7 +264,9 @@ class NetworkManager:
         if failures:raise NetworkError('The previous network settings could not be fully restored.')
 
 class NetworkController:
-    def __init__(self,backend):self.backend=backend;self.applied=self.pending=backend.preferences()
+    def __init__(self,backend,initial_state=None):
+        self.backend=backend
+        self.applied=self.pending=backend.preferences()if initial_state is None else initial_state.validate()
     def cancel(self):self.pending=self.applied
     def apply(self):
         self.pending.validate();before=self.applied

@@ -7,7 +7,7 @@ import struct
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'src'))
-from win95lx.control_panel.theme_preferences import installed_names,native_256_component
+from win95lx.control_panel.theme_preferences import installed_names,native_256_component,original_screensaver
 
 
 def stage(output):
@@ -32,6 +32,8 @@ def stage(output):
         label = labels[theme.name.casefold()]
         catalog[label] = {'wallpaper': {'file': dest, 'mode': 'tile' if re.search(r'(?im)^TileWallpaper=1\s*$', section.group(1)) else 'center'},
                           'pointers': 'Plus! / ' + label, 'sounds': 'Plus! / ' + label}
+        saver=original_screensaver(theme)
+        if saver is not None:catalog[label]['screensaver']=saver
         records.append({'source': str(theme.relative_to(ROOT)), 'sha256': hashlib.sha256(theme.read_bytes()).hexdigest(),
                         'wallpaper_source': str(original.relative_to(ROOT)), 'wallpaper_sha256': hashlib.sha256(original.read_bytes()).hexdigest(), 'output': dest})
     # Original THEMES.EXE conversion output, independently exported from the

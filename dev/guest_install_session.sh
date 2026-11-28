@@ -32,6 +32,11 @@ fi
 PYTHONPATH="$release/src" python3 -c 'from win95lx.shell.app import Shell; from win95lx.explorer.presentation import DriveView'
 chown -R root:root "$release"
 chmod -R go-w "$release"
+find "$release/assets" -type d -exec chmod 755 {} +
+find "$release/assets" -type f -exec chmod 644 {} +
+if id win95 >/dev/null 2>&1; then
+    runuser -u win95 -- test -r "$release/assets/screensavers/catalog.json"
+fi
 ln -sfn "$release" /opt/win95lx/current.new
 mv -Tf /opt/win95lx/current.new /opt/win95lx/current
 install -d /etc/X11/xorg.conf.d

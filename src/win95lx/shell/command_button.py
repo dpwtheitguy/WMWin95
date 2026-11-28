@@ -1,6 +1,7 @@
 """Measured Windows 95 BUTTON painting, contained within the HWND rectangle."""
 from dataclasses import dataclass
-from win95lx.shell.widgets import FACE,LIGHT,SHADOW,BLACK
+from win95lx.control_panel.theme_appearance import appearance
+FACE='ButtonFace';LIGHT='ButtonHilight';SHADOW='ButtonShadow';BLACK='ButtonDkShadow'
 
 
 def parse_label(label):
@@ -74,7 +75,8 @@ def draw_command_button(p,label,rect,*,default=False,focused=False,pressed=False
     `rect` is the actual HWND/hit rectangle. A default outline is painted
     INSIDE it. The painter's original bitmap font must match the reference.
     """
-    state=metrics(p.font,label,rect,default=default,focused=focused,pressed=pressed,enabled=enabled,mnemonic=mnemonic)
+    font=appearance.font('message',p.font)
+    state=metrics(font,label,rect,default=default,focused=focused,pressed=pressed,enabled=enabled,mnemonic=mnemonic)
     x,y,w,h=state.rect;p.cr.save();p.cr.rectangle(x,y,w,h);p.cr.clip();p.fill(x,y,w,h,FACE)
     if state.pressed:
         if state.default:
@@ -93,10 +95,10 @@ def draw_command_button(p,label,rect,*,default=False,focused=False,pressed=False
             p.fill(bx+bw-2,by+1,1,bh-2,SHADOW);p.fill(bx+1,by+bh-2,bw-2,1,SHADOW)
     tx,ty=state.text_origin
     def text(color,dx=0,dy=0):
-        p.text(state.text,tx+dx,ty+dy,color)
+        p.text(state.text,tx+dx,ty+dy,color,role='message')
         if state.mnemonic is not None:
-            index=state.mnemonic;p.fill(tx+dx+p.font.width(state.text[:index]),ty+dy+12,p.font.width(state.text[index]),1,color)
-    if state.enabled:text(BLACK)
-    else:text(LIGHT,1,1);text(SHADOW)
+            index=state.mnemonic;p.fill(tx+dx+font.width(state.text[:index]),ty+dy+12,font.width(state.text[index]),1,color)
+    if state.enabled:text('ButtonText')
+    else:text(LIGHT,1,1);text('GrayText')
     if state.focus_rect:outline(p,state.focus_rect,BLACK)
     p.cr.restore();return state

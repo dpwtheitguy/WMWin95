@@ -210,3 +210,39 @@ showed the complete command and correctly reopened applet. Pace automated input,
 observe the expected field/page before the next action, and retain/reject
 transitional captures separately. Stable pixels alone cannot establish that an
 expected operation completed; check its semantic result too.
+
+## Recycle Bin interaction validation — 28 November 2026
+
+User observation/backlog: a menu remains exposed or retains focus when a Recycle
+Bin alert/confirmation appears. Reproduce in Win95LX and the classic/IE4/Plus
+reference profiles before changing behavior. This is queued Explorer work, not a
+claim that this defect is fixed in the Themes/screensaver release.
+
+Acceptance requirement: dismiss the originating menu and all submenus, release
+pointer/keyboard grabs, then show the owned modal prompt with native default
+button/focus. Background shell actions must not fire while the prompt is open.
+After Yes/No/Cancel/Escape (where native supports it), restore focus to the
+correct folder/desktop owner without reopening the menu or repeating the action.
+
+Experimentation and regression matrix:
+
+- Empty Bin from desktop context menu, Bin window File menu and background menu;
+  test empty/nonempty Bin, selected/unselected items and multiple independent
+  folder windows. Compare prompt text, icon, counts, buttons and default focus.
+- Delete/restore/empty one file, multiple files and nested folders; include same
+  names, inaccessible targets, interrupted operations and failed writes. Use a
+  disposable filesystem fixture; preserve actual user files.
+- Open menus by pointer and keyboard, then trigger prompts. Exercise nested
+  submenu, outside click, Alt, Escape, Enter, Tab/Shift+Tab, repeated activation
+  and held-button/double-click sequences. Assert exactly one operation.
+- Verify menu visibility and GTK/device grab state before the modal appears;
+  use real pointer/key events, not only direct handler calls. Confirm that a
+  click intended for a prompt cannot fall through to the desktop or folder.
+- Close/destroy the owner while a menu or prompt is active; test focus transfer
+  and safe cancellation. Capture original and ours at matching guest resolution,
+  theme, focus and selection; distinguish actual guest behavior from VM scaling.
+
+Unit tests should cover menu-to-modal transitions, ownership, command counts and
+failure rollback. Physical UAT/regression should cover focus/grab release,
+button/keyboard responses and reopen. Capture exact prompt regions separately
+from broader interaction acceptance. No destructive experiment on user data.
